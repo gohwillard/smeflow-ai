@@ -111,10 +111,10 @@ Dashboard / AI Insights
 - [x] Project concept defined
 - [x] Initial architecture decided
 - [x] Documentation skeleton created
-- [ ] GitHub repository created
-- [ ] Monorepo initialized
-- [ ] Frontend scaffolded
-- [ ] Backend scaffolded
+- [x] GitHub repository created
+- [x] Monorepo initialized
+- [x] Frontend scaffolded
+- [x] Backend scaffolded
 - [ ] PostgreSQL connected
 - [ ] Authentication implemented
 - [ ] Inventory module implemented
