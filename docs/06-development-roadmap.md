@@ -1,217 +1,978 @@
 # 06 — Development Roadmap
 
+## Purpose and Authority
+
+This document is the canonical development sequence for SMEFlow AI. It defines
+the fixed top-level phases, the small sub-milestones within each phase, and the
+conditions required to mark work complete.
+
+Top-level phase names and numbers are fixed. They must not be renamed or
+renumbered without explicit user approval.
+
+## Status Legend
+
+- ✅ Completed — implementation and relevant verification are complete.
+- 🚧 Current — actively being implemented.
+- ⬜ Planned — future work that has not started.
+
+## Roadmap Status Rules
+
+- Statuses must reflect verified repository state, not only the original plan.
+- Future work must not be marked completed.
+- A phase becomes 🚧 Current when work begins on its first incomplete
+  sub-milestone; Phase 2 therefore becomes current only when Phase 2A begins.
+- Completion is governed by the milestone verification rules at the end of this
+  document.
+
+The current project state is:
+
+- Phase 0 — Repository and Planning: ✅ Completed
+- Phase 1 — Application Foundation: ✅ Completed
+- Phase 2 — Authentication and Company Setup: ⬜ Planned — next phase
+- Phase 2A — Company & User Domain Database Design: ⬜ Planned — next milestone
+
+---
+
 ## Phase 0 — Repository and Planning
 
-Goal: establish professional project foundations.
+**Status:** ✅ Completed
 
-Tasks:
+**Goal:** Establish professional project foundations and prepare the repository
+for structured application development.
 
-- [ ] Create GitHub repository
-- [ ] Add README
-- [ ] Add documentation folder
-- [ ] Create monorepo structure
-- [ ] Configure TypeScript
-- [ ] Configure linting and formatting
-- [ ] Create development branches/issues
-- [ ] Make initial commit
+### Completed work
 
-Deliverable:
+- GitHub repository and Git history
+- Root README and project documentation structure
+- npm monorepo/workspace structure for the web app, API, and shared package area
+- TypeScript foundation for the frontend and backend
+- Frontend linting configuration
+- Git ignore and environment-example setup
+- Project-specific `AGENTS.md` instructions
+- Node.js 22 project version configuration
+- Initial product, requirements, architecture, database, API, testing,
+  deployment, and roadmap planning
 
-A clean public repository that already explains what the project will become.
+### Definition of Done
+
+The repository has a documented product direction, an agreed modular-monolith
+architecture, a maintainable workspace structure, safe environment conventions,
+and the project configuration needed to begin application development in small,
+reviewable milestones.
 
 ---
 
 ## Phase 1 — Application Foundation
 
-Goal: frontend, backend and database can run locally.
+**Status:** ✅ Completed
 
-Tasks:
+**Goal:** Establish and verify the complete local full-stack development
+foundation.
 
-- [ ] Scaffold React application
-- [ ] Scaffold Express API
-- [ ] Configure PostgreSQL
-- [ ] Install Prisma
-- [ ] Add first migration
-- [ ] Add health-check endpoint
-- [ ] Connect frontend to backend
-- [ ] Configure environment variables
+### Phase 1A — Express + TypeScript Backend Foundation
 
-Definition of Done:
+**Status:** ✅ Completed
 
-Opening the web app successfully calls:
+- Express backend with TypeScript
+- Environment-based configuration
+- CORS configuration
+- `GET /api/v1/health` endpoint
+- Backend development, typecheck, build, and start scripts
+- Typechecking and production-build verification
+
+### Phase 1B — React ↔ Express Connection
+
+**Status:** ✅ Completed
+
+- React + TypeScript + Vite frontend
+- Centralized frontend API layer
+- `VITE_API_BASE_URL` environment configuration
+- Frontend request to `/api/v1/health`
+- API checking, online, and offline UI states
+- Frontend-to-backend communication and CORS verification
+
+### Phase 1C — PostgreSQL + Prisma Foundation
+
+**Status:** ✅ Completed
+
+- PostgreSQL 18 local environment
+- Prisma ORM 7
+- PostgreSQL driver adapter
+- Reusable Prisma client/database module
+- Database-aware health check
+- HTTP 200 response when the database is connected
+- HTTP 503 response when the database is disconnected
+- Prisma schema validation and Prisma Client generation
+- No application or business models
+- No migrations
+
+The absence of a Phase 1 migration is intentional. Phase 1 established and
+verified the PostgreSQL and Prisma infrastructure without inventing fake or
+placeholder business tables. The first migration must represent a reviewed,
+meaningful business domain and therefore belongs to Phase 2B.
+
+### Phase 1D — Full-stack Foundation Verification
+
+**Status:** ✅ Completed
+
+- Frontend lint and production build
+- Backend typecheck and production build
+- Prisma schema validation and Prisma Client generation
+- React → Express → Prisma → PostgreSQL verification
+- Environment and repository hygiene checks
+- Tracked-file, ignored-secret, and safe-example verification
+
+### Definition of Done
+
+The complete local development flow works:
 
 ```text
-GET /api/v1/health
+React
+→ Express
+→ Prisma
+→ PostgreSQL
 ```
 
-and displays API status.
+Application and business models were intentionally deferred until their domains
+could be designed and reviewed.
 
 ---
 
 ## Phase 2 — Authentication and Company Setup
 
-Tasks:
+**Status:** ⬜ Planned — next phase
 
-- [ ] User registration
-- [ ] Password hashing
-- [ ] Login
-- [ ] JWT authentication
-- [ ] Auth middleware
-- [ ] Company profile
-- [ ] Protected frontend routes
+**Goal:** Establish SMEFlow's first real business domain, authentication
+foundation, and company-level data ownership boundary.
 
-Definition of Done:
+### Phase 2A — Company & User Domain Database Design
 
-A new user can register, sign in and access only their own company data.
+**Status:** ⬜ Planned — next milestone
+
+This milestone is design only. Do not create a migration during Phase 2A.
+
+Design and document:
+
+- `Company`
+- `User`
+- `UserRole`
+- Company → Users relationship
+- MVP rule that one user belongs to one company
+- UUID strategy
+- Timestamp strategy
+- Company data-ownership rule
+- Required indexes
+- Email and other uniqueness decisions
+- PostgreSQL table-naming conventions
+- Authentication-related decisions intentionally deferred to later milestones
+
+### Phase 2B — First Prisma Schema & Migration
+
+**Status:** ⬜ Planned
+
+- Implement the reviewed `Company` model
+- Implement the reviewed `User` model
+- Implement the reviewed `UserRole` enum
+- Validate the Prisma schema
+- Generate Prisma Client
+- Create SMEFlow's first meaningful migration
+- Inspect the generated PostgreSQL schema
+- Verify primary keys, foreign keys, indexes, and unique constraints
+- Verify the migration can be recreated safely in development
+
+This is SMEFlow's first real business migration. Do not create a dummy migration
+to satisfy the superseded Phase 1 checklist.
+
+### Phase 2C — Registration & Password Security
+
+**Status:** ⬜ Planned
+
+- Registration API
+- Input validation
+- Password hashing
+- Appropriate creation of a company and its `OWNER` user
+- Duplicate-email handling
+- Database transaction where necessary
+- No plaintext password storage or exposure
+- Registration tests
+
+### Phase 2D — Login & JWT Authentication
+
+**Status:** ⬜ Planned
+
+- Login API
+- Credential verification
+- JWT generation
+- Secure JWT configuration
+- Authentication response contract
+- Invalid-login handling
+- Relevant tests
+
+### Phase 2E — Authentication Middleware & Company Isolation
+
+**Status:** ⬜ Planned
+
+- JWT verification middleware
+- Authenticated-user request context
+- Company ownership boundary
+- Prevention of access to another company's records
+- Authorization foundation
+- Relevant authorization and security tests
+
+### Phase 2F — Company Profile
+
+**Status:** ⬜ Planned
+
+- Retrieve the authenticated user's company profile
+- Update allowed company details
+- Backend validation
+- Company-scoped access
+- Frontend company-profile screen where appropriate
+
+### Phase 2G — Protected Frontend Authentication Flow
+
+**Status:** ⬜ Planned
+
+- Registration page
+- Login page
+- Authentication state
+- Protected routes
+- Logout
+- Authenticated API handling
+- Loading and error states
+
+Do not introduce a global state library unless the implementation demonstrates a
+real need that the existing stack cannot reasonably address.
+
+### Phase 2H — Phase 2 Verification
+
+**Status:** ⬜ Planned
+
+Verify the complete flow:
+
+```text
+Register
+→ Company created
+→ OWNER user created
+→ Login
+→ JWT
+→ Protected API
+→ Company-isolated data
+```
+
+### Definition of Done
+
+A new user can register, sign in, access protected pages, and access only data
+belonging to their company.
 
 ---
 
 ## Phase 3 — Product and Inventory Module
 
-Tasks:
+**Status:** ⬜ Planned
 
-- [ ] Category CRUD
-- [ ] Product CRUD
-- [ ] Product search
-- [ ] Stock quantity
-- [ ] Inventory movement table
-- [ ] Manual stock adjustment
-- [ ] Low-stock indicator
-- [ ] Tests for stock rules
+**Goal:** Build the first major operational SME module.
 
-This is the first major portfolio milestone.
+### Phase 3A — Product & Inventory Domain Design
+
+**Status:** ⬜ Planned
+
+Design and review:
+
+- `Category`
+- `Product`
+- `InventoryMovement`
+- Entity relationships
+- Company ownership
+- SKU uniqueness rules
+- Price representation
+- Quantity representation
+- Reorder level
+- Inventory movement types
+- Indexes and constraints
+
+Review the database design before implementation.
+
+### Phase 3B — Product & Inventory Schema Migration
+
+**Status:** ⬜ Planned
+
+- Implement only the approved Prisma models
+- Create the migration
+- Verify the resulting database structure, relationships, indexes, and constraints
+
+### Phase 3C — Category & Product Backend
+
+**Status:** ⬜ Planned
+
+- Category CRUD
+- Product CRUD
+- Input validation
+- Company isolation
+- Archive or deactivate behavior where appropriate
+- Backend and business-rule tests
+
+### Phase 3D — Product Frontend
+
+**Status:** ⬜ Planned
+
+- Product list
+- Create product
+- Edit product
+- Product details
+- Category handling
+- Loading, error, and empty states
+
+### Phase 3E — Inventory Movement & Manual Adjustment
+
+**Status:** ⬜ Planned
+
+- Inventory movement records
+- Stock-in adjustment
+- Stock-out adjustment
+- Backend-controlled stock changes
+- Transactional integrity
+- Prevention of invalid negative stock according to the approved business rules
+
+The frontend must never arbitrarily overwrite stock quantity. Every stock change
+must be controlled by backend business logic and recorded as an inventory
+movement.
+
+### Phase 3F — Product Search & Low Stock
+
+**Status:** ⬜ Planned
+
+- Product search
+- Useful filters
+- Low-stock indicator
+- Reorder-level logic
+- Evidence-based indexes where required
+
+### Phase 3G — Product & Inventory Verification
+
+**Status:** ⬜ Planned
+
+Verify at minimum:
+
+- Company isolation
+- SKU constraints
+- Inventory traceability
+- Negative-stock prevention
+- Stock-adjustment correctness
+
+### Definition of Done
+
+Users can manage products and categories, track stock through inventory
+movements, perform controlled adjustments, search products, and identify
+low-stock items.
 
 ---
 
 ## Phase 4 — Customers and Suppliers
 
-Tasks:
+**Status:** ⬜ Planned
 
-- [ ] Customer CRUD
-- [ ] Supplier CRUD
-- [ ] Search/filter
-- [ ] Detail pages
-- [ ] Related transaction history
+**Goal:** Create the external-party master data required for purchasing and
+sales.
+
+### Phase 4A — Customer & Supplier Domain Design
+
+**Status:** ⬜ Planned
+
+Design fields, company ownership, indexes, relationships, uniqueness decisions,
+and future transaction relationships.
+
+### Phase 4B — Customer & Supplier Schema Migration
+
+**Status:** ⬜ Planned
+
+Implement the approved schema, create the migration, and verify its database
+structure and constraints.
+
+### Phase 4C — Customer Backend & Frontend
+
+**Status:** ⬜ Planned
+
+- CRUD
+- Search and filtering
+- Customer details
+- Validation
+- Company isolation
+
+### Phase 4D — Supplier Backend & Frontend
+
+**Status:** ⬜ Planned
+
+- CRUD
+- Search and filtering
+- Supplier details
+- Validation
+- Company isolation
+
+### Phase 4E — Related Transaction History Foundation
+
+**Status:** ⬜ Planned
+
+Prepare customer and supplier detail structures for future transaction history.
+Do not invent or prematurely implement purchasing or sales records.
+
+### Phase 4F — Phase 4 Verification
+
+**Status:** ⬜ Planned
+
+Verify CRUD behavior, search, company isolation, and data integrity.
+
+### Definition of Done
+
+Users can manage customers and suppliers securely and consistently.
 
 ---
 
 ## Phase 5 — Purchasing Workflow
 
-Business flow:
+**Status:** ⬜ Planned
+
+**Goal:** Implement the complete supplier → purchase → stock-in workflow.
 
 ```text
 Supplier
 → Purchase Order
 → Receive Items
 → Inventory Movement
-→ Stock Quantity Increase
+→ Stock Increase
 ```
 
-Tasks:
+### Phase 5A — Purchasing Domain Design
 
-- [ ] Create purchase order
-- [ ] Add purchase order items
-- [ ] PO statuses
-- [ ] Receive items
-- [ ] Update stock inside a database transaction
-- [ ] Record inventory movements
-- [ ] Test purchasing business logic
+**Status:** ⬜ Planned
+
+Design and review:
+
+- `PurchaseOrder`
+- `PurchaseOrderItem`
+- Statuses and allowed transitions
+- Numbering strategy
+- `receivedQuantity`
+- Totals
+- Supplier and product relationships
+- Company ownership
+- Partial-receiving decision
+- Idempotency requirements
+- Transaction boundaries
+
+### Phase 5B — Purchasing Schema Migration
+
+**Status:** ⬜ Planned
+
+Implement the approved models, create the migration, and verify the resulting
+database structure and constraints.
+
+### Phase 5C — Purchase Order Backend
+
+**Status:** ⬜ Planned
+
+- Create purchase order
+- Add items
+- Update allowed fields
+- Enforce status transitions
+- Calculate totals
+- Validate input and business rules
+- Enforce company isolation
+
+### Phase 5D — Purchase Receiving
+
+**Status:** ⬜ Planned
+
+- Receive items
+- Create inventory movements
+- Increase stock
+- Use an appropriate database transaction
+- Protect against duplicate receiving
+- Support partial receiving only if approved during design
+
+### Phase 5E — Purchasing Frontend
+
+**Status:** ⬜ Planned
+
+- Purchase-order list
+- Create and edit workflow
+- Purchase-order details
+- Receiving workflow
+- Status display
+- Loading and error states
+
+### Phase 5F — Purchasing Tests & Verification
+
+**Status:** ⬜ Planned
+
+Verify at minimum:
+
+- Stock increases correctly
+- Receiving remains traceable through inventory movements
+- The same receiving event cannot accidentally increase stock twice
+- Invalid status transitions are rejected
+- Company isolation works
+
+### Definition of Done
+
+A supplier purchase order can be created and received, producing accurate,
+traceable inventory increases.
 
 ---
 
 ## Phase 6 — Sales Workflow
 
-Business flow:
+**Status:** ⬜ Planned
+
+**Goal:** Implement the complete customer sales flow.
 
 ```text
 Customer
 → Quotation
 → Sales Order
+→ Fulfilment
+→ Inventory Movement
 → Invoice
-→ Stock Movement
 ```
 
-Tasks:
+### Phase 6A — Sales Domain Design
 
-- [ ] Create quotation
-- [ ] Add quotation items
-- [ ] Convert quotation
-- [ ] Create sales order
-- [ ] Confirm / fulfil sales order
-- [ ] Reduce inventory
-- [ ] Generate invoice
-- [ ] Test sales business logic
+**Status:** ⬜ Planned
+
+Design and review:
+
+- `Quotation`
+- `QuotationItem`
+- `SalesOrder`
+- `SalesOrderItem`
+- `Invoice`
+- Statuses and allowed transitions
+- Numbering strategies
+- Totals
+- Customer and product relationships
+- Quotation conversion rules
+- Stock-fulfilment timing
+- Invoice rules
+- Idempotency requirements
+
+### Phase 6B — Sales Schema Migration
+
+**Status:** ⬜ Planned
+
+Implement the approved models, create the migration, and verify the resulting
+database structure and constraints.
+
+### Phase 6C — Quotation Workflow
+
+**Status:** ⬜ Planned
+
+- Create quotations
+- Manage line items
+- Calculate totals
+- Enforce statuses
+- Support expiry where appropriate
+- Provide the frontend quotation workflow
+
+### Phase 6D — Quotation → Sales Order Conversion
+
+**Status:** ⬜ Planned
+
+- Convert an accepted quotation
+- Prevent duplicate conversion
+- Preserve relevant commercial information
+- Validate conversion rules
+- Use a transaction where appropriate
+
+### Phase 6E — Sales Order Fulfilment & Inventory
+
+**Status:** ⬜ Planned
+
+- Enforce sales-order statuses
+- Fulfil an order
+- Validate available stock
+- Create inventory movements
+- Decrease stock
+- Use an appropriate database transaction
+- Handle insufficient stock
+
+### Phase 6F — Invoice Workflow
+
+**Status:** ⬜ Planned
+
+- Generate an invoice
+- Enforce invoice statuses
+- Record a due date
+- Represent amount paid and outstanding according to the approved design
+- Provide frontend invoice views
+
+SMEFlow must not expand into a complete accounting or general-ledger product.
+
+### Phase 6G — Sales Tests & Verification
+
+**Status:** ⬜ Planned
+
+Verify at minimum:
+
+- Quotation totals
+- Duplicate-conversion prevention
+- Insufficient-stock handling
+- Stock reduction and movement traceability
+- Invoice totals
+- Company isolation
+- Invalid status transitions
+
+### Definition of Done
+
+A customer quotation can progress into a sales order, stock can be fulfilled
+safely, and an invoice can be generated.
 
 ---
 
 ## Phase 7 — Dashboard
 
-Tasks:
+**Status:** ⬜ Planned
 
-- [ ] Sales KPI cards
-- [ ] Order statistics
-- [ ] Low-stock list
-- [ ] Top products
-- [ ] Recent orders
-- [ ] Outstanding invoices
-- [ ] Date filters
+**Goal:** Turn operational data into useful business information.
+
+### Phase 7A — KPI & Metric Definitions
+
+**Status:** ⬜ Planned
+
+Before coding, formally define calculations for:
+
+- Sales
+- Order counts
+- Low-stock products
+- Top products
+- Recent transactions
+- Outstanding invoices
+
+Metrics must be explicit and unambiguous.
+
+### Phase 7B — Dashboard Backend Queries
+
+**Status:** ⬜ Planned
+
+Create appropriate business/data services and aggregation queries. Prioritize
+correctness before optimization.
+
+### Phase 7C — Dashboard Frontend
+
+**Status:** ⬜ Planned
+
+- KPI cards
+- Sales overview
+- Low-stock section
+- Top products
+- Recent activity and orders
+- Outstanding invoices
+
+### Phase 7D — Date Filtering & Query Performance
+
+**Status:** ⬜ Planned
+
+- Date filters
+- Query review
+- Appropriate indexes when evidence demonstrates a need
+
+Do not add caching infrastructure prematurely.
+
+### Phase 7E — Dashboard Verification
+
+**Status:** ⬜ Planned
+
+Validate every metric against known database data and its approved definition.
+
+### Definition of Done
+
+Users can view reliable business KPIs derived from SMEFlow operational data.
 
 ---
 
 ## Phase 8 — AI Business Assistant
 
-Start AI only after business data is reliable.
+**Status:** ⬜ Planned
 
-Version 1 should be read-only.
+**Goal:** Add AI only after reliable, structured business data exists.
 
-Supported questions may include:
+AI Version 1 must remain read-only. The LLM must never execute arbitrary
+generated SQL.
+
+### Phase 8A — AI Architecture & Safety Design
+
+**Status:** ⬜ Planned
+
+Define:
+
+- Allowed questions
+- Approved backend tools and functions
+- Authorization boundaries
+- Data-access rules
+- Response structure
+- Failure behavior
+
+### Phase 8B — Business Query Tool Layer
+
+**Status:** ⬜ Planned
+
+Create approved backend functions for questions such as:
 
 - Top-selling products
 - Low-stock products
 - Sales totals
 - Customer ranking
 - Outstanding invoices
-- Product reorder suggestions
+- Reorder suggestions
 
-Tasks:
+The backend remains responsible for database access and authorization.
 
-- [ ] Define allowed AI tools/functions
-- [ ] Create business query service
-- [ ] Integrate LLM API
-- [ ] Add AI chat interface
-- [ ] Add source/metric explanation
-- [ ] Add AI failure handling
-- [ ] Test authorization boundaries
+### Phase 8C — LLM Integration
+
+**Status:** ⬜ Planned
+
+Integrate the selected LLM API through the approved tool/query architecture and
+keep provider-specific logic appropriately isolated.
+
+### Phase 8D — AI Assistant Frontend
+
+**Status:** ⬜ Planned
+
+Create the read-only AI business-assistant chat experience.
+
+### Phase 8E — Explanation, Sources & Failure Handling
+
+**Status:** ⬜ Planned
+
+Where useful, show:
+
+- Metrics used
+- Date range
+- Structured source information
+- Uncertainty and failure states
+
+### Phase 8F — AI Authorization & Safety Verification
+
+**Status:** ⬜ Planned
+
+Test:
+
+- Company isolation
+- Unsupported questions
+- LLM API failures
+- Malformed model output
+- Prompt attempts to access unauthorized data
+
+### Definition of Done
+
+A company user can ask approved natural-language questions about their own
+business data and receive useful read-only answers without bypassing application
+authorization.
 
 ---
 
 ## Phase 9 — Production Quality
 
-Tasks:
+**Status:** ⬜ Planned
 
-- [ ] Unit tests
-- [ ] Integration tests
-- [ ] Loading/empty/error states
-- [ ] Logging
-- [ ] Seed/demo data
-- [ ] Security review
-- [ ] Responsive UI polish
-- [ ] CI pipeline
+**Goal:** Improve reliability, security, maintainability, demo quality, and
+engineering maturity.
+
+### Phase 9A — Automated Testing Review
+
+**Status:** ⬜ Planned
+
+Review test gaps and strengthen:
+
+- Unit tests
+- Integration tests
+- Critical end-to-end flows
+
+Testing is not postponed until Phase 9. Each earlier phase must include tests for
+the business rules it introduces; this milestone reviews and expands coverage.
+
+### Phase 9B — Error Handling & Logging
+
+**Status:** ⬜ Planned
+
+Review:
+
+- Consistent API errors
+- Production-safe logging
+- Unexpected failures
+- Request or operation observability where appropriate
+
+Avoid excessive infrastructure.
+
+### Phase 9C — Demo Seed Data
+
+**Status:** ⬜ Planned
+
+Create safe, fictional demo data and an intentional seed strategy. Never use real
+customer personal information.
+
+### Phase 9D — Security Review
+
+**Status:** ⬜ Planned
+
+Review:
+
+- Authentication
+- Authorization
+- Company isolation
+- Secret handling
+- Input validation
+- Dependency vulnerabilities
+- Common web and API security risks
+
+### Phase 9E — UX & Responsive Polish
+
+**Status:** ⬜ Planned
+
+Improve:
+
+- Loading states
+- Empty states
+- Error states
+- Forms
+- Responsive layout
+- Usability consistency
+
+### Phase 9F — CI Pipeline
+
+**Status:** ⬜ Planned
+
+Add an appropriate GitHub CI workflow for relevant checks such as:
+
+- Install
+- Lint
+- Typecheck
+- Tests
+- Build
+
+Do not introduce unnecessary DevOps complexity.
+
+### Definition of Done
+
+The application passes the agreed quality, security, testing, and usability
+checks required for deployment and portfolio demonstration.
 
 ---
 
 ## Phase 10 — Deployment and Portfolio Presentation
 
-Tasks:
+**Status:** ⬜ Planned
 
-- [ ] Deploy PostgreSQL
-- [ ] Deploy backend
-- [ ] Deploy frontend
-- [ ] Configure production environment variables
-- [ ] Add demo user
-- [ ] Add screenshots
-- [ ] Add architecture diagram
-- [ ] Add ERD
-- [ ] Record demo video
-- [ ] Improve README
-- [ ] Link project from portfolio site
+**Goal:** Deploy SMEFlow and make it easy for recruiters and interviewers to
+understand and evaluate.
+
+### Phase 10A — Production PostgreSQL
+
+**Status:** ⬜ Planned
+
+- Select an appropriate low-cost managed PostgreSQL provider based on the options
+  available at deployment time
+- Do not assume the originally suggested provider remains the best choice
+- Configure the production database securely
+
+### Phase 10B — Backend Deployment
+
+**Status:** ⬜ Planned
+
+Deploy the Express API and configure:
+
+- Environment variables
+- CORS
+- Database connection
+- Production startup
+- Health verification
+
+### Phase 10C — Frontend Deployment
+
+**Status:** ⬜ Planned
+
+Deploy the React frontend and configure the production API URL correctly.
+
+### Phase 10D — Production Migration & Demo Data
+
+**Status:** ⬜ Planned
+
+- Run approved production migrations safely
+- Add fictional demo data where appropriate
+- Never expose secrets
+
+### Phase 10E — Production End-to-End Verification
+
+**Status:** ⬜ Planned
+
+Verify:
+
+```text
+React
+→ production API
+→ Prisma
+→ production PostgreSQL
+```
+
+Also verify the major business workflows in the production environment.
+
+### Phase 10F — Portfolio Presentation
+
+**Status:** ⬜ Planned
+
+- Polished README
+- Screenshots
+- Architecture diagram
+- Entity-relationship diagram
+- Demo account or instructions where appropriate
+- Demo video
+- Feature overview
+- Engineering decisions
+- Testing overview
+- Deployment architecture
+- Portfolio-site link
+
+### Definition of Done
+
+A recruiter can open the project, understand its architecture and business
+problem, use or view a working deployment, and evaluate the engineering decisions
+without needing local setup.
+
+---
+
+## Cross-Phase Development Rules
+
+1. Complete phases in order unless the user explicitly changes the priority.
+2. Work on one sub-milestone at a time.
+3. Do not implement a later sub-milestone merely because it is convenient.
+4. Design important business and database domains before implementing them.
+5. Create migrations only from reviewed domain designs.
+6. Add tests during the phase that introduces the relevant business rules.
+7. Phase 9 expands quality coverage; it does not postpone testing until Phase 9.
+8. AI remains Phase 8 and must not be introduced earlier.
+9. Deployment remains Phase 10 unless temporary deployment is explicitly
+   required earlier.
+10. Keep documentation synchronized with implementation.
+
+## Milestone Completion Rules
+
+A milestone may be marked completed only after its relevant verification passes.
+Writing code or documentation alone does not establish completion.
+
+Depending on the milestone, verification may include:
+
+- Lint
+- Typecheck
+- Build
+- Unit tests
+- Integration tests
+- Prisma schema validation
+- Prisma Client generation
+- Migration verification
+- API behavior
+- Frontend behavior
+- Database-integrity checks
+- Company-isolation and security checks
+
+After a milestone is successfully verified, update the README Current Status,
+the development log, and the `AGENTS.md` Current Development Stage where
+appropriate.

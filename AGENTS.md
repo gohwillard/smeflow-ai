@@ -120,20 +120,7 @@ ADJUSTMENT_OUT
 
 Do NOT prioritize AI before the core business system works.
 
-Development order:
-
-1. Repository and documentation
-2. Frontend/backend foundation
-3. PostgreSQL + Prisma
-4. Authentication
-5. Product + Inventory
-6. Customer + Supplier
-7. Purchasing workflow
-8. Sales workflow
-9. Dashboard
-10. AI Assistant
-11. Testing
-12. Deployment
+Follow the canonical development order in `docs/06-development-roadmap.md`.
 
 AI V1 must be read-only.
 
@@ -152,6 +139,17 @@ Before making major architecture or business-flow decisions, read:
 - docs/06-development-roadmap.md
 
 Keep documentation aligned with implementation.
+
+## Roadmap Governance
+
+- `docs/06-development-roadmap.md` is the canonical development sequence.
+- Before implementing a new milestone, identify the current roadmap milestone.
+- Implement only the milestone explicitly requested by the user.
+- Do not skip ahead or implement later-phase features proactively.
+- If a request conflicts with the roadmap or current architecture, explain the conflict before implementing.
+- A milestone must pass its relevant verification before it is marked complete.
+- After completion, update README Current Status, the development log, and Current Development Stage where appropriate.
+- Do not rename or renumber top-level phases without explicit user approval.
 
 ## Development Style
 
@@ -295,12 +293,16 @@ Keep commits focused and understandable.
 
 ## Current Development Stage
 
-Phase 1D — Full-stack Foundation Verification is complete. Phase 1 application foundation is complete.
+Phase 0 — Repository and Planning is complete.
+
+Phase 1 — Application Foundation is complete, including Phase 1D — Full-stack Foundation Verification.
 
 The React frontend calls the Express health endpoint, and the Express backend verifies its local PostgreSQL connection through Prisma ORM 7. The complete browser-to-database development flow has been verified.
 
 Node.js 22 should be used for this project.
 
-The next goal is Phase 2 — Database Design & First Domain Schema.
+Phase 2 — Authentication and Company Setup is next.
 
-Do not implement authentication, later business modules or AI before completing the first domain schema milestone.
+The next milestone is Phase 2A — Company & User Domain Database Design. Phase 2A is design only; the first meaningful Prisma migration belongs to Phase 2B.
+
+Do not implement the Phase 2B schema or migration, authentication, later business modules, or AI before Phase 2A is completed and reviewed.

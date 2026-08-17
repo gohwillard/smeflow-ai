@@ -36,4 +36,15 @@
 - **Important fixes:** None required. The application foundation was already internally consistent; only milestone documentation and local startup instructions were updated.
 - **Final Phase 1 architecture:** React + TypeScript + Vite → Express + TypeScript → Prisma ORM 7 → PostgreSQL 18.6.
 - **Known issues:** None.
-- **Next phase:** Phase 2 — Database Design & First Domain Schema.
+- **Next milestone:** Phase 2A — Company & User Domain Database Design.
+
+## Roadmap Normalization After Phase 1
+
+- **Status:** Complete
+- **Documentation updated:** Refined the project roadmap into the canonical development sequence, fixed the top-level Phase 0–10 numbering, and added small, reviewable sub-milestones under every phase.
+- **Technical decisions:** Preserved Phase 1 as infrastructure-only and moved the first meaningful Prisma migration to Phase 2B, after the Company and User domain is designed and reviewed in Phase 2A. No placeholder migration is required.
+- **Governance:** Updated `AGENTS.md` to require roadmap-first milestone selection, ordered delivery, relevant verification before completion, and synchronized status documentation.
+- **Verification:** Checked the roadmap's phase numbering, milestone coverage, current statuses, historical Phase 1 implementation, and consistency across the roadmap, README, `AGENTS.md`, and this development log.
+- **Application changes:** None. No application code, Prisma models, migrations, or dependencies were changed.
+- **Known issues:** None.
+- **Next milestone:** Phase 2A — Company & User Domain Database Design.

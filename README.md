@@ -84,7 +84,7 @@ smeflow-ai/
 4. APIs should have clear validation and error handling.
 5. Important features should include tests.
 6. Documentation should be updated alongside implementation.
-7. Every major milestone should be deployed and demonstrable.
+7. Every milestone should pass its relevant verification and remain demonstrable.
 
 ## MVP Business Flow
 
@@ -124,9 +124,9 @@ Dashboard / AI Insights
 - [ ] AI assistant implemented
 - [ ] Production deployment completed
 
-Current development milestone: Phase 1D — Full-stack Foundation Verification is complete.
+Completed phases: Phase 0 — Repository and Planning and Phase 1 — Application Foundation.
 
-Next milestone: Phase 2 — Database Design & First Domain Schema.
+Next milestone: Phase 2A — Company & User Domain Database Design (design only; no migration).
 
 ## Local Development
 
