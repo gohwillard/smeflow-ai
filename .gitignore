@@ -23,6 +23,7 @@ build/
 # Prisma / local DB
 *.db
 *.db-journal
+/apps/api/src/generated/prisma/
 
 # Test coverage
 coverage/

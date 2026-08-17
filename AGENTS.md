@@ -191,9 +191,9 @@ Keep commits focused and understandable.
 
 ## Current Development Stage
 
-The project is currently at the frontend/backend foundation stage.
+Phase 1C — PostgreSQL + Prisma Database Foundation is complete.
 
-React + TypeScript + Vite frontend has been scaffolded.
+The React frontend calls the Express health endpoint, and the Express backend verifies its local PostgreSQL connection through Prisma ORM 7.
 
 Node.js 22 should be used for this project.
 
@@ -201,7 +201,8 @@ The next goal is:
 
 React frontend
 → Express backend
-→ GET /api/v1/health
-→ frontend successfully calls backend
+→ Prisma
+→ PostgreSQL
+→ full-stack foundation verification
 
-Do not implement database, authentication or AI before completing this milestone.
+Do not implement authentication, business modules or AI before completing Phase 1D.
