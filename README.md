@@ -113,6 +113,7 @@ Dashboard / AI Insights
 - [x] Documentation skeleton created
 - [x] GitHub repository created
 - [x] Monorepo initialized
+- [x] Phase 1 application foundation complete
 - [x] Frontend scaffolded
 - [x] Backend scaffolded
 - [x] Frontend ↔ backend connection established
@@ -123,9 +124,42 @@ Dashboard / AI Insights
 - [ ] AI assistant implemented
 - [ ] Production deployment completed
 
-Current development milestone: Phase 1C — PostgreSQL + Prisma Database Foundation is complete.
+Current development milestone: Phase 1D — Full-stack Foundation Verification is complete.
 
-Next milestone: Phase 1D — Full-stack Foundation Verification.
+Next milestone: Phase 2 — Database Design & First Domain Schema.
+
+## Local Development
+
+Complete the one-time setup from the repository root:
+
+```bash
+nvm use
+npm ci
+cp apps/api/.env.example apps/api/.env
+cp apps/web/.env.example apps/web/.env
+```
+
+Replace the placeholder values in `apps/api/.env` with the local PostgreSQL
+configuration. Keep both local `.env` files untracked.
+
+For normal development, start the backend from one terminal:
+
+```bash
+cd path/to/smeflow-ai
+nvm use
+npm run dev:api
+```
+
+Then start the frontend from a second terminal:
+
+```bash
+cd path/to/smeflow-ai
+nvm use
+npm run dev:web
+```
+
+Open `http://localhost:5173`. The backend health endpoint is available at
+`http://localhost:4000/api/v1/health`.
 
 ## Portfolio Outcome
 

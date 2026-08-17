@@ -27,3 +27,13 @@
 - **Verification:** Prisma validation and client generation passed; backend typecheck and production build passed; a live `SELECT 1` health check returned HTTP 200 with `database: "connected"`; an isolated unreachable-connection test returned HTTP 503 with `database: "disconnected"` and no sensitive details.
 - **Known issues:** None.
 - **Next milestone:** Phase 1D — Full-stack Foundation Verification.
+
+## Phase 1D — Full-stack Foundation Verification
+
+- **Status:** Complete
+- **Verification performed:** Audited the monorepo structure, Node.js version, workspace scripts, Prisma configuration, environment examples, ignore rules, frontend API configuration, backend environment handling, CORS behavior, health endpoint success and failure responses, and the complete browser-to-database flow.
+- **Checks executed:** Clean `npm ci`; frontend lint and production build; backend typecheck and production build; Prisma schema validation and client generation; live HTTP 200 database-connected health check; CORS header check; isolated HTTP 503 database-disconnected check; tracked-file and ignore-rule hygiene checks; and a headless-browser confirmation that the React application displayed `API Online`.
+- **Important fixes:** None required. The application foundation was already internally consistent; only milestone documentation and local startup instructions were updated.
+- **Final Phase 1 architecture:** React + TypeScript + Vite → Express + TypeScript → Prisma ORM 7 → PostgreSQL 18.6.
+- **Known issues:** None.
+- **Next phase:** Phase 2 — Database Design & First Domain Schema.
