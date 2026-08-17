@@ -1,0 +1,169 @@
+# 02 — Functional and Non-Functional Requirements
+
+## Functional Requirements
+
+### FR-01 Authentication
+
+The system shall allow a user to:
+
+- Register an account
+- Log in
+- Log out
+- Access protected application pages
+- View and update basic profile information
+
+### FR-02 Company
+
+The system shall allow a user to:
+
+- Create a company profile
+- Update company details
+- Associate business records with the company
+
+### FR-03 Products
+
+The system shall allow authorized users to:
+
+- Create products
+- Edit products
+- Archive products
+- Search and filter products
+- Assign product categories
+- Define SKU, selling price, cost price and reorder level
+
+### FR-04 Inventory
+
+The system shall:
+
+- Track current stock quantity
+- Record stock movements
+- Support stock-in
+- Support stock-out
+- Prevent invalid negative stock unless explicitly allowed
+- Display low-stock products
+
+### FR-05 Customers
+
+The system shall allow users to:
+
+- Create customers
+- Edit customers
+- Search customers
+- View customer transaction history
+
+### FR-06 Suppliers
+
+The system shall allow users to:
+
+- Create suppliers
+- Edit suppliers
+- Search suppliers
+- View supplier purchase history
+
+### FR-07 Quotations
+
+The system shall allow users to:
+
+- Create a quotation
+- Add multiple quotation items
+- Calculate subtotal and total
+- Set quotation status
+- Convert an accepted quotation into a sales order
+
+### FR-08 Sales Orders
+
+The system shall allow users to:
+
+- Create a sales order
+- Add multiple items
+- Track order status
+- Confirm the order
+- Reduce inventory when the relevant business event occurs
+
+### FR-09 Purchase Orders
+
+The system shall allow users to:
+
+- Create purchase orders
+- Select a supplier
+- Add multiple products
+- Track purchase order status
+- Receive purchased stock
+- Increase inventory after stock is received
+
+### FR-10 Invoices
+
+The system shall allow users to:
+
+- Generate an invoice from a sales order
+- Track invoice status
+- Record payment status
+- View outstanding invoices
+
+### FR-11 Dashboard
+
+The system shall display:
+
+- Total sales
+- Number of orders
+- Low-stock products
+- Top-selling products
+- Recent transactions
+- Outstanding invoices
+
+### FR-12 AI Business Assistant
+
+The system shall allow a user to ask natural-language questions about business data.
+
+The AI assistant should:
+
+- Access only authorized company data
+- Use application-generated structured data
+- Return concise answers
+- Explain the data used when appropriate
+- Avoid directly modifying business records during the first implementation
+
+## Non-Functional Requirements
+
+### NFR-01 Security
+
+- Passwords must never be stored in plain text.
+- Protected APIs require authentication.
+- Data access must be scoped to the authenticated user's company.
+- Environment secrets must not be committed to Git.
+
+### NFR-02 Maintainability
+
+- Backend code should use controller/service/repository-style separation.
+- Database schema changes should use Prisma migrations.
+- Reusable frontend components should be separated from page components.
+
+### NFR-03 Reliability
+
+- Important backend operations should use database transactions where appropriate.
+- API input must be validated.
+- Errors should return consistent responses.
+
+### NFR-04 Performance
+
+- Lists should support pagination.
+- Frequently searched fields should be indexed when necessary.
+- Dashboard calculations should avoid unnecessary repeated queries.
+
+### NFR-05 Usability
+
+- The interface should be responsive.
+- Forms should display validation errors clearly.
+- Status values should be visually distinguishable.
+- Empty states should guide the user toward the next action.
+
+### NFR-06 Testability
+
+- Core business rules should have automated tests.
+- Important API routes should have integration tests.
+- Critical user flows should eventually have end-to-end tests.
+
+### NFR-07 Deployability
+
+- Frontend, backend and database should be independently configurable through environment variables.
+- Production deployment instructions must be documented.
