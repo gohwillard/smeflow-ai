@@ -175,6 +175,110 @@ Do not introduce microservices unless there is a strong reason.
 
 Do not add new major dependencies without explaining why.
 
+## Working Rules
+
+- Always inspect the current repository before making changes.
+- Read the relevant documentation before implementing a milestone.
+- Do not assume files, architecture, dependencies, or behavior that have not been verified.
+- Work only on the milestone explicitly requested by the user.
+- Do not implement future phases early.
+- Do not refactor working code purely for stylistic preference.
+- Prefer small, reviewable changes.
+
+If a requested change conflicts with the current architecture or documentation,
+stop and explain the conflict before implementing it.
+
+## Scope Control
+
+Do not interpret a milestone broadly.
+
+If the user requests Phase X, implement only the requirements of Phase X.
+
+Do not proactively implement features belonging to later phases,
+even if doing so would appear convenient.
+
+Do not add:
+- unrelated features
+- unnecessary abstractions
+- premature infrastructure
+- unnecessary dependencies
+- speculative future modules
+
+Before adding a new production dependency:
+1. Explain why it is required.
+2. Confirm that the existing stack cannot reasonably solve the problem without it.
+3. Prefer established, maintainable dependencies.
+
+## Learning Mode
+
+This is both a portfolio project and a learning project.
+
+- Prefer understandable implementations over clever implementations.
+- Explain important architecture decisions.
+- Explain important backend and database decisions.
+- Explain unfamiliar technologies when introducing them.
+- Do not generate the entire application at once.
+- Keep implementation aligned with what the user can reasonably understand and explain in an interview.
+- Avoid unnecessary overengineering.
+
+## Security and Secrets
+
+- Never display, log, or commit secrets.
+- Never expose `.env` contents.
+- Never print a full `DATABASE_URL`.
+- Never expose database passwords, JWT secrets, API keys, or credentials.
+- Do not modify local credentials unless explicitly requested.
+- Use `.env.example` only for safe placeholders.
+
+## Verification
+
+Before considering a milestone complete, run the checks relevant to the changed code.
+
+These may include:
+
+- lint
+- typecheck
+- build
+- automated tests
+- Prisma validation
+- Prisma Client generation
+- API/manual behavior verification
+
+Also:
+
+- inspect `git status`
+- confirm no secrets are tracked
+- confirm the requested behavior actually works
+- confirm no later-phase work was introduced accidentally
+
+Do not claim completion if required verification has not passed.
+
+## Documentation Updates
+
+After a milestone is successfully completed:
+
+1. Update the root `README.md` Current Status section.
+2. Append a concise entry to `docs/09-development-log.md`.
+3. Update the `Current Development Stage` section in this `AGENTS.md` if the project stage changed.
+
+The development log entry should include:
+- milestone name
+- status
+- what was implemented
+- important technical decisions
+- verification performed
+- known issues, if any
+- next milestone
+
+Do not rewrite unrelated documentation.
+
+## Git Execution Rules
+
+- Do not commit or push unless explicitly requested by the user.
+- Do not create branches unless explicitly requested.
+- After a successfully verified milestone, suggest one concise conventional-style commit message.
+- Keep commits focused on one meaningful milestone or change.
+
 ## Git
 
 Use meaningful conventional-style commits where practical.
