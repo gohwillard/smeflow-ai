@@ -115,12 +115,17 @@ Dashboard / AI Insights
 - [x] Monorepo initialized
 - [x] Frontend scaffolded
 - [x] Backend scaffolded
+- [x] Frontend ↔ backend connection established
 - [ ] PostgreSQL connected
 - [ ] Authentication implemented
 - [ ] Inventory module implemented
 - [ ] Sales workflow implemented
 - [ ] AI assistant implemented
 - [ ] Production deployment completed
+
+Current development milestone: Phase 1B — React ↔ Express Connection is complete.
+
+Next milestone: PostgreSQL + Prisma foundation.
 
 ## Portfolio Outcome
 
