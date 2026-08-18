@@ -120,6 +120,7 @@ Dashboard / AI Insights
 - [x] PostgreSQL and Prisma connected
 - [x] Phase 2A Company and User domain design approved
 - [x] Phase 2B Company and User Prisma schema and first migration complete
+- [x] Phase 2C registration and password security complete
 - [ ] Authentication implemented
 - [ ] Inventory module implemented
 - [ ] Sales workflow implemented
@@ -128,12 +129,14 @@ Dashboard / AI Insights
 
 Completed phases: Phase 0 — Repository and Planning and Phase 1 — Application Foundation. Phase 2 — Authentication and Company Setup is in progress.
 
-Completed milestone: Phase 2B — First Prisma Schema & Migration. The approved
-`Company`, `User`, and `UserRole` design is implemented with PostgreSQL-native
-UUIDs, timezone-aware timestamps, required company ownership, and migration
-`20260818020913_init_company_user`.
+Completed milestone: Phase 2C — Registration & Password Security. The API now
+provides `POST /api/v1/auth/register` with Zod validation, lowercase email
+normalization, asynchronous Node.js scrypt password hashing, atomic Company and
+OWNER creation, safe responses, duplicate-email handling, and automated tests.
+No login, JWT, authentication middleware, frontend auth flow, schema change, or
+new migration was added.
 
-Next milestone: Phase 2C — Registration & Password Security.
+Next milestone: Phase 2D — Login & JWT Authentication.
 
 ## Local Development
 

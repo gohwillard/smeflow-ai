@@ -31,7 +31,8 @@ The current project state is:
 - Phase 2 — Authentication and Company Setup: 🚧 Current
 - Phase 2A — Company & User Domain Database Design: ✅ Completed
 - Phase 2B — First Prisma Schema & Migration: ✅ Completed
-- Phase 2C — Registration & Password Security: ⬜ Planned — next milestone
+- Phase 2C — Registration & Password Security: ✅ Completed
+- Phase 2D — Login & JWT Authentication: ⬜ Planned — next milestone
 
 ---
 
@@ -193,7 +194,7 @@ to satisfy the superseded Phase 1 checklist.
 
 ### Phase 2C — Registration & Password Security
 
-**Status:** ⬜ Planned
+**Status:** ✅ Completed
 
 - Registration API
 - Input validation
@@ -203,6 +204,19 @@ to satisfy the superseded Phase 1 checklist.
 - Database transaction where necessary
 - No plaintext password storage or exposure
 - Registration tests
+
+Implemented as `POST /api/v1/auth/register`. Zod validates the five approved
+registration fields, names and email are trimmed, and email is lowercased before
+persistence. Passwords remain opaque 15–128-character values and are hashed with
+Node.js 22's asynchronous scrypt using a random 16-byte salt, 64-byte derived
+key, and versioned self-describing storage format.
+
+A nested Prisma create atomically inserts the Company and its explicit `OWNER`
+User. The database email-unique constraint remains authoritative and maps
+duplicate normalized emails to HTTP 409. Responses select only safe company and
+user fields. Integration tests verify success, normalization, owner assignment,
+atomic rollback, hashed storage, response safety, duplicates, validation, and
+random salts. No schema or migration change was required.
 
 ### Phase 2D — Login & JWT Authentication
 

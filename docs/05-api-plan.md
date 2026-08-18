@@ -14,6 +14,66 @@ POST   /auth/login
 GET    /auth/me
 ```
 
+### Register a Company Owner
+
+Implemented in Phase 2C:
+
+```text
+POST /api/v1/auth/register
+```
+
+Request body:
+
+```json
+{
+  "companyName": "Northstar Supplies",
+  "firstName": "Amina",
+  "lastName": "Rahman",
+  "email": "amina@example.com",
+  "password": "example passphrase for local demo"
+}
+```
+
+Registration accepts only these five fields. Company and personal names are
+trimmed and must remain non-empty. Email is trimmed, validated, lowercased, and
+stored in that canonical form. Passwords are not trimmed or otherwise
+normalized; they must contain 15–128 characters, and no composition rules are
+imposed.
+
+The password is stored only as a versioned, self-describing asynchronous Node.js
+scrypt hash with a random 16-byte salt and a 64-byte derived key. Company and
+initial `OWNER` creation use one nested Prisma write, so both records commit or
+both roll back. The global `users.email` unique constraint is the final source of
+truth for duplicates, which return HTTP 409 with `EMAIL_ALREADY_EXISTS`.
+
+Successful response: HTTP 201 Created
+
+```json
+{
+  "status": "success",
+  "data": {
+    "company": {
+      "id": "c42f9c82-84f3-42d8-8c5a-0bbb467f5f91",
+      "name": "Northstar Supplies"
+    },
+    "user": {
+      "id": "1e44b878-cfc5-45da-83aa-fe1163b56b8d",
+      "email": "amina@example.com",
+      "firstName": "Amina",
+      "lastName": "Rahman",
+      "role": "OWNER",
+      "isActive": true,
+      "createdAt": "2026-08-18T03:48:15.375Z"
+    }
+  }
+}
+```
+
+The response never includes `password` or `passwordHash` and does not issue a
+token. Invalid input returns HTTP 400 with safe field-level messages. Unexpected
+failures return a generic HTTP 500 response without Prisma details or stack
+traces. Login, JWT issuance, and `GET /auth/me` remain future milestones.
+
 ## Products
 
 ```text
