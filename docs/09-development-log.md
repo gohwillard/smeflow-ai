@@ -48,3 +48,12 @@
 - **Application changes:** None. No application code, Prisma models, migrations, or dependencies were changed.
 - **Known issues:** None.
 - **Next milestone:** Phase 2A — Company & User Domain Database Design.
+
+## Phase 2A — Company & User Domain Database Design
+
+- **Status:** Complete
+- **Documented:** Approved the `Company`, `User`, and `UserRole` domain design, one-company-per-user MVP relationship, PostgreSQL UUID and timestamp strategies, table names, constraints, indexes, and company data-ownership boundary.
+- **Technical decisions:** Kept user email globally unique and defined a trimmed, lowercase stored form to prevent case-variant login identities; indexed `users.companyId`; kept child ownership derivable from parents where safe; prohibited silent cascading company deletion; and deferred exact-one-owner enforcement to backend business logic.
+- **Verification:** Reviewed the design against requirements, architecture, roadmap, and security rules; confirmed documentation consistency and verified that no Prisma model, migration, application code, authentication, or dependency change was introduced.
+- **Known issues:** None. Deferred decisions are recorded in `docs/04-database-design.md`.
+- **Next milestone:** Phase 2B — First Prisma Schema & Migration.

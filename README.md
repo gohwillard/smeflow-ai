@@ -118,15 +118,18 @@ Dashboard / AI Insights
 - [x] Backend scaffolded
 - [x] Frontend ↔ backend connection established
 - [x] PostgreSQL and Prisma connected
+- [x] Phase 2A Company and User domain design approved
 - [ ] Authentication implemented
 - [ ] Inventory module implemented
 - [ ] Sales workflow implemented
 - [ ] AI assistant implemented
 - [ ] Production deployment completed
 
-Completed phases: Phase 0 — Repository and Planning and Phase 1 — Application Foundation.
+Completed phases: Phase 0 — Repository and Planning and Phase 1 — Application Foundation. Phase 2 — Authentication and Company Setup is in progress.
 
-Next milestone: Phase 2A — Company & User Domain Database Design (design only; no migration).
+Completed milestone: Phase 2A — Company & User Domain Database Design (documentation only; no Prisma models or migration).
+
+Next milestone: Phase 2B — First Prisma Schema & Migration.
 
 ## Local Development
 

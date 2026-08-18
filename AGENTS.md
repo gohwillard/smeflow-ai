@@ -301,8 +301,8 @@ The React frontend calls the Express health endpoint, and the Express backend ve
 
 Node.js 22 should be used for this project.
 
-Phase 2 — Authentication and Company Setup is next.
+Phase 2 — Authentication and Company Setup is in progress.
 
-The next milestone is Phase 2A — Company & User Domain Database Design. Phase 2A is design only; the first meaningful Prisma migration belongs to Phase 2B.
+Phase 2A — Company & User Domain Database Design is complete. It approved the `Company`, `User`, and `UserRole` design, the one-company-per-user MVP relationship, UUID and timestamp strategies, globally unique normalized user email, the company ownership boundary, and required constraints and indexes. Phase 2A changed documentation only; no Prisma models or migration were created.
 
-Do not implement the Phase 2B schema or migration, authentication, later business modules, or AI before Phase 2A is completed and reviewed.
+The next milestone is Phase 2B — First Prisma Schema & Migration. Implement only the reviewed Phase 2A design in that milestone; do not implement registration, authentication, later business modules, or AI.

@@ -28,8 +28,9 @@ The current project state is:
 
 - Phase 0 — Repository and Planning: ✅ Completed
 - Phase 1 — Application Foundation: ✅ Completed
-- Phase 2 — Authentication and Company Setup: ⬜ Planned — next phase
-- Phase 2A — Company & User Domain Database Design: ⬜ Planned — next milestone
+- Phase 2 — Authentication and Company Setup: 🚧 Current
+- Phase 2A — Company & User Domain Database Design: ✅ Completed
+- Phase 2B — First Prisma Schema & Migration: ⬜ Planned — next milestone
 
 ---
 
@@ -140,14 +141,14 @@ could be designed and reviewed.
 
 ## Phase 2 — Authentication and Company Setup
 
-**Status:** ⬜ Planned — next phase
+**Status:** 🚧 Current
 
 **Goal:** Establish SMEFlow's first real business domain, authentication
 foundation, and company-level data ownership boundary.
 
 ### Phase 2A — Company & User Domain Database Design
 
-**Status:** ⬜ Planned — next milestone
+**Status:** ✅ Completed
 
 This milestone is design only. Do not create a migration during Phase 2A.
 
@@ -168,7 +169,7 @@ Design and document:
 
 ### Phase 2B — First Prisma Schema & Migration
 
-**Status:** ⬜ Planned
+**Status:** ⬜ Planned — next milestone
 
 - Implement the reviewed `Company` model
 - Implement the reviewed `User` model
