@@ -112,29 +112,31 @@ function fillRegistrationForm() {
 
 function mockSuccessfulLogin(
   fetchMock: ReturnType<typeof vi.fn>,
-  authenticatedUser = ownerUser,
+  currentUser = ownerUser,
+  loginResponseUser = currentUser,
 ) {
   fetchMock
     .mockResolvedValueOnce(
       success({
         accessToken: 'memory-only-token',
         expiresIn: 1800,
-        user: authenticatedUser,
+        user: loginResponseUser,
       }),
     )
-    .mockResolvedValueOnce(success({ user: authenticatedUser }))
+    .mockResolvedValueOnce(success({ user: currentUser }))
 }
 
 async function loginAndOpenCompany(
   fetchMock: ReturnType<typeof vi.fn>,
-  authenticatedUser = ownerUser,
+  currentUser = ownerUser,
+  loginResponseUser = currentUser,
 ) {
-  mockSuccessfulLogin(fetchMock, authenticatedUser)
+  mockSuccessfulLogin(fetchMock, currentUser, loginResponseUser)
   fetchMock.mockResolvedValueOnce(success({ company }))
   vi.stubGlobal('fetch', fetchMock)
 
   renderApp('/login')
-  fillLoginForm(authenticatedUser.email)
+  fillLoginForm(loginResponseUser.email)
   fireEvent.click(
     await screen.findByRole('link', { name: 'Open company profile' }),
   )
@@ -384,16 +386,20 @@ describe('Phase 2G Company Profile editing', () => {
       const fetchMock = vi.fn()
       await loginAndOpenCompany(fetchMock, createUser(role))
 
-      expect(
-        screen.getByRole('button', { name: 'Edit profile' }),
-      ).toBeTruthy()
+      fireEvent.click(screen.getByRole('button', { name: 'Edit profile' }))
+
+      expect(screen.getByRole('button', { name: 'Save changes' })).toBeTruthy()
       expect(screen.queryByText('Read only')).toBeNull()
     },
   )
 
-  it('keeps STAFF read-only without editable controls', async () => {
+  it('uses the /auth/me role and keeps STAFF read-only without editable controls', async () => {
     const fetchMock = vi.fn()
-    await loginAndOpenCompany(fetchMock, createUser('STAFF'))
+    await loginAndOpenCompany(
+      fetchMock,
+      createUser('STAFF'),
+      createUser('OWNER'),
+    )
 
     expect(screen.getByText('Read only')).toBeTruthy()
     expect(

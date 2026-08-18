@@ -157,6 +157,7 @@ export function CompanyProfilePage() {
   const [isSubmitting, setIsSubmitting] = useState(false)
   const { runAuthenticated, user } = useAuth()
   const canEdit = user?.role === 'OWNER' || user?.role === 'ADMIN'
+  const isEditMode = canEdit && isEditing
 
   useEffect(() => {
     const controller = new AbortController()
@@ -213,7 +214,7 @@ export function CompanyProfilePage() {
   async function saveChanges(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (!company || !formValues || isSubmitting) {
+    if (!company || !formValues || !canEdit || isSubmitting) {
       return
     }
 
@@ -263,7 +264,7 @@ export function CompanyProfilePage() {
           <p>Your protected company details from the SMEFlow API.</p>
         </div>
 
-        {company && canEdit && !isEditing && (
+        {company && canEdit && !isEditMode && (
           <button
             className="button button--secondary"
             onClick={startEditing}
@@ -295,7 +296,7 @@ export function CompanyProfilePage() {
         </div>
       )}
 
-      {company && !isEditing && (
+      {company && !isEditMode && (
         <article className="profile-card">
           <div className="profile-card__title">
             <span className="company-avatar" aria-hidden="true">
@@ -328,7 +329,7 @@ export function CompanyProfilePage() {
         </article>
       )}
 
-      {company && isEditing && formValues && (
+      {company && isEditMode && formValues && (
         <form
           className="profile-card profile-form"
           noValidate

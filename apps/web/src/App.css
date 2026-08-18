@@ -166,6 +166,7 @@ a:hover {
   position: absolute;
   top: 50%;
   right: 0.45rem;
+  transform: translateY(-50%);
   width: 2.15rem;
   height: 2.15rem;
   display: grid;
@@ -560,7 +561,7 @@ a:hover {
   padding-right: 1.5rem;
 }
 
-.profile-details div:nth-child(even) {
+.profile-details div:nth-child(even):not(.profile-details__wide) {
   padding-left: 1.5rem;
   border-left: 1px solid #e1ebe8;
 }
@@ -701,7 +702,7 @@ a:hover {
   }
 
   .profile-details div:nth-child(odd):not(.profile-details__wide),
-  .profile-details div:nth-child(even) {
+  .profile-details div:nth-child(even):not(.profile-details__wide) {
     padding-right: 0;
     padding-left: 0;
     border-left: 0;
