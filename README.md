@@ -124,6 +124,7 @@ Dashboard / AI Insights
 - [x] Phase 2D login and JWT authentication complete
 - [x] Phase 2E authentication middleware and company isolation complete
 - [x] Phase 2F company profile API complete
+- [x] Phase 2G protected frontend authentication flow complete
 - [ ] Authentication implemented
 - [ ] Inventory module implemented
 - [ ] Sales workflow implemented
@@ -132,18 +133,29 @@ Dashboard / AI Insights
 
 Completed phases: Phase 0 — Repository and Planning and Phase 1 — Application Foundation. Phase 2 — Authentication and Company Setup is in progress.
 
-Completed milestone: Phase 2F — Company Profile. Authenticated users can retrieve
-their own company's safe profile through `GET /api/v1/company/profile`. `OWNER`
-and `ADMIN` users can partially update the five allowed profile fields through
-`PATCH /api/v1/company/profile`, while `STAFF` remains read-only. Company scope
-comes only from the current database-validated `req.auth.companyId`; client
-input cannot select another company. Updates use strict validation, trim strings,
-normalize company contact email, preserve omitted fields, and allow explicit
-`null` to clear optional fields. All 66 API tests and live HTTP verification
-passed. No dependency, schema, migration, or frontend authentication change was
-required.
+Completed milestone: Phase 2G — Protected Frontend Authentication Flow. The Vite
+SPA now provides `/register`, `/login`, `/app`, and `/company` routes using a
+small React Context authentication layer and reusable public/protected route
+guards. Registration redirects to login because the backend intentionally does
+not issue a token. Login keeps the returned access token only in React memory,
+confirms the current User through `GET /api/v1/auth/me`, and then opens the
+authenticated application. While the SPA remains loaded, authenticated
+navigation to `/login` or `/register` redirects to `/app`. Password fields have
+accessible show/hide controls. The protected Company Profile lets `OWNER` and
+`ADMIN` users edit the five backend-approved fields, while `STAFF` remains
+read-only; backend authorization remains authoritative. Logout clears local
+authentication state, authenticated HTTP 401 responses clear the session, and
+HTTP 403 responses leave the user signed in.
 
-Next milestone: Phase 2G — Protected Frontend Authentication Flow.
+The access token is intentionally not written to `localStorage`,
+`sessionStorage`, IndexedDB, cookies, or URLs. Refreshing the SPA—or entering a
+route through the address bar, which reloads the document—therefore requires
+login again. Persistent authentication or an HttpOnly-cookie session design is
+deferred. All 24 frontend flow tests, frontend lint and production build, and a
+complete live browser flow passed. No backend contract, Prisma schema, or
+migration changed.
+
+Next milestone: Phase 2H — Phase 2 Verification.
 
 ## Local Development
 

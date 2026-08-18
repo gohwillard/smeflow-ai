@@ -35,7 +35,8 @@ The current project state is:
 - Phase 2D — Login & JWT Authentication: ✅ Completed
 - Phase 2E — Authentication Middleware & Company Isolation: ✅ Completed
 - Phase 2F — Company Profile: ✅ Completed
-- Phase 2G — Protected Frontend Authentication Flow: ⬜ Planned — next milestone
+- Phase 2G — Protected Frontend Authentication Flow: ✅ Completed
+- Phase 2H — Phase 2 Verification: ⬜ Planned — next milestone
 
 ---
 
@@ -300,7 +301,7 @@ Phase 2G. No dependency, schema, or migration change was required.
 
 ### Phase 2G — Protected Frontend Authentication Flow
 
-**Status:** ⬜ Planned
+**Status:** ✅ Completed
 
 - Registration page
 - Login page
@@ -312,6 +313,38 @@ Phase 2G. No dependency, schema, or migration change was required.
 
 Do not introduce a global state library unless the implementation demonstrates a
 real need that the existing stack cannot reasonably address.
+
+Implemented as a normal Vite SPA with React Router declarative routing for
+`/register`, `/login`, `/app`, and `/company`. A small typed React Context owns
+the access token, current User, authentication status, login, registration,
+logout, and authenticated-request handling. Login confirms the authenticated
+User through `GET /api/v1/auth/me` before establishing the frontend session;
+the JWT is never decoded into trusted frontend User state.
+
+The access token is intentionally held only in React application memory. It is
+not persisted in `localStorage`, `sessionStorage`, IndexedDB, cookies, or URLs,
+so refreshing the SPA returns the user to login. An address-bar navigation also
+reloads the document and has the same intentional result. Persistent
+authentication and HttpOnly-cookie session design remain deferred. Reusable
+route guards redirect unauthenticated users away from protected pages and, while
+the SPA remains loaded, redirect authenticated users away from login and
+registration to `/app`. Authenticated API HTTP 401 responses clear the local
+session, while HTTP 403 responses preserve it.
+
+The registration and login forms handle validation, approved backend error
+codes, network failures, and submission states without retaining submitted
+passwords. Both password inputs provide keyboard-accessible show/hide controls
+with changing accessible labels. The minimal authenticated home shows only safe
+current-User data. The protected Company Profile page lets `OWNER` and `ADMIN`
+edit only `name`, `registrationNumber`, `email`, `phone`, and `address` through
+the existing PATCH API; `STAFF` remains read-only. Optional blank fields become
+`null`, unchanged fields are omitted, the backend response replaces local saved
+state, and backend authorization remains authoritative. React Router was added
+for SPA routing; Vitest, React Testing Library, and jsdom were added as the
+focused frontend test setup. All 24 frontend flow tests, frontend lint and
+production build, and live OWNER/STAFF browser verification passed. No backend
+contract, schema, migration, later business module, or Phase 2H verification
+work was introduced.
 
 ### Phase 2H — Phase 2 Verification
 
