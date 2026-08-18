@@ -34,7 +34,8 @@ The current project state is:
 - Phase 2C — Registration & Password Security: ✅ Completed
 - Phase 2D — Login & JWT Authentication: ✅ Completed
 - Phase 2E — Authentication Middleware & Company Isolation: ✅ Completed
-- Phase 2F — Company Profile: ⬜ Planned — next milestone
+- Phase 2F — Company Profile: ✅ Completed
+- Phase 2G — Protected Frontend Authentication Flow: ⬜ Planned — next milestone
 
 ---
 
@@ -275,13 +276,27 @@ frontend authentication, or later business module was introduced.
 
 ### Phase 2F — Company Profile
 
-**Status:** ⬜ Planned
+**Status:** ✅ Completed
 
 - Retrieve the authenticated user's company profile
 - Update allowed company details
 - Backend validation
 - Company-scoped access
 - Frontend company-profile screen where appropriate
+
+Implemented authenticated `GET` and `PATCH /api/v1/company/profile` endpoints.
+Both use the database-validated `req.auth.companyId` as their only Company scope
+and select only the eight safe profile response fields. All roles may read;
+`OWNER` and `ADMIN` may update, while `STAFF` receives HTTP 403 and remains
+read-only.
+
+PATCH strictly accepts only `name`, `registrationNumber`, `email`, `phone`, and
+`address`. Supplied strings are trimmed, company contact email is validated and
+lowercased, omitted fields remain unchanged, and the four optional fields can be
+cleared with explicit `null`. Integration and live HTTP verification passed,
+including two-company isolation and forbidden-field attempts. The profile UI
+was intentionally deferred because protected frontend authentication belongs to
+Phase 2G. No dependency, schema, or migration change was required.
 
 ### Phase 2G — Protected Frontend Authentication Flow
 

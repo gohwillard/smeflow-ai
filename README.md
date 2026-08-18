@@ -123,6 +123,7 @@ Dashboard / AI Insights
 - [x] Phase 2C registration and password security complete
 - [x] Phase 2D login and JWT authentication complete
 - [x] Phase 2E authentication middleware and company isolation complete
+- [x] Phase 2F company profile API complete
 - [ ] Authentication implemented
 - [ ] Inventory module implemented
 - [ ] Sales workflow implemented
@@ -131,17 +132,18 @@ Dashboard / AI Insights
 
 Completed phases: Phase 0 — Repository and Planning and Phase 1 — Application Foundation. Phase 2 — Authentication and Company Setup is in progress.
 
-Completed milestone: Phase 2E — Authentication Middleware & Company Isolation.
-The API now accepts access tokens only through the Bearer `Authorization` header,
-cryptographically verifies their pinned HS256 signature and required claims,
-and revalidates the current user's existence, active state, company, and role
-against PostgreSQL. Valid requests receive a typed `{ userId, companyId, role }`
-authentication context sourced from current database values. The protected
-`GET /api/v1/auth/me` endpoint returns only safe current-user fields. Automated
-and live HTTP verification passed; no schema, migration, frontend authentication,
-role-permission matrix, or later business module was added.
+Completed milestone: Phase 2F — Company Profile. Authenticated users can retrieve
+their own company's safe profile through `GET /api/v1/company/profile`. `OWNER`
+and `ADMIN` users can partially update the five allowed profile fields through
+`PATCH /api/v1/company/profile`, while `STAFF` remains read-only. Company scope
+comes only from the current database-validated `req.auth.companyId`; client
+input cannot select another company. Updates use strict validation, trim strings,
+normalize company contact email, preserve omitted fields, and allow explicit
+`null` to clear optional fields. All 66 API tests and live HTTP verification
+passed. No dependency, schema, migration, or frontend authentication change was
+required.
 
-Next milestone: Phase 2F — Company Profile.
+Next milestone: Phase 2G — Protected Frontend Authentication Flow.
 
 ## Local Development
 

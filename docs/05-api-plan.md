@@ -191,6 +191,69 @@ now inactive returns HTTP 403 `ACCOUNT_INACTIVE`. Responses do not expose token,
 cryptographic, Prisma, or password details, and `passwordHash` is never selected
 for the response.
 
+## Company
+
+Implemented in Phase 2F:
+
+```text
+GET    /company/profile
+PATCH  /company/profile
+```
+
+Both routes require a valid Bearer access token. They derive the Company
+exclusively from the current database-validated `req.auth.companyId`; there is no
+client-selectable Company ID in the path, query contract, or request body.
+
+### Retrieve the Company Profile
+
+```text
+GET /api/v1/company/profile
+Authorization: Bearer <access-token>
+```
+
+`OWNER`, `ADMIN`, and `STAFF` may retrieve their own Company. The response
+contains only the approved profile fields:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "company": {
+      "id": "c42f9c82-84f3-42d8-8c5a-0bbb467f5f91",
+      "name": "Northstar Supplies",
+      "registrationNumber": "202601234567",
+      "email": "contact@northstar.example",
+      "phone": "+60 12 345 6789",
+      "address": "1 Example Road, Kuala Lumpur",
+      "createdAt": "2026-08-18T03:48:15.375Z",
+      "updatedAt": "2026-08-18T07:30:00.000Z"
+    }
+  }
+}
+```
+
+### Update the Company Profile
+
+```text
+PATCH /api/v1/company/profile
+Authorization: Bearer <access-token>
+```
+
+`OWNER` and `ADMIN` may update the profile. `STAFF` receives HTTP 403
+`FORBIDDEN`. The strict request body allows only `name`, `registrationNumber`,
+`email`, `phone`, and `address`; unknown and immutable fields are rejected with
+HTTP 400 `VALIDATION_ERROR`.
+
+PATCH is partial: omitted fields retain their current values. Supplied strings
+are trimmed and cannot be blank. `name` cannot be `null`. The other four fields
+are optional and accept explicit `null` to clear their stored values. Company
+contact email is validated, trimmed, and lowercased, but remains separate from
+the globally unique User login email and is not unique.
+
+An authenticated request whose Company unexpectedly cannot be found receives a
+safe HTTP 404 `COMPANY_NOT_FOUND` response. Prisma and database details are not
+returned.
+
 ## Products
 
 ```text
