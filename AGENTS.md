@@ -301,7 +301,7 @@ The React frontend calls the Express health endpoint, and the Express backend ve
 
 Node.js 22 should be used for this project.
 
-Phase 2 — Authentication and Company Setup is in progress.
+Phase 2 — Authentication and Company Setup is complete.
 
 Phase 2A — Company & User Domain Database Design is complete. It approved the `Company`, `User`, and `UserRole` design, the one-company-per-user MVP relationship, UUID and timestamp strategies, globally unique normalized user email, the company ownership boundary, and required constraints and indexes. Phase 2A changed documentation only; no Prisma models or migration were created.
 
@@ -317,4 +317,6 @@ Phase 2F — Company Profile is complete. Authenticated `OWNER`, `ADMIN`, and `S
 
 Phase 2G — Protected Frontend Authentication Flow is complete. The Vite SPA now uses React Router for `/register`, `/login`, `/app`, and `/company`; a typed React Context keeps the access token and current User only in application memory; login confirms identity through `GET /api/v1/auth/me`; authenticated in-SPA navigation away from public routes, protected routes, local logout, and consistent authenticated API errors are implemented. Login and registration passwords have accessible visibility controls. `OWNER` and `ADMIN` can edit the five backend-approved Company Profile fields using normalized diff-only PATCH requests and backend-authoritative responses, while `STAFF` remains read-only and backend authorization remains authoritative. HTTP 401 clears local authentication while HTTP 403 preserves it. Refreshing or navigating through the address bar intentionally requires login again because no token is persisted to Web Storage, IndexedDB, cookies, or URLs. All 24 frontend tests, frontend lint/build, and live OWNER/STAFF browser verification passed. No backend contract, schema, or migration changed.
 
-The next milestone is Phase 2H — Phase 2 Verification. Verify the complete Phase 2 flow only when that milestone is explicitly requested; do not implement Phase 3 business modules or AI early.
+Phase 2H — Phase 2 Verification is complete. The approved Company/User domain, live PostgreSQL schema and migration, registration, login/JWT security, Bearer middleware, current-User database revalidation, Company isolation, `/auth/me`, Company Profile authorization, protected frontend flow, password controls, memory-only token behavior, and OWNER/ADMIN/STAFF UX were fully audited. All 66 backend tests and 24 frontend tests passed, along with frontend lint/build, backend typecheck/build, Prisma validation/generation/migration status, schema-drift comparison, a clean fictional Company A/Company B browser/API/database E2E scenario, visual regression review, security review, and test-data cleanup. No Phase 2 application defect, dependency change, schema change, or migration was required.
+
+Development is intentionally paused after Phase 2. Phase 3 has not started and remains planned. No next development milestone is active; do not begin Phase 3 or any later feature without explicit user instruction.
