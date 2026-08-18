@@ -305,4 +305,6 @@ Phase 2 — Authentication and Company Setup is in progress.
 
 Phase 2A — Company & User Domain Database Design is complete. It approved the `Company`, `User`, and `UserRole` design, the one-company-per-user MVP relationship, UUID and timestamp strategies, globally unique normalized user email, the company ownership boundary, and required constraints and indexes. Phase 2A changed documentation only; no Prisma models or migration were created.
 
-The next milestone is Phase 2B — First Prisma Schema & Migration. Implement only the reviewed Phase 2A design in that milestone; do not implement registration, authentication, later business modules, or AI.
+Phase 2B — First Prisma Schema & Migration is complete. The reviewed design is implemented with Prisma-generated UUID v4 IDs stored as PostgreSQL-native UUIDs, `timestamptz(3)` timestamps, a required `User.companyId` relation using `ON DELETE RESTRICT`, and migration `20260818020913_init_company_user`. Database metadata, schema drift, isolated migration recreation, Prisma generation, typecheck, and build were verified.
+
+The next milestone is Phase 2C — Registration & Password Security. Implement registration, validation, password hashing, and transactional creation only when that milestone is explicitly requested; do not implement login, JWT, authentication middleware, later business modules, or AI early.

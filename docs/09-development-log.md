@@ -57,3 +57,12 @@
 - **Verification:** Reviewed the design against requirements, architecture, roadmap, and security rules; confirmed documentation consistency and verified that no Prisma model, migration, application code, authentication, or dependency change was introduced.
 - **Known issues:** None. Deferred decisions are recorded in `docs/04-database-design.md`.
 - **Next milestone:** Phase 2B — First Prisma Schema & Migration.
+
+## Phase 2B — First Prisma Schema & Migration
+
+- **Status:** Complete
+- **Implemented:** Added only the approved `Company`, `User`, and `UserRole` Prisma definitions and migration `20260818020913_init_company_user`. The migration creates the `companies` and `users` tables, native UUID keys, required company relation, role enum, global unique email index, explicit `companyId` index, approved defaults, and timezone-aware timestamps.
+- **Technical decisions:** Used Prisma-generated UUID v4 values with PostgreSQL `uuid` columns, `timestamptz(3)` for UTC-aware timestamps, Prisma `@updatedAt` maintenance, and `ON DELETE RESTRICT` to prevent silent deletion of a company's users. Because the local database role cannot create Prisma's shadow database, generated the SQL with Prisma `migrate diff` and applied the unchanged result with `migrate deploy`; no `db push` or manual SQL correction was used.
+- **Verification:** Prisma format, validation, and Client generation passed; the migration applied successfully; PostgreSQL catalog inspection confirmed tables, types, nullability, enum values, defaults, primary and foreign keys, indexes, uniqueness, and deletion behavior; Prisma reported no schema drift; the migration recreated successfully in a temporary isolated schema that was removed afterward; backend typecheck and production build passed; no application records were created.
+- **Known issues:** The local PostgreSQL application role cannot create shadow databases, so future `prisma migrate dev` usage requires a dedicated shadow database or an appropriate development-role permission change. This did not block applying or independently recreating the committed migration.
+- **Next milestone:** Phase 2C — Registration & Password Security.

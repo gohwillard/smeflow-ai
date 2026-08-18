@@ -119,6 +119,7 @@ Dashboard / AI Insights
 - [x] Frontend ↔ backend connection established
 - [x] PostgreSQL and Prisma connected
 - [x] Phase 2A Company and User domain design approved
+- [x] Phase 2B Company and User Prisma schema and first migration complete
 - [ ] Authentication implemented
 - [ ] Inventory module implemented
 - [ ] Sales workflow implemented
@@ -127,9 +128,12 @@ Dashboard / AI Insights
 
 Completed phases: Phase 0 — Repository and Planning and Phase 1 — Application Foundation. Phase 2 — Authentication and Company Setup is in progress.
 
-Completed milestone: Phase 2A — Company & User Domain Database Design (documentation only; no Prisma models or migration).
+Completed milestone: Phase 2B — First Prisma Schema & Migration. The approved
+`Company`, `User`, and `UserRole` design is implemented with PostgreSQL-native
+UUIDs, timezone-aware timestamps, required company ownership, and migration
+`20260818020913_init_company_user`.
 
-Next milestone: Phase 2B — First Prisma Schema & Migration.
+Next milestone: Phase 2C — Registration & Password Security.
 
 ## Local Development
 

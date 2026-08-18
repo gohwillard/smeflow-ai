@@ -22,6 +22,9 @@ context only. Their fields, relationships, constraints, and indexes are not
 approved implementation specifications and must be designed in their canonical
 roadmap milestones before implementation.
 
+Phase 2B subsequently implemented this approved design in Prisma schema and
+migration `20260818020913_init_company_user`.
+
 ## Approved Phase 2A Design
 
 ### `Company`
@@ -141,6 +144,22 @@ No other blocking relational or security issue was identified. The design keeps
 password material limited to a non-returned hash and avoids unsafe cascading
 company deletion.
 
+## Phase 2B Implementation Details
+
+- Domain IDs use Prisma's `@default(uuid())` UUID v4 generation and PostgreSQL's
+  native `uuid` columns through `@db.Uuid`. UUID values are therefore supplied
+  by Prisma rather than a PostgreSQL column default.
+- `createdAt` and `updatedAt` use `@db.Timestamptz(3)`. `createdAt` has
+  `@default(now())`, while Prisma maintains `updatedAt` through `@updatedAt`.
+- `User.companyId` is a required native UUID foreign key. The relation uses
+  `onDelete: Restrict` so a company with users cannot be silently deleted; Prisma
+  generated `ON UPDATE CASCADE` for referenced ID updates.
+- The database tables are mapped to `companies` and `users`. The migration also
+  creates the global unique user-email index and explicit non-unique
+  `companyId` index approved in Phase 2A.
+- The first migration is `20260818020913_init_company_user` and contains no
+  authentication endpoints, password-hashing behavior, or later-domain models.
+
 ## Future Planned Models — Not Approved by Phase 2A
 
 These models belong to later roadmap design milestones and must not be inferred
@@ -157,8 +176,6 @@ relationship can enforce isolation safely.
 
 ## Decisions Intentionally Deferred
 
-- Exact Prisma model syntax, mappings, defaults, and the first migration
-  (Phase 2B).
 - Password-hashing algorithm and parameters, registration validation, and
   transactional creation of a company with its initial owner (Phase 2C).
 - Login credential verification and JWT design (Phase 2D).

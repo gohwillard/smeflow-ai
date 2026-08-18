@@ -30,7 +30,8 @@ The current project state is:
 - Phase 1 — Application Foundation: ✅ Completed
 - Phase 2 — Authentication and Company Setup: 🚧 Current
 - Phase 2A — Company & User Domain Database Design: ✅ Completed
-- Phase 2B — First Prisma Schema & Migration: ⬜ Planned — next milestone
+- Phase 2B — First Prisma Schema & Migration: ✅ Completed
+- Phase 2C — Registration & Password Security: ⬜ Planned — next milestone
 
 ---
 
@@ -169,7 +170,7 @@ Design and document:
 
 ### Phase 2B — First Prisma Schema & Migration
 
-**Status:** ⬜ Planned — next milestone
+**Status:** ✅ Completed
 
 - Implement the reviewed `Company` model
 - Implement the reviewed `User` model
@@ -180,6 +181,12 @@ Design and document:
 - Inspect the generated PostgreSQL schema
 - Verify primary keys, foreign keys, indexes, and unique constraints
 - Verify the migration can be recreated safely in development
+
+Implemented as migration `20260818020913_init_company_user`. The migration
+creates only the `companies` and `users` domain tables, the `UserRole` enum, and
+their approved keys, relationship, defaults, unique constraint, and index.
+PostgreSQL catalog inspection and an isolated recreation check verified the
+resulting schema.
 
 This is SMEFlow's first real business migration. Do not create a dummy migration
 to satisfy the superseded Phase 1 checklist.
