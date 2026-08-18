@@ -21,3 +21,16 @@ export const registrationSchema = z
   .strict();
 
 export type RegistrationInput = z.infer<typeof registrationSchema>;
+
+export const loginSchema = z
+  .object({
+    email: z
+      .string()
+      .trim()
+      .email("Email must be a valid email address")
+      .transform((email) => email.toLowerCase()),
+    password: z.string().min(1, "Password is required"),
+  })
+  .strict();
+
+export type LoginInput = z.infer<typeof loginSchema>;

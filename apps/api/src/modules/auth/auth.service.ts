@@ -1,13 +1,31 @@
 import { prisma } from "../../config/database.js";
 import { Prisma, UserRole } from "../../generated/prisma/client.js";
-import { hashPassword } from "../../shared/security/password.js";
+import { signAccessToken } from "../../shared/security/jwt.js";
+import {
+  hashPassword,
+  verifyPassword,
+} from "../../shared/security/password.js";
 
-import type { RegistrationInput } from "./auth.schema.js";
+import type { LoginInput, RegistrationInput } from "./auth.schema.js";
 
 export class EmailAlreadyExistsError extends Error {
   constructor() {
     super("An account with this email already exists");
     this.name = "EmailAlreadyExistsError";
+  }
+}
+
+export class InvalidCredentialsError extends Error {
+  constructor() {
+    super("Invalid email or password");
+    this.name = "InvalidCredentialsError";
+  }
+}
+
+export class AccountInactiveError extends Error {
+  constructor() {
+    super("Account is inactive");
+    this.name = "AccountInactiveError";
   }
 }
 
@@ -72,4 +90,40 @@ export async function registerCompanyOwner(input: RegistrationInput) {
 
     throw error;
   }
+}
+
+export async function loginUser(input: LoginInput) {
+  const user = await prisma.user.findUnique({
+    where: { email: input.email },
+    select: {
+      id: true,
+      companyId: true,
+      email: true,
+      passwordHash: true,
+      firstName: true,
+      lastName: true,
+      role: true,
+      isActive: true,
+    },
+  });
+
+  if (!user || !(await verifyPassword(input.password, user.passwordHash))) {
+    throw new InvalidCredentialsError();
+  }
+
+  if (!user.isActive) {
+    throw new AccountInactiveError();
+  }
+
+  const { passwordHash: _passwordHash, ...safeUser } = user;
+  const token = await signAccessToken({
+    userId: safeUser.id,
+    companyId: safeUser.companyId,
+    role: safeUser.role,
+  });
+
+  return {
+    ...token,
+    user: safeUser,
+  };
 }

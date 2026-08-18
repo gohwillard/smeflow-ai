@@ -72,7 +72,70 @@ Successful response: HTTP 201 Created
 The response never includes `password` or `passwordHash` and does not issue a
 token. Invalid input returns HTTP 400 with safe field-level messages. Unexpected
 failures return a generic HTTP 500 response without Prisma details or stack
-traces. Login, JWT issuance, and `GET /auth/me` remain future milestones.
+traces. `GET /auth/me` remains a future milestone.
+
+### Login and Receive an Access Token
+
+Implemented in Phase 2D:
+
+```text
+POST /api/v1/auth/login
+```
+
+Request body:
+
+```json
+{
+  "email": "amina@example.com",
+  "password": "example passphrase for local demo"
+}
+```
+
+Login accepts only `email` and `password`. Email is required, trimmed,
+validated, and lowercased before lookup, consistently with registration. The
+password is a required non-empty string and remains opaque: it is not trimmed,
+lowercased, normalized, logged, or echoed. Login intentionally does not apply
+registration's 15-character minimum to existing passwords.
+
+The backend retrieves the user by canonical email and asynchronously verifies
+the submitted password against the parameters, salt, and derived key embedded in
+the existing versioned scrypt hash. Malformed or unsupported stored hashes fail
+safely. Unknown emails and incorrect passwords both return HTTP 401 with the
+same `INVALID_CREDENTIALS` response. A user whose credentials are correct but
+whose account is inactive receives HTTP 403 `ACCOUNT_INACTIVE` and no token.
+
+Successful response: HTTP 200 OK
+
+```json
+{
+  "status": "success",
+  "data": {
+    "accessToken": "<signed-access-token>",
+    "expiresIn": 1800,
+    "user": {
+      "id": "1e44b878-cfc5-45da-83aa-fe1163b56b8d",
+      "companyId": "c42f9c82-84f3-42d8-8c5a-0bbb467f5f91",
+      "email": "amina@example.com",
+      "firstName": "Amina",
+      "lastName": "Rahman",
+      "role": "OWNER",
+      "isActive": true
+    }
+  }
+}
+```
+
+The access token is signed with explicitly pinned HS256 through `jose`. Its
+registered claims are `sub` (the user ID), `iat`, `exp`, `iss`, and `aud`; its
+only custom claims are `companyId` and `role`. The configured lifetime is 30
+minutes. The API requires `JWT_SECRET`, `JWT_ISSUER`, `JWT_AUDIENCE`, and
+`JWT_ACCESS_TOKEN_TTL`; the intended issuer and audience are `smeflow-api` and
+`smeflow-web`, and the signing secret must contain at least 32 bytes. Real
+secrets remain only in untracked environment files.
+
+The response never includes `password` or `passwordHash` and does not set a
+cookie. Token-verification middleware, protected routes, and company-isolation
+enforcement belong to Phase 2E.
 
 ## Products
 

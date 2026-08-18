@@ -121,6 +121,7 @@ Dashboard / AI Insights
 - [x] Phase 2A Company and User domain design approved
 - [x] Phase 2B Company and User Prisma schema and first migration complete
 - [x] Phase 2C registration and password security complete
+- [x] Phase 2D login and JWT authentication complete
 - [ ] Authentication implemented
 - [ ] Inventory module implemented
 - [ ] Sales workflow implemented
@@ -129,14 +130,16 @@ Dashboard / AI Insights
 
 Completed phases: Phase 0 — Repository and Planning and Phase 1 — Application Foundation. Phase 2 — Authentication and Company Setup is in progress.
 
-Completed milestone: Phase 2C — Registration & Password Security. The API now
-provides `POST /api/v1/auth/register` with Zod validation, lowercase email
-normalization, asynchronous Node.js scrypt password hashing, atomic Company and
-OWNER creation, safe responses, duplicate-email handling, and automated tests.
-No login, JWT, authentication middleware, frontend auth flow, schema change, or
-new migration was added.
+Completed milestone: Phase 2D — Login & JWT Authentication. The API now provides
+`POST /api/v1/auth/login` with normalized email lookup, asynchronous verification
+of the existing scrypt password format, generic invalid-credential handling,
+inactive-account rejection, and HS256 access-token issuance through `jose`.
+Tokens contain only the user subject, company ID, role, issuer, audience, issued
+time, and expiration, with a configured 30-minute lifetime. Automated and live
+HTTP verification passed. No authentication middleware, protected route,
+frontend auth flow, schema change, or migration was added.
 
-Next milestone: Phase 2D — Login & JWT Authentication.
+Next milestone: Phase 2E — Authentication Middleware & Company Isolation.
 
 ## Local Development
 
@@ -150,7 +153,9 @@ cp apps/web/.env.example apps/web/.env
 ```
 
 Replace the placeholder values in `apps/api/.env` with the local PostgreSQL
-configuration. Keep both local `.env` files untracked.
+and JWT configuration. Generate a random `JWT_SECRET` containing at least 32
+bytes; never reuse the empty example value. Keep both local `.env` files
+untracked.
 
 For normal development, start the backend from one terminal:
 

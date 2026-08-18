@@ -32,7 +32,8 @@ The current project state is:
 - Phase 2A — Company & User Domain Database Design: ✅ Completed
 - Phase 2B — First Prisma Schema & Migration: ✅ Completed
 - Phase 2C — Registration & Password Security: ✅ Completed
-- Phase 2D — Login & JWT Authentication: ⬜ Planned — next milestone
+- Phase 2D — Login & JWT Authentication: ✅ Completed
+- Phase 2E — Authentication Middleware & Company Isolation: ⬜ Planned — next milestone
 
 ---
 
@@ -220,7 +221,7 @@ random salts. No schema or migration change was required.
 
 ### Phase 2D — Login & JWT Authentication
 
-**Status:** ⬜ Planned
+**Status:** ✅ Completed
 
 - Login API
 - Credential verification
@@ -229,6 +230,21 @@ random salts. No schema or migration change was required.
 - Authentication response contract
 - Invalid-login handling
 - Relevant tests
+
+Implemented as `POST /api/v1/auth/login`. Login trims and lowercases email while
+treating the supplied password as an opaque, non-empty string. The extended
+password utility defensively parses the existing self-describing scrypt format,
+derives with the stored parameters and salt, and uses a length check followed by
+Node.js `timingSafeEqual`. Unknown users, incorrect passwords, and malformed
+stored hashes share the safe HTTP 401 `INVALID_CREDENTIALS` response; inactive
+users receive HTTP 403 `ACCOUNT_INACTIVE` and no token.
+
+Successful login returns safe user fields and a `jose`-signed HS256 access token.
+The token contains `sub`, `companyId`, `role`, `iat`, `exp`, `iss`, and `aud`,
+uses the configured 30-minute lifetime, and is backed by required environment
+configuration with a minimum 32-byte signing secret. Integration and live HTTP
+verification passed. No middleware, protected route, refresh/session
+infrastructure, schema change, or migration was introduced.
 
 ### Phase 2E — Authentication Middleware & Company Isolation
 
