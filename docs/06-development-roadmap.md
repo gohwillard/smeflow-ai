@@ -33,7 +33,8 @@ The current project state is:
 - Phase 2B — First Prisma Schema & Migration: ✅ Completed
 - Phase 2C — Registration & Password Security: ✅ Completed
 - Phase 2D — Login & JWT Authentication: ✅ Completed
-- Phase 2E — Authentication Middleware & Company Isolation: ⬜ Planned — next milestone
+- Phase 2E — Authentication Middleware & Company Isolation: ✅ Completed
+- Phase 2F — Company Profile: ⬜ Planned — next milestone
 
 ---
 
@@ -248,7 +249,7 @@ infrastructure, schema change, or migration was introduced.
 
 ### Phase 2E — Authentication Middleware & Company Isolation
 
-**Status:** ⬜ Planned
+**Status:** ✅ Completed
 
 - JWT verification middleware
 - Authenticated-user request context
@@ -256,6 +257,21 @@ infrastructure, schema change, or migration was introduced.
 - Prevention of access to another company's records
 - Authorization foundation
 - Relevant authorization and security tests
+
+Implemented reusable Bearer authentication middleware and the protected
+`GET /api/v1/auth/me` endpoint. The middleware uses `jose` cryptographic
+verification with pinned HS256, configured issuer and audience, expiration, and
+required registered and custom claims. It then loads the current User by token
+subject and rejects missing Users, inactive accounts, and stale company or role
+claims before establishing the typed `{ userId, companyId, role }` request
+context from database values.
+
+Company scope is therefore derived from `req.auth.companyId`, never arbitrary
+request input. Integration tests cover header handling, invalid signatures,
+expiration, issuer, audience, algorithm restrictions, claim validation, deleted
+and inactive Users, stale company and role claims, safe response fields, and a
+two-company scope-override attempt. No schema, migration, role-permission matrix,
+frontend authentication, or later business module was introduced.
 
 ### Phase 2F — Company Profile
 

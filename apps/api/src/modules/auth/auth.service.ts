@@ -6,6 +6,7 @@ import {
   verifyPassword,
 } from "../../shared/security/password.js";
 
+import type { AuthenticatedRequestContext } from "../../shared/http/auth-context.js";
 import type { LoginInput, RegistrationInput } from "./auth.schema.js";
 
 export class EmailAlreadyExistsError extends Error {
@@ -126,4 +127,22 @@ export async function loginUser(input: LoginInput) {
     ...token,
     user: safeUser,
   };
+}
+
+export async function getCurrentUser(auth: AuthenticatedRequestContext) {
+  return prisma.user.findFirst({
+    where: {
+      id: auth.userId,
+      companyId: auth.companyId,
+    },
+    select: {
+      id: true,
+      companyId: true,
+      email: true,
+      firstName: true,
+      lastName: true,
+      role: true,
+      isActive: true,
+    },
+  });
 }

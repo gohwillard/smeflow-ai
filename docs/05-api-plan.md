@@ -72,7 +72,7 @@ Successful response: HTTP 201 Created
 The response never includes `password` or `passwordHash` and does not issue a
 token. Invalid input returns HTTP 400 with safe field-level messages. Unexpected
 failures return a generic HTTP 500 response without Prisma details or stack
-traces. `GET /auth/me` remains a future milestone.
+traces.
 
 ### Login and Receive an Access Token
 
@@ -134,8 +134,62 @@ minutes. The API requires `JWT_SECRET`, `JWT_ISSUER`, `JWT_AUDIENCE`, and
 secrets remain only in untracked environment files.
 
 The response never includes `password` or `passwordHash` and does not set a
-cookie. Token-verification middleware, protected routes, and company-isolation
-enforcement belong to Phase 2E.
+cookie. Phase 2E uses this access token for protected API authentication.
+
+### Retrieve the Authenticated User
+
+Implemented in Phase 2E:
+
+```text
+GET /api/v1/auth/me
+Authorization: Bearer <access-token>
+```
+
+The endpoint accepts access tokens only through the standard Bearer
+`Authorization` header. Tokens in query parameters, request bodies, URL paths,
+or custom token fields are not accepted. The middleware cryptographically
+verifies the signature with the configured HS256 algorithm, issuer, audience,
+and expiration requirements, and requires valid `sub`, `companyId`, `role`,
+`iss`, `aud`, `iat`, and `exp` claims.
+
+After token verification, the middleware loads the current User by `sub` and
+requires that the User still exists, remains active, and still has the company
+and role represented by the token. The current database values establish the
+trusted request context:
+
+```text
+req.auth = { userId, companyId, role }
+```
+
+Future company-scoped modules must derive their ownership filter from
+`req.auth.companyId`; they must not trust a `companyId` supplied by a client.
+
+Successful response: HTTP 200 OK
+
+```json
+{
+  "status": "success",
+  "data": {
+    "user": {
+      "id": "1e44b878-cfc5-45da-83aa-fe1163b56b8d",
+      "companyId": "c42f9c82-84f3-42d8-8c5a-0bbb467f5f91",
+      "email": "amina@example.com",
+      "firstName": "Amina",
+      "lastName": "Rahman",
+      "role": "OWNER",
+      "isActive": true
+    }
+  }
+}
+```
+
+Missing credentials return HTTP 401 `AUTHENTICATION_REQUIRED`. Malformed,
+invalid, expired, wrongly issued, wrongly targeted, unsupported-algorithm, stale,
+or unknown-user tokens return HTTP 401 `INVALID_TOKEN`. These 401 responses use
+`WWW-Authenticate: Bearer`. A cryptographically valid token for a User who is
+now inactive returns HTTP 403 `ACCOUNT_INACTIVE`. Responses do not expose token,
+cryptographic, Prisma, or password details, and `passwordHash` is never selected
+for the response.
 
 ## Products
 

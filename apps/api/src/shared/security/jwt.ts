@@ -1,7 +1,8 @@
-import { jwtVerify, SignJWT, type JWTPayload } from "jose";
+import { jwtVerify, SignJWT } from "jose";
+import { z } from "zod";
 
 import { getJwtConfig, JWT_ALGORITHM } from "../../config/auth.js";
-import type { UserRole } from "../../generated/prisma/client.js";
+import { UserRole } from "../../generated/prisma/client.js";
 
 interface AccessTokenIdentity {
   userId: string;
@@ -13,6 +14,32 @@ export interface SignedAccessToken {
   accessToken: string;
   expiresIn: number;
 }
+
+export interface VerifiedAccessTokenIdentity {
+  userId: string;
+  companyId: string;
+  role: UserRole;
+}
+
+export class InvalidAccessTokenError extends Error {
+  constructor() {
+    super("Access token is invalid");
+    this.name = "InvalidAccessTokenError";
+  }
+}
+
+const accessTokenClaimsSchema = z.object({
+  sub: z.uuid(),
+  companyId: z.uuid(),
+  role: z.enum(UserRole),
+  iss: z.string().min(1),
+  aud: z.union([
+    z.string().min(1),
+    z.array(z.string().min(1)).min(1),
+  ]),
+  iat: z.number().int().nonnegative(),
+  exp: z.number().int().nonnegative(),
+});
 
 export async function signAccessToken(
   identity: AccessTokenIdentity,
@@ -38,13 +65,38 @@ export async function signAccessToken(
   };
 }
 
-export async function verifyAccessToken(token: string): Promise<JWTPayload> {
+export async function verifyAccessToken(
+  token: string,
+): Promise<VerifiedAccessTokenIdentity> {
   const config = getJwtConfig();
-  const { payload } = await jwtVerify(token, config.secret, {
-    algorithms: [JWT_ALGORITHM],
-    issuer: config.issuer,
-    audience: config.audience,
-  });
 
-  return payload;
+  try {
+    const { payload } = await jwtVerify(token, config.secret, {
+      algorithms: [JWT_ALGORITHM],
+      issuer: config.issuer,
+      audience: config.audience,
+      requiredClaims: [
+        "sub",
+        "companyId",
+        "role",
+        "iss",
+        "aud",
+        "iat",
+        "exp",
+      ],
+    });
+    const validationResult = accessTokenClaimsSchema.safeParse(payload);
+
+    if (!validationResult.success) {
+      throw new InvalidAccessTokenError();
+    }
+
+    return {
+      userId: validationResult.data.sub,
+      companyId: validationResult.data.companyId,
+      role: validationResult.data.role,
+    };
+  } catch {
+    throw new InvalidAccessTokenError();
+  }
 }

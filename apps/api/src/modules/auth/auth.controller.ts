@@ -1,10 +1,12 @@
 import type { NextFunction, Request, Response } from "express";
 
+import { getAuthenticatedRequestContext } from "../../shared/http/auth-context.js";
 import { loginSchema, registrationSchema } from "./auth.schema.js";
 import {
   AccountInactiveError,
   EmailAlreadyExistsError,
   InvalidCredentialsError,
+  getCurrentUser,
   loginUser,
   registerCompanyOwner,
 } from "./auth.service.js";
@@ -50,6 +52,35 @@ export async function register(
       return;
     }
 
+    next(error);
+  }
+}
+
+export async function me(
+  request: Request,
+  response: Response,
+  next: NextFunction,
+): Promise<void> {
+  try {
+    const auth = getAuthenticatedRequestContext(request);
+    const user = await getCurrentUser(auth);
+
+    if (!user) {
+      response.set("WWW-Authenticate", "Bearer").status(401).json({
+        status: "error",
+        error: {
+          code: "INVALID_TOKEN",
+          message: "Access token is invalid",
+        },
+      });
+      return;
+    }
+
+    response.status(200).json({
+      status: "success",
+      data: { user },
+    });
+  } catch (error) {
     next(error);
   }
 }

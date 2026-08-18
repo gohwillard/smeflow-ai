@@ -122,6 +122,7 @@ Dashboard / AI Insights
 - [x] Phase 2B Company and User Prisma schema and first migration complete
 - [x] Phase 2C registration and password security complete
 - [x] Phase 2D login and JWT authentication complete
+- [x] Phase 2E authentication middleware and company isolation complete
 - [ ] Authentication implemented
 - [ ] Inventory module implemented
 - [ ] Sales workflow implemented
@@ -130,16 +131,17 @@ Dashboard / AI Insights
 
 Completed phases: Phase 0 — Repository and Planning and Phase 1 — Application Foundation. Phase 2 — Authentication and Company Setup is in progress.
 
-Completed milestone: Phase 2D — Login & JWT Authentication. The API now provides
-`POST /api/v1/auth/login` with normalized email lookup, asynchronous verification
-of the existing scrypt password format, generic invalid-credential handling,
-inactive-account rejection, and HS256 access-token issuance through `jose`.
-Tokens contain only the user subject, company ID, role, issuer, audience, issued
-time, and expiration, with a configured 30-minute lifetime. Automated and live
-HTTP verification passed. No authentication middleware, protected route,
-frontend auth flow, schema change, or migration was added.
+Completed milestone: Phase 2E — Authentication Middleware & Company Isolation.
+The API now accepts access tokens only through the Bearer `Authorization` header,
+cryptographically verifies their pinned HS256 signature and required claims,
+and revalidates the current user's existence, active state, company, and role
+against PostgreSQL. Valid requests receive a typed `{ userId, companyId, role }`
+authentication context sourced from current database values. The protected
+`GET /api/v1/auth/me` endpoint returns only safe current-user fields. Automated
+and live HTTP verification passed; no schema, migration, frontend authentication,
+role-permission matrix, or later business module was added.
 
-Next milestone: Phase 2E — Authentication Middleware & Company Isolation.
+Next milestone: Phase 2F — Company Profile.
 
 ## Local Development
 
