@@ -21,6 +21,11 @@ const productDescriptionSchema = z
   .transform((description) => description || null)
   .nullable();
 
+const productUnitSchema = requiredProductString(
+  "Product unit",
+  50,
+).transform((unit) => unit.toUpperCase());
+
 const exactDecimalString = (
   fieldName: string,
   integerDigits: number,
@@ -53,7 +58,7 @@ export const productCreateSchema = z
     ),
     name: requiredProductString("Product name", 200),
     description: productDescriptionSchema.optional(),
-    unit: requiredProductString("Product unit", 50),
+    unit: productUnitSchema,
     costPrice: moneySchema("Cost price"),
     sellingPrice: moneySchema("Selling price"),
     reorderLevel: quantitySchema("Reorder level").optional(),
@@ -68,7 +73,7 @@ export const productUpdateSchema = z
       .optional(),
     name: requiredProductString("Product name", 200).optional(),
     description: productDescriptionSchema.optional(),
-    unit: requiredProductString("Product unit", 50).optional(),
+    unit: productUnitSchema.optional(),
     costPrice: moneySchema("Cost price").optional(),
     sellingPrice: moneySchema("Selling price").optional(),
     reorderLevel: quantitySchema("Reorder level").optional(),

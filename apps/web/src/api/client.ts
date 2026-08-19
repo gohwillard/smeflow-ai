@@ -4,7 +4,7 @@ export type ApiErrorDetail = {
 }
 
 type ApiRequestOptions = {
-  method?: 'GET' | 'POST' | 'PATCH'
+  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE'
   body?: unknown
   accessToken?: string
   signal?: AbortSignal

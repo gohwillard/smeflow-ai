@@ -184,7 +184,12 @@ describe("Product API", () => {
     const response = await request(app)
       .post("/api/v1/products")
       .set("Authorization", bearer(ownerToken))
-      .send(productInput(`  ${sku("create-normalized").toLowerCase()}  `, { description: "   " }))
+      .send(
+        productInput(`  ${sku("create-normalized").toLowerCase()}  `, {
+          description: "   ",
+          unit: "  pcs  ",
+        }),
+      )
       .expect(201);
 
     expect(response.body).toEqual({
@@ -196,7 +201,7 @@ describe("Product API", () => {
           sku: sku("CREATE-NORMALIZED"),
           name: "Test Product",
           description: null,
-          unit: "pcs",
+          unit: "PCS",
           costPrice: "10.25",
           sellingPrice: "15.99",
           quantityOnHand: "0.000",
@@ -384,7 +389,7 @@ describe("Product API", () => {
         sku: `  ${sku("OWNER-UPDATE-AFTER").toLowerCase()}  `,
         name: "  Updated Product  ",
         description: "   ",
-        unit: "  box  ",
+        unit: "box",
         costPrice: "20.50",
         sellingPrice: "25.75",
         reorderLevel: "2.250",
@@ -396,13 +401,36 @@ describe("Product API", () => {
       sku: sku("OWNER-UPDATE-AFTER"),
       name: "Updated Product",
       description: null,
-      unit: "box",
+      unit: "BOX",
       costPrice: "20.50",
       sellingPrice: "25.75",
       quantityOnHand: "0.000",
       reorderLevel: "2.250",
       isActive: false,
     });
+  });
+
+  it("normalizes mixed-case Product units during update", async () => {
+    const product = await prisma.product.create({
+      data: {
+        companyId: companyAId,
+        sku: sku("MIXED-CASE-UNIT"),
+        name: "Mixed Case Unit Product",
+        unit: "PCS",
+        costPrice: "1.00",
+        sellingPrice: "2.00",
+      },
+    });
+    const response = await request(app)
+      .patch(`/api/v1/products/${product.id}`)
+      .set("Authorization", bearer(ownerToken))
+      .send({ unit: "Kg" })
+      .expect(200);
+
+    expect(response.body.data.product.unit).toBe("KG");
+    expect(
+      (await prisma.product.findUnique({ where: { id: product.id } }))?.unit,
+    ).toBe("KG");
   });
 
   it("allows an ADMIN to create, update, and archive a Product", async () => {

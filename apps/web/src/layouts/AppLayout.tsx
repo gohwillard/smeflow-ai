@@ -24,6 +24,8 @@ export function AppLayout() {
           <NavLink to="/app" end>
             Home
           </NavLink>
+          <NavLink to="/products">Products</NavLink>
+          <NavLink to="/categories">Categories</NavLink>
           <NavLink to="/company">Company</NavLink>
         </nav>
 

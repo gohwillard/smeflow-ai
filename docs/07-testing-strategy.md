@@ -89,5 +89,18 @@ constraints for Category and Product CRUD. They cover OWNER/ADMIN/STAFF
 authorization, two-Company isolation, strict field rejection, archive behavior,
 case-insensitive Category uniqueness, normalized SKU uniqueness, active Category
 assignment, read-only stock, and fixed-scale decimal-string responses. The
-complete backend regression suite currently contains 136 passing tests across 6
+complete backend regression suite currently contains 137 passing tests across 6
 test files.
+
+## Phase 3D Coverage
+
+Phase 3D frontend tests cover protected Product and Category routes, loading and
+empty states, OWNER/ADMIN management, STAFF read-only behavior, Category
+create/edit/archive/reactivation, Product list/create/detail/edit/lifecycle
+flows, active and archived Category relationships, Uncategorized Products,
+fixed-scale decimal-string request handling, duplicate and unavailable-record
+errors, reusable archive/reactivation confirmation behavior, focus and Escape
+handling, pending-request deduplication, destructive action semantics,
+read-only stock, and the existing 401, 403, logout, and memory-only-authentication
+behavior. The complete frontend regression suite contains 69 passing tests
+across 3 test files.

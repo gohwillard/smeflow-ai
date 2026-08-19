@@ -278,8 +278,8 @@ Create accepts only `categoryId` (optional UUID or `null`), `sku`, `name`,
 and `reorderLevel` (optional). PATCH accepts those fields plus `isActive`.
 Unknown and immutable fields—including `companyId` and `quantityOnHand`—return
 HTTP 400 `VALIDATION_ERROR`. SKU, name, unit, and supplied description are
-trimmed; SKU is uppercased; a blank description becomes `null`. New Products
-always start at `quantityOnHand = 0`.
+trimmed; SKU and unit are uppercased; a blank description becomes `null`. New
+Products always start at `quantityOnHand = 0`.
 
 Money and quantity inputs must be non-negative decimal strings: prices allow at
 most two fractional digits, while `reorderLevel` allows at most three. Product
@@ -293,7 +293,7 @@ digits; `quantityOnHand` and `reorderLevel` with three) and contain:
   "sku": "DRILL-001",
   "name": "Cordless Drill",
   "description": "18V cordless drill",
-  "unit": "pcs",
+  "unit": "PCS",
   "costPrice": "10.25",
   "sellingPrice": "15.99",
   "quantityOnHand": "0.000",

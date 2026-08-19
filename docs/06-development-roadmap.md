@@ -40,13 +40,14 @@ The current project state is:
 - Phase 3 — Product and Inventory Module: 🚧 Current
 - Phase 3A — Product & Inventory Domain Design: ✅ Completed
 - Phase 3B — Product & Inventory Schema Migration: ✅ Completed
-- Phase 3C — Category & Product Backend: 🚧 Implemented and Codex-verified;
-  awaiting manual API verification
+- Phase 3C — Category & Product Backend: ✅ Completed
+- Phase 3D — Product Frontend: 🚧 Implemented and Codex-verified; awaiting
+  manual browser verification
 
-Phase 3 is in progress. Its approved Phase 3A domain design and verified Phase
-3B schema migration are complete. Phase 3C is implemented and its automated
-verification passes, but it awaits user/ChatGPT manual API verification before
-approval. Phase 3D and all later Phase 3 milestones remain planned.
+Phase 3 is in progress. Phase 3A, Phase 3B, and Phase 3C are complete. Phase 3D
+is implemented and its automated and visual verification passes, but it awaits
+user/ChatGPT manual browser verification before approval. Phase 3E and all later
+Phase 3 milestones remain planned and have not started.
 
 ---
 
@@ -455,7 +456,7 @@ migration.
 
 ### Phase 3C — Category & Product Backend
 
-**Status:** 🚧 Implemented and Codex-verified; awaiting manual API verification
+**Status:** ✅ Completed
 
 - Authenticated Category and Product CRUD APIs
 - Strict Zod body and UUID-parameter validation
@@ -465,14 +466,14 @@ migration.
 - Exact decimal-string API boundary and read-only `quantityOnHand`
 - Active same-Company Category assignment with historical inactive links retained
 - Idempotent archive/deactivate behavior without hard deletion or stock changes
-- 70 focused Category/Product tests plus all 66 Phase 2 regressions passing
+- 71 focused Category/Product tests plus all 66 Phase 2 regressions passing
 
-Manual API verification and user/ChatGPT approval remain required before Phase
-3D starts.
+Automated verification and user/ChatGPT manual API verification passed before
+Phase 3D began.
 
 ### Phase 3D — Product Frontend
 
-**Status:** ⬜ Planned
+**Status:** 🚧 Implemented and Codex-verified; awaiting manual browser verification
 
 - Product list
 - Create product
@@ -480,6 +481,24 @@ Manual API verification and user/ChatGPT approval remain required before Phase
 - Product details
 - Category handling
 - Loading, error, and empty states
+
+Implemented protected `/products`, `/products/new`, `/products/:productId`,
+`/products/:productId/edit`, and `/categories` routes in the existing React
+Router application shell. The frontend reuses memory-only authentication,
+authenticated native fetch handling, and page-local state. OWNER and ADMIN can
+manage Product/Category master data and lifecycle state; STAFF receives
+read-only views. Active Category selection, archived historical relationships,
+Uncategorized Products, exact decimal strings, safe API errors, reusable
+accessible lifecycle confirmation, and duplicate-submission prevention are
+covered. Product lists use an aligned desktop table and stacked mobile cards.
+`quantityOnHand` is displayed only and is absent from Product request construction.
+The backend now also trims and uppercases Product units on both create and update.
+
+All 69 frontend tests across 3 files and all 137 backend tests across 6 files
+pass, together with frontend lint/build, backend typecheck/build, Prisma
+validation, scope/hygiene review, and 1440×1000/390×844 browser visual review.
+Manual browser verification and user/ChatGPT approval remain required. Phase 3E
+has not started.
 
 ### Phase 3E — Inventory Movement & Manual Adjustment
 

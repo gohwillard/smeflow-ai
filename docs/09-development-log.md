@@ -154,3 +154,21 @@
 - **Schema and scope:** No dependency, Prisma schema, migration, frontend, InventoryMovement API, stock-adjustment service, search, low-stock, Purchasing, Sales, or Phase 3D+ functionality was added. The approved Phase 2 and Phase 3B migrations are unchanged.
 - **Known issues:** None identified in automated verification. Manual API verification remains pending.
 - **Next milestone:** ChatGPT/user manual API verification of Phase 3C before starting Phase 3D.
+
+## Phase 3D — Product Frontend
+
+- **Status:** Implemented and Codex-verified; awaiting user/ChatGPT manual browser verification before approval.
+- **Implemented:** Added protected Product list, create, detail, and edit routes plus a protected Category management route; authenticated-shell navigation; typed Category/Product native-fetch helpers; OWNER/ADMIN Category create/edit/archive/reactivation; OWNER/ADMIN Product create/edit/archive/reactivation; STAFF read-only views; lifecycle badges; Category-name resolution; Uncategorized support; read-only stock display; and deliberate loading, empty, error, confirmation, success, and submission states.
+- **Technical decisions:** Reused React Router, the memory-only `AuthProvider`, `runAuthenticated`, native `fetch`, page-local state, and the existing CSS conventions with no new dependency. Product decimal values remain strings and are format-checked without arithmetic. Edit requests are diff-only, never include `companyId` or `quantityOnHand`, preserve an unchanged archived current Category, and allow only active Categories or Uncategorized as new assignments. Backend authorization and Company scope remain authoritative.
+- **Verification:** All 3 frontend test files passed with 67/67 tests. Frontend lint and the TypeScript-backed Vite production build passed. Desktop and 390px mobile headless-Chrome review covered populated and empty Product lists, create/detail/edit screens, active and archived Product presentation, Category management, and STAFF read-only presentation. Diff, changed-path, dependency, secret/token, stock-write, and Phase 3E+ scope checks passed.
+- **Known issues:** No implementation blocker identified. Full refresh still intentionally clears the memory-only session. Manual browser verification remains required before Phase 3D approval.
+- **Next milestone:** ChatGPT/user manual browser verification of Phase 3D before starting Phase 3E. Phase 3E has not started.
+
+## Phase 3D — Manual Review Remediation
+
+- **Status:** Implemented and Codex-verified; awaiting user/ChatGPT browser re-test and final STAFF read-only verification before Phase 3D approval.
+- **Implemented:** Rebalanced the desktop Product table, converted its existing semantic rows into stacked mobile cards without primary horizontal scrolling, improved action spacing and destructive styling, inset the Product Category select chevron, and replaced native lifecycle prompts with one reusable accessible confirmation dialog for Product and Category archive/reactivation. Added backend-authoritative Product-unit trim-and-uppercase normalization for create and update.
+- **Technical decisions:** Kept one Product-table DOM structure and changed only its responsive presentation, avoiding duplicated content. The dialog uses labelled modal semantics, initial Cancel focus, a trapped Tab cycle, Escape cancellation, focus restoration, scroll locking, pending controls, and synchronous duplicate-confirmation protection. The Zod Product boundary performs unit normalization before the existing service write; no Prisma or database change was needed.
+- **Verification:** All 69 frontend tests across 3 files, frontend ESLint/build, all 137 backend tests across 6 files, backend typecheck/build, Prisma Client generation/validation, and `git diff --check` passed. Headless Chrome review at 1440×1000 and 390×844 covered Product table/cards and actions, create form/select, Product details, and the confirmation dialog.
+- **Known issues:** No implementation blocker identified. Full refresh still intentionally clears the memory-only session. Phase 3D remains awaiting manual browser verification; Phase 3E and Phase 3F have not started.
+- **Next milestone:** ChatGPT/user re-test the Phase 3D visual/lifecycle fixes, then perform the final STAFF read-only browser verification before approving Phase 3D.

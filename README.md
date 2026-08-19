@@ -130,7 +130,8 @@ Dashboard / AI Insights
 - [x] Phase 3 officially started
 - [x] Phase 3A Product and Inventory domain design approved
 - [x] Phase 3B Product and Inventory schema migration complete
-- [x] Phase 3C Category and Product backend implemented and Codex-verified
+- [x] Phase 3C Category and Product backend complete
+- [x] Phase 3D Product frontend implemented and Codex-verified
 - [ ] Inventory module implemented
 - [ ] Sales workflow implemented
 - [ ] AI assistant implemented
@@ -160,11 +161,18 @@ complete. Prisma and PostgreSQL now contain the approved `Category`, `Product`,
 `InventoryMovement`, and `InventoryMovementType` structures, tenant-aware
 foreign keys, exact decimal types, business uniqueness rules, indexes, and
 database checks through migration `20260819112747_add_product_inventory`.
-Phase 3C — Category & Product Backend is implemented and Codex-verified, with
-authenticated tenant-scoped CRUD, OWNER/ADMIN management, STAFF read-only
-access, strict validation, fixed-scale decimal-string responses, and archive
-behavior. All 136 backend tests pass. Phase 3C now awaits user/ChatGPT manual API
-verification before approval and before Phase 3D begins.
+Phase 3C — Category & Product Backend is complete after manual API verification.
+Phase 3D — Product Frontend is implemented and Codex-verified. Protected
+Product list, create, detail, and edit routes plus Category management now use
+the Phase 3C APIs. OWNER and ADMIN receive lifecycle-management controls, STAFF
+remains read-only, archived Category relationships remain visible, decimal
+values stay strings, Product units are backend-normalized to uppercase, and
+`quantityOnHand` is display-only. The Product list now uses an aligned desktop
+table and stacked mobile cards, and all Product/Category archive and reactivate
+actions use a reusable accessible confirmation dialog. All 69 frontend tests
+and 137 backend tests pass, together with the relevant lint, typecheck, builds,
+Prisma validation, and 1440×1000/390×844 visual review. Phase 3D awaits
+user/ChatGPT manual browser verification before approval. Phase 3E has not started.
 
 ## Local Development
 

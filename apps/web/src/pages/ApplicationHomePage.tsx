@@ -14,8 +14,8 @@ export function ApplicationHomePage() {
         <p className="eyebrow">Authenticated workspace</p>
         <h1 id="home-heading">Welcome, {user.firstName}.</h1>
         <p>
-          Your protected SMEFlow application is ready. Business modules will be
-          added in their roadmap phases.
+          Your protected SMEFlow workspace now includes Product and Category
+          management.
         </p>
       </div>
 
@@ -37,6 +37,20 @@ export function ApplicationHomePage() {
               </dd>
             </div>
           </dl>
+        </article>
+
+        <article className="content-card content-card--action">
+          <p className="card-label">Product catalog</p>
+          <h2>Manage Products and Categories</h2>
+          <p>View master data, lifecycle status, and read-only stock balances.</p>
+          <div className="row-actions">
+            <Link className="button button--primary" to="/products">
+              Open Products
+            </Link>
+            <Link className="button button--secondary" to="/categories">
+              Categories
+            </Link>
+          </div>
         </article>
 
         <article className="content-card content-card--action">
