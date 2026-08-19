@@ -130,6 +130,7 @@ Dashboard / AI Insights
 - [x] Phase 3 officially started
 - [x] Phase 3A Product and Inventory domain design approved
 - [x] Phase 3B Product and Inventory schema migration complete
+- [x] Phase 3C Category and Product backend implemented and Codex-verified
 - [ ] Inventory module implemented
 - [ ] Sales workflow implemented
 - [ ] AI assistant implemented
@@ -159,8 +160,11 @@ complete. Prisma and PostgreSQL now contain the approved `Category`, `Product`,
 `InventoryMovement`, and `InventoryMovementType` structures, tenant-aware
 foreign keys, exact decimal types, business uniqueness rules, indexes, and
 database checks through migration `20260819112747_add_product_inventory`.
-Phase 3C — Category & Product Backend has not started and requires explicit
-instruction after review of Phase 3B.
+Phase 3C — Category & Product Backend is implemented and Codex-verified, with
+authenticated tenant-scoped CRUD, OWNER/ADMIN management, STAFF read-only
+access, strict validation, fixed-scale decimal-string responses, and archive
+behavior. All 136 backend tests pass. Phase 3C now awaits user/ChatGPT manual API
+verification before approval and before Phase 3D begins.
 
 ## Local Development
 

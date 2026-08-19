@@ -256,31 +256,97 @@ returned.
 
 ## Products
 
-These Phase 3C routes remain preliminary. Product removal must archive/deactivate
-the Product rather than physically delete it, and create/update contracts must
-not accept an arbitrary `quantityOnHand` value. Stock changes belong only to
-backend-controlled inventory operations.
+Implemented in Phase 3C:
 
 ```text
 GET    /products
-GET    /products/:id
+GET    /products/:productId
 POST   /products
-PATCH  /products/:id
-DELETE /products/:id
+PATCH  /products/:productId
+DELETE /products/:productId
 ```
+
+All routes require Bearer authentication and derive Company scope exclusively
+from `req.auth.companyId`. `OWNER`, `ADMIN`, and `STAFF` may list and retrieve.
+Only `OWNER` and `ADMIN` may create, update, or archive; `STAFF` receives HTTP
+403 `FORBIDDEN` for writes. Lists include active and archived records in
+deterministic creation order. Search, filters, pagination, and low-stock queries
+remain deferred.
+
+Create accepts only `categoryId` (optional UUID or `null`), `sku`, `name`,
+`description` (optional string or `null`), `unit`, `costPrice`, `sellingPrice`,
+and `reorderLevel` (optional). PATCH accepts those fields plus `isActive`.
+Unknown and immutable fields—including `companyId` and `quantityOnHand`—return
+HTTP 400 `VALIDATION_ERROR`. SKU, name, unit, and supplied description are
+trimmed; SKU is uppercased; a blank description becomes `null`. New Products
+always start at `quantityOnHand = 0`.
+
+Money and quantity inputs must be non-negative decimal strings: prices allow at
+most two fractional digits, while `reorderLevel` allows at most three. Product
+responses use fixed-scale exact strings (`costPrice` and `sellingPrice` with two
+digits; `quantityOnHand` and `reorderLevel` with three) and contain:
+
+```json
+{
+  "id": "ae7c26d2-a801-4814-91cc-7b9ab8d652e0",
+  "categoryId": null,
+  "sku": "DRILL-001",
+  "name": "Cordless Drill",
+  "description": "18V cordless drill",
+  "unit": "pcs",
+  "costPrice": "10.25",
+  "sellingPrice": "15.99",
+  "quantityOnHand": "0.000",
+  "reorderLevel": "1.500",
+  "isActive": true,
+  "createdAt": "2026-08-19T04:30:00.000Z",
+  "updatedAt": "2026-08-19T04:30:00.000Z"
+}
+```
+
+A supplied Category must be active and owned by the authenticated Company.
+Cross-Company, inactive, and unavailable Categories share HTTP 400
+`CATEGORY_UNAVAILABLE`. Existing Product links remain intact after a Category
+is archived, and unrelated Product updates continue to work; only a new or
+changed assignment is checked for active status. Duplicate normalized SKUs
+return HTTP 409 `SKU_ALREADY_EXISTS`.
+
+DELETE sets `isActive = false`, returns the safe Product, and is idempotent. It
+does not delete the row, release the SKU, alter `quantityOnHand`, or create or
+delete InventoryMovement records. PATCH may reactivate with `isActive: true`.
+Tenant-local missing and cross-Company IDs both return HTTP 404
+`PRODUCT_NOT_FOUND`.
 
 ## Categories
 
-Category removal must archive/deactivate the Category rather than break existing
-Product relationships. The final Phase 3C contract must make this lifecycle
-behavior explicit even if it retains the preliminary `DELETE` route shape.
+Implemented in Phase 3C:
 
 ```text
 GET    /categories
+GET    /categories/:categoryId
 POST   /categories
-PATCH  /categories/:id
-DELETE /categories/:id
+PATCH  /categories/:categoryId
+DELETE /categories/:categoryId
 ```
+
+All routes require Bearer authentication and use only `req.auth.companyId` for
+ownership. All roles may list and retrieve; only `OWNER` and `ADMIN` may create,
+update, and archive. Lists include active and archived Categories in
+deterministic creation order.
+
+Create accepts only `name` and optional `description`. PATCH accepts `name`,
+`description`, and `isActive`. Names are trimmed and nonblank; descriptions are
+trimmed, accept `null`, and normalize blank strings to `null`. Unknown and
+immutable fields, including `companyId`, return HTTP 400 `VALIDATION_ERROR`.
+Responses contain only `id`, `name`, `description`, `isActive`, `createdAt`, and
+`updatedAt`.
+
+Category names preserve their display casing but are unique case-insensitively
+within one Company across active and archived rows. Conflicts return HTTP 409
+`CATEGORY_ALREADY_EXISTS`; different Companies may use the same name. DELETE
+sets `isActive = false`, is idempotent, and never deletes or detaches Products.
+PATCH may reactivate with `isActive: true`. Tenant-local missing and
+cross-Company IDs both return HTTP 404 `CATEGORY_NOT_FOUND`.
 
 ## Inventory
 

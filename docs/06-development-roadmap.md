@@ -40,11 +40,13 @@ The current project state is:
 - Phase 3 — Product and Inventory Module: 🚧 Current
 - Phase 3A — Product & Inventory Domain Design: ✅ Completed
 - Phase 3B — Product & Inventory Schema Migration: ✅ Completed
+- Phase 3C — Category & Product Backend: 🚧 Implemented and Codex-verified;
+  awaiting manual API verification
 
 Phase 3 is in progress. Its approved Phase 3A domain design and verified Phase
-3B schema migration are complete. Phase 3C and all later Phase 3 implementation
-milestones remain planned; Phase 3C must not start without explicit instruction
-after Phase 3B review.
+3B schema migration are complete. Phase 3C is implemented and its automated
+verification passes, but it awaits user/ChatGPT manual API verification before
+approval. Phase 3D and all later Phase 3 milestones remain planned.
 
 ---
 
@@ -394,8 +396,8 @@ A new user can register, sign in, access protected pages, and access only data
 belonging to their company.
 
 Phase 2 is complete. Phase 3 has since completed its Phase 3A design and Phase
-3B database-schema foundation; no Phase 3 backend or frontend functionality has
-started.
+3B database-schema foundation, and Phase 3C backend implementation is awaiting
+manual verification. No Phase 3 frontend functionality has started.
 
 ---
 
@@ -448,18 +450,25 @@ PostgreSQL expression/check constraints. Prisma validation and generation,
 migration application/status/replay, two drift comparisons, live PostgreSQL
 catalog inspection, transactional integrity/isolation checks, fictional-record
 rollback, all 66 existing backend tests, backend typecheck, and backend build
-passed. Phase 3C has not started.
+passed. Phase 3C has since been implemented without changing this schema or
+migration.
 
 ### Phase 3C — Category & Product Backend
 
-**Status:** ⬜ Planned
+**Status:** 🚧 Implemented and Codex-verified; awaiting manual API verification
 
-- Category CRUD
-- Product CRUD
-- Input validation
-- Company isolation
-- Archive or deactivate behavior where appropriate
-- Backend and business-rule tests
+- Authenticated Category and Product CRUD APIs
+- Strict Zod body and UUID-parameter validation
+- Company scope derived only from `req.auth.companyId`
+- OWNER/ADMIN management and STAFF read-only authorization
+- Case-insensitive Category-name and normalized SKU conflicts mapped safely
+- Exact decimal-string API boundary and read-only `quantityOnHand`
+- Active same-Company Category assignment with historical inactive links retained
+- Idempotent archive/deactivate behavior without hard deletion or stock changes
+- 70 focused Category/Product tests plus all 66 Phase 2 regressions passing
+
+Manual API verification and user/ChatGPT approval remain required before Phase
+3D starts.
 
 ### Phase 3D — Product Frontend
 

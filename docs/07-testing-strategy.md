@@ -81,3 +81,13 @@ Examples:
 5. A user cannot access another company's records or connect records across
    Companies.
 6. Invoice totals must equal the associated line-item calculations.
+
+## Phase 3C Coverage
+
+Phase 3C integration tests exercise the real Express routes and PostgreSQL
+constraints for Category and Product CRUD. They cover OWNER/ADMIN/STAFF
+authorization, two-Company isolation, strict field rejection, archive behavior,
+case-insensitive Category uniqueness, normalized SKU uniqueness, active Category
+assignment, read-only stock, and fixed-scale decimal-string responses. The
+complete backend regression suite currently contains 136 passing tests across 6
+test files.
