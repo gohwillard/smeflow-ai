@@ -38,12 +38,13 @@ The current project state is:
 - Phase 2G — Protected Frontend Authentication Flow: ✅ Completed
 - Phase 2H — Phase 2 Verification: ✅ Completed
 - Phase 3 — Product and Inventory Module: 🚧 Current
-- Phase 3A — Product & Inventory Domain Design: 🚧 Current
+- Phase 3A — Product & Inventory Domain Design: ✅ Completed
+- Phase 3B — Product & Inventory Schema Migration: ✅ Completed
 
-Phase 3 has officially started. Phase 3A is the current documentation-only
-milestone and its proposed domain design is awaiting user review and approval.
-Phase 3B and all later Phase 3 implementation milestones remain planned and
-must not start without explicit instruction after Phase 3A approval.
+Phase 3 is in progress. Its approved Phase 3A domain design and verified Phase
+3B schema migration are complete. Phase 3C and all later Phase 3 implementation
+milestones remain planned; Phase 3C must not start without explicit instruction
+after Phase 3B review.
 
 ---
 
@@ -392,8 +393,9 @@ was required.
 A new user can register, sign in, access protected pages, and access only data
 belonging to their company.
 
-Phase 2 is complete. Phase 3 has since started with its design-only Phase 3A
-milestone; no Phase 3 implementation work has started.
+Phase 2 is complete. Phase 3 has since completed its Phase 3A design and Phase
+3B database-schema foundation; no Phase 3 backend or frontend functionality has
+started.
 
 ---
 
@@ -405,7 +407,7 @@ milestone; no Phase 3 implementation work has started.
 
 ### Phase 3A — Product & Inventory Domain Design
 
-**Status:** 🚧 Current
+**Status:** ✅ Completed
 
 Design and review:
 
@@ -425,17 +427,28 @@ Design and review:
 - Tenant-aware relationships
 - Indexes and constraints
 
-This milestone is documentation only. Its proposed design must be reviewed and
-approved before Phase 3B begins; no Prisma model, migration, API, or frontend
-implementation belongs to Phase 3A.
+This documentation-only milestone produced the reviewed and approved design now
+implemented by Phase 3B. It added no Prisma model, migration, API, or frontend
+implementation itself.
 
 ### Phase 3B — Product & Inventory Schema Migration
 
-**Status:** ⬜ Planned
+**Status:** ✅ Completed
 
 - Implement only the approved Prisma models
 - Create the migration
 - Verify the resulting database structure, relationships, indexes, and constraints
+
+Implemented as migration `20260819112747_add_product_inventory`. It adds only
+the approved `Category`, `Product`, `InventoryMovement`, and
+`InventoryMovementType` schema, the minimum User/Company relation additions,
+tenant-aware composite keys and foreign keys, exact decimal fields, lifecycle
+defaults, business uniqueness, listing/history indexes, and customized
+PostgreSQL expression/check constraints. Prisma validation and generation,
+migration application/status/replay, two drift comparisons, live PostgreSQL
+catalog inspection, transactional integrity/isolation checks, fictional-record
+rollback, all 66 existing backend tests, backend typecheck, and backend build
+passed. Phase 3C has not started.
 
 ### Phase 3C — Category & Product Backend
 

@@ -8,38 +8,110 @@ datasource db {
 }
 
 model Company {
-  id                 String   @id @default(uuid()) @db.Uuid
+  id                 String              @id @default(uuid()) @db.Uuid
   name               String
   registrationNumber String?
   email              String?
   phone              String?
   address            String?
-  createdAt          DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt          DateTime @updatedAt @db.Timestamptz(3)
+  createdAt          DateTime            @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime            @updatedAt @db.Timestamptz(3)
   users              User[]
+  categories         Category[]
+  products           Product[]
+  inventoryMovements InventoryMovement[]
 
   @@map("companies")
 }
 
 model User {
-  id           String   @id @default(uuid()) @db.Uuid
-  companyId    String   @db.Uuid
-  email        String   @unique
-  passwordHash String
-  firstName    String
-  lastName     String
-  role         UserRole @default(STAFF)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now()) @db.Timestamptz(3)
-  updatedAt    DateTime @updatedAt @db.Timestamptz(3)
-  company      Company  @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  id                        String              @id @default(uuid()) @db.Uuid
+  companyId                 String              @db.Uuid
+  email                     String              @unique
+  passwordHash              String
+  firstName                 String
+  lastName                  String
+  role                      UserRole            @default(STAFF)
+  isActive                  Boolean             @default(true)
+  createdAt                 DateTime            @default(now()) @db.Timestamptz(3)
+  updatedAt                 DateTime            @updatedAt @db.Timestamptz(3)
+  company                   Company             @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  createdInventoryMovements InventoryMovement[]
 
+  @@unique([id, companyId])
   @@index([companyId])
   @@map("users")
+}
+
+model Category {
+  id          String    @id @default(uuid()) @db.Uuid
+  companyId   String    @db.Uuid
+  name        String
+  description String?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now()) @db.Timestamptz(3)
+  updatedAt   DateTime  @updatedAt @db.Timestamptz(3)
+  company     Company   @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  products    Product[]
+
+  @@unique([id, companyId])
+  @@index([companyId, isActive])
+  @@map("categories")
+}
+
+model Product {
+  id                 String              @id @default(uuid()) @db.Uuid
+  companyId          String              @db.Uuid
+  categoryId         String?             @db.Uuid
+  sku                String
+  name               String
+  description        String?
+  unit               String
+  costPrice          Decimal             @db.Decimal(12, 2)
+  sellingPrice       Decimal             @db.Decimal(12, 2)
+  quantityOnHand     Decimal             @default(0) @db.Decimal(14, 3)
+  reorderLevel       Decimal             @default(0) @db.Decimal(14, 3)
+  isActive           Boolean             @default(true)
+  createdAt          DateTime            @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime            @updatedAt @db.Timestamptz(3)
+  company            Company             @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  category           Category?           @relation(fields: [categoryId, companyId], references: [id, companyId], onDelete: Restrict)
+  inventoryMovements InventoryMovement[]
+
+  @@unique([id, companyId])
+  @@unique([companyId, sku])
+  @@index([companyId, categoryId])
+  @@index([companyId, isActive])
+  @@map("products")
+}
+
+model InventoryMovement {
+  id              String                @id @default(uuid()) @db.Uuid
+  companyId       String                @db.Uuid
+  productId       String                @db.Uuid
+  createdByUserId String                @db.Uuid
+  type            InventoryMovementType
+  quantity        Decimal               @db.Decimal(14, 3)
+  quantityBefore  Decimal               @db.Decimal(14, 3)
+  quantityAfter   Decimal               @db.Decimal(14, 3)
+  note            String?
+  createdAt       DateTime              @default(now()) @db.Timestamptz(3)
+  company         Company               @relation(fields: [companyId], references: [id], onDelete: Restrict)
+  product         Product               @relation(fields: [productId, companyId], references: [id, companyId], onDelete: Restrict)
+  createdByUser   User                  @relation(fields: [createdByUserId, companyId], references: [id, companyId], onDelete: Restrict)
+
+  @@index([companyId, productId, createdAt])
+  @@map("inventory_movements")
 }
 
 enum UserRole {
   OWNER
   ADMIN
   STAFF
+}
+
+enum InventoryMovementType {
+  OPENING_BALANCE
+  MANUAL_IN
+  MANUAL_OUT
 }

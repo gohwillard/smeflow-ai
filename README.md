@@ -128,7 +128,8 @@ Dashboard / AI Insights
 - [x] Phase 2H full Phase 2 verification complete
 - [x] Authentication implemented
 - [x] Phase 3 officially started
-- [ ] Phase 3A Product and Inventory domain design awaiting review and approval
+- [x] Phase 3A Product and Inventory domain design approved
+- [x] Phase 3B Product and Inventory schema migration complete
 - [ ] Inventory module implemented
 - [ ] Sales workflow implemented
 - [ ] AI assistant implemented
@@ -152,11 +153,14 @@ reload or address-bar navigation recreates the SPA, clears authentication, and
 returns the user to login; no token is stored in Web Storage, IndexedDB,
 cookies, or URLs.
 
-Phase 3 — Product and Inventory Module has officially started. Phase 3A —
-Product & Inventory Domain Design is the current documentation-only milestone.
-Its proposed Category, Product, and InventoryMovement design is awaiting user
-review and approval. No Prisma Phase 3 model, migration, backend/frontend Phase
-3 functionality, or Phase 3B work has started.
+Phase 3 — Product and Inventory Module is in progress. Phase 3A — Product &
+Inventory Domain Design and Phase 3B — Product & Inventory Schema Migration are
+complete. Prisma and PostgreSQL now contain the approved `Category`, `Product`,
+`InventoryMovement`, and `InventoryMovementType` structures, tenant-aware
+foreign keys, exact decimal types, business uniqueness rules, indexes, and
+database checks through migration `20260819112747_add_product_inventory`.
+Phase 3C — Category & Product Backend has not started and requires explicit
+instruction after review of Phase 3B.
 
 ## Local Development
 

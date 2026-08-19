@@ -323,6 +323,8 @@ Phase 2H — Phase 2 Verification is complete. The approved Company/User domain,
 
 Phase 3 — Product and Inventory Module has officially started.
 
-Phase 3A — Product & Inventory Domain Design is the current milestone. It is a documentation-only milestone: the proposed `Category`, `Product`, `InventoryMovement`, ownership, tenant-safety, decimal, traceability, lifecycle, authorization, constraint, index, transaction, and concurrency decisions are documented in `docs/04-database-design.md` and await user review and approval.
+Phase 3A — Product & Inventory Domain Design is complete and approved. It documented the approved `Category`, `Product`, `InventoryMovement`, ownership, tenant-safety, decimal, traceability, lifecycle, authorization, constraint, index, transaction, and concurrency decisions in `docs/04-database-design.md`.
 
-Phase 3B — Product & Inventory Schema Migration has not started. Do not add Phase 3 Prisma models, migrations, backend/frontend functionality, or later-phase work until the Phase 3A design is explicitly approved and the next milestone is requested.
+Phase 3B — Product & Inventory Schema Migration is complete. Prisma and migration `20260819112747_add_product_inventory` implement the approved models and enum, tenant-aware composite keys and foreign keys, exact decimal types, lifecycle defaults, business uniqueness, indexes, and customized PostgreSQL string, numeric, and movement-arithmetic constraints. Prisma validation/generation/status/replay, drift checks, PostgreSQL catalog and transactional behavior checks, cleanup, all 66 backend tests, backend typecheck, and backend build passed. The existing Phase 2 migration was not changed.
+
+Phase 3C — Category & Product Backend has not started. Do not add Category/Product routes, controllers, services, validation, frontend functionality, inventory adjustment logic, or later-phase work without explicit user instruction after Phase 3B review.

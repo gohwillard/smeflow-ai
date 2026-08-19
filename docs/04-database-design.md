@@ -17,12 +17,13 @@ Phase 2A approved the `Company`, `User`, and `UserRole` design documented below,
 and Phase 2B implemented it in Prisma schema and migration
 `20260818020913_init_company_user`.
 
-Phase 3A is now the current documentation-only milestone. The proposed
-`Category`, `Product`, `InventoryMovement`, and `InventoryMovementType` design
-in this document has been reviewed against the implemented Phase 2 foundation
-but still requires user approval before implementation. Phase 3A adds no Prisma
-model, enum, migration, API, service, or frontend functionality. Phase 3B has
-not started.
+Phase 3A approved the `Category`, `Product`, `InventoryMovement`, and
+`InventoryMovementType` design documented below. Phase 3B implemented that
+design in Prisma schema and migration
+`20260819112747_add_product_inventory`, including customized PostgreSQL SQL for
+the expression index and check constraints that Prisma Schema Language cannot
+represent. Phase 3C has not started; no Category/Product API, inventory service,
+or frontend Product/Inventory functionality has been implemented.
 
 Models assigned to later roadmap phases remain planning context only. Their
 fields, relationships, constraints, and indexes must be designed in their own
@@ -163,11 +164,11 @@ company deletion.
 - The first migration is `20260818020913_init_company_user` and contains no
   authentication endpoints, password-hashing behavior, or later-domain models.
 
-## Proposed Phase 3A Product and Inventory Design
+## Approved Phase 3A Product and Inventory Design
 
-This section is the implementation specification proposed for Phase 3B. It is
-pending user review and approval. Phase 3A defines the domain only; all runtime
-behavior described here belongs to the later Phase 3 milestones named below.
+This section is the approved implementation specification used by Phase 3B.
+Phase 3A defined the domain only; all runtime behavior described here belongs to
+the later Phase 3 milestones named below.
 
 ### `Category`
 
@@ -473,6 +474,29 @@ authoritative for allowed fields, normalization, authorization, Company scope,
 activity, opening-balance rules, movement semantics, and stock availability.
 Database constraints are the final integrity safety net. None of these layers
 replaces the others.
+
+### Phase 3B Implementation Details
+
+- Migration `20260819112747_add_product_inventory` creates `categories`,
+  `products`, `inventory_movements`, and the three-value
+  `InventoryMovementType` enum without changing the Phase 2 migration.
+- Prisma represents all approved models, native UUID/decimal/timestamp types,
+  defaults, direct Company relations, composite candidate keys, tenant-aware
+  composite relations, business uniqueness, and access-path indexes that its
+  schema language supports.
+- Customized migration SQL adds the per-Company functional unique index on
+  `lower(Category.name)`; required-string normalization checks; non-negative
+  Product price, stock, and reorder checks; positive/non-negative movement
+  checks; and type-aware movement arithmetic. `OPENING_BALANCE` requires a zero
+  before-balance and an after-balance equal to its quantity.
+- Every Company, Category, Product, and movement-author foreign key uses
+  `ON DELETE RESTRICT`. PostgreSQL verification confirmed the optional composite
+  Product-to-Category foreign key permits `categoryId = NULL` while rejecting a
+  Category from another Company.
+- Migration replay, live-schema drift comparison, PostgreSQL catalog inspection,
+  transactional constraint/isolation checks, Prisma validation and generation,
+  and existing backend regressions passed. Transactional fictional verification
+  records were rolled back.
 
 ### Explicit Phase 3 Exclusions
 
