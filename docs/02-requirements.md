@@ -39,7 +39,7 @@ The system shall:
 - Record stock movements
 - Support stock-in
 - Support stock-out
-- Prevent invalid negative stock unless explicitly allowed
+- Prevent negative stock; the SMEFlow MVP does not allow it
 - Display low-stock products
 
 ### FR-05 Customers

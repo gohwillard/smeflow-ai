@@ -256,6 +256,11 @@ returned.
 
 ## Products
 
+These Phase 3C routes remain preliminary. Product removal must archive/deactivate
+the Product rather than physically delete it, and create/update contracts must
+not accept an arbitrary `quantityOnHand` value. Stock changes belong only to
+backend-controlled inventory operations.
+
 ```text
 GET    /products
 GET    /products/:id
@@ -266,6 +271,10 @@ DELETE /products/:id
 
 ## Categories
 
+Category removal must archive/deactivate the Category rather than break existing
+Product relationships. The final Phase 3C contract must make this lifecycle
+behavior explicit even if it retains the preliminary `DELETE` route shape.
+
 ```text
 GET    /categories
 POST   /categories
@@ -274,6 +283,11 @@ DELETE /categories/:id
 ```
 
 ## Inventory
+
+The Phase 3E adjustment contract must derive Company scope from
+`req.auth.companyId`, allow manual adjustments only for `OWNER` and `ADMIN`, and
+atomically update Product stock with an immutable InventoryMovement. `STAFF`
+remains read-only for the initial MVP.
 
 ```text
 GET    /inventory

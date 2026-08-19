@@ -127,6 +127,8 @@ Dashboard / AI Insights
 - [x] Phase 2G protected frontend authentication flow complete
 - [x] Phase 2H full Phase 2 verification complete
 - [x] Authentication implemented
+- [x] Phase 3 officially started
+- [ ] Phase 3A Product and Inventory domain design awaiting review and approval
 - [ ] Inventory module implemented
 - [ ] Sales workflow implemented
 - [ ] AI assistant implemented
@@ -150,9 +152,11 @@ reload or address-bar navigation recreates the SPA, clears authentication, and
 returns the user to login; no token is stored in Web Storage, IndexedDB,
 cookies, or URLs.
 
-Development is intentionally paused after Phase 2. No milestone is currently
-active. Phase 3 — Product and Inventory Module remains planned and has not
-started; it must not begin without explicit user instruction.
+Phase 3 — Product and Inventory Module has officially started. Phase 3A —
+Product & Inventory Domain Design is the current documentation-only milestone.
+Its proposed Category, Product, and InventoryMovement design is awaiting user
+review and approval. No Prisma Phase 3 model, migration, backend/frontend Phase
+3 functionality, or Phase 3B work has started.
 
 ## Local Development
 

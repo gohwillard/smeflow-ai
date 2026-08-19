@@ -13,17 +13,20 @@
 
 ## Design Status and Scope
 
-Phase 2A approves only the `Company`, `User`, and `UserRole` design documented
-below. It is a documentation-only milestone: no Prisma models or migrations are
-part of this phase.
+Phase 2A approved the `Company`, `User`, and `UserRole` design documented below,
+and Phase 2B implemented it in Prisma schema and migration
+`20260818020913_init_company_user`.
 
-The later-domain models listed near the end of this document remain planning
-context only. Their fields, relationships, constraints, and indexes are not
-approved implementation specifications and must be designed in their canonical
-roadmap milestones before implementation.
+Phase 3A is now the current documentation-only milestone. The proposed
+`Category`, `Product`, `InventoryMovement`, and `InventoryMovementType` design
+in this document has been reviewed against the implemented Phase 2 foundation
+but still requires user approval before implementation. Phase 3A adds no Prisma
+model, enum, migration, API, service, or frontend functionality. Phase 3B has
+not started.
 
-Phase 2B subsequently implemented this approved design in Prisma schema and
-migration `20260818020913_init_company_user`.
+Models assigned to later roadmap phases remain planning context only. Their
+fields, relationships, constraints, and indexes must be designed in their own
+canonical milestones before implementation.
 
 ## Approved Phase 2A Design
 
@@ -160,12 +163,333 @@ company deletion.
 - The first migration is `20260818020913_init_company_user` and contains no
   authentication endpoints, password-hashing behavior, or later-domain models.
 
-## Future Planned Models — Not Approved by Phase 2A
+## Proposed Phase 3A Product and Inventory Design
+
+This section is the implementation specification proposed for Phase 3B. It is
+pending user review and approval. Phase 3A defines the domain only; all runtime
+behavior described here belongs to the later Phase 3 milestones named below.
+
+### `Category`
+
+PostgreSQL table name: `categories`
+
+| Field | Conceptual type | Required | Design rule |
+| --- | --- | --- | --- |
+| `id` | UUID | Yes | Primary key; use the existing Prisma-generated UUID v4 and native PostgreSQL `uuid` convention. |
+| `companyId` | UUID | Yes | Required owner and foreign key to `companies.id`; never accepted as client-selected scope. |
+| `name` | String | Yes | Trim before storage and reject an empty result. Preserve user-facing casing, but enforce case-insensitive uniqueness within the Company. |
+| `description` | String | No | Optional descriptive text; trim supplied text and store `null` rather than a blank-only value. |
+| `isActive` | Boolean | Yes | Defaults to `true`; normal removal is deactivation, not hard deletion. |
+| `createdAt` | Timestamp with time zone | Yes | Defaults when created, using `timestamptz(3)`. |
+| `updatedAt` | Timestamp with time zone | Yes | Prisma-maintained using `@updatedAt` and `timestamptz(3)`. |
+
+A Category belongs to exactly one Company, and a Company may have many
+Categories. Different Companies may both have a Category displayed as
+`Electrical`; one Company may not store case variants such as `Electrical`,
+`electrical`, and `ELECTRICAL` as separate Categories.
+
+The recommended Phase 3B database rule is a PostgreSQL functional unique index
+on `("companyId", lower("name"))`, combined with a constraint that the stored
+name is already trimmed and non-empty. This preserves useful display casing and
+avoids a redundant normalization column whose value could become inconsistent.
+Prisma does not currently express this functional index as an ordinary
+`@@unique`, so Phase 3B must add and inspect the exact index in the migration SQL
+and verify migration replay. The backend must still trim names and map database
+uniqueness failures to a safe conflict response. A `citext` extension is not
+needed for this single rule.
+
+The uniqueness rule covers active and inactive rows. An archived Category keeps
+its name reserved; normal behavior is to find and reactivate or rename that row,
+not create a case-variant duplicate.
+
+### `Product`
+
+PostgreSQL table name: `products`
+
+| Field | Conceptual type | Required | Design rule |
+| --- | --- | --- | --- |
+| `id` | UUID | Yes | Primary key using the established UUID convention. |
+| `companyId` | UUID | Yes | Required Company owner; scope comes only from authenticated backend identity. |
+| `categoryId` | UUID | No | Optional Category assignment. When present, the Category must belong to the same Company. |
+| `sku` | String | Yes | Trim and uppercase before storage; non-empty and unique per Company across active and inactive Products. |
+| `name` | String | Yes | Trim before storage and reject an empty result. Product names are not unique. |
+| `description` | String | No | Optional; trim supplied text and store `null` rather than a blank-only value. |
+| `unit` | String | Yes | Required simple Product-level label such as `pcs`, `box`, `meter`, `kg`, or `litre`; trim and reject an empty result. |
+| `costPrice` | Decimal(12,2) | Yes | Exact non-negative monetary amount. |
+| `sellingPrice` | Decimal(12,2) | Yes | Exact non-negative monetary amount. |
+| `quantityOnHand` | Decimal(14,3) | Yes | Current stock balance; defaults to `0` and cannot be negative. Not writable through ordinary Product CRUD. |
+| `reorderLevel` | Decimal(14,3) | Yes | Non-negative low-stock threshold; defaults to `0`. |
+| `isActive` | Boolean | Yes | Defaults to `true`; normal removal is deactivation. |
+| `createdAt` | Timestamp with time zone | Yes | Defaults when created, using `timestamptz(3)`. |
+| `updatedAt` | Timestamp with time zone | Yes | Prisma-maintained using `@updatedAt` and `timestamptz(3)`. |
+
+A Product belongs to exactly one Company and may belong to zero or one Category.
+An assigned Category must be owned by that same Company. New assignment to an
+inactive Category should be rejected by Phase 3C business logic, while existing
+Product relationships remain intact if a Category is later archived.
+
+SKU uniqueness is `UNIQUE (companyId, sku)` over every Product, including
+inactive Products. The backend stores the canonical trimmed, uppercase form, so
+`" drill-001 "`, `"Drill-001"`, and `"DRILL-001"` all become `DRILL-001`.
+Different Companies may use the same canonical SKU. Archiving never releases an
+SKU because historical records must continue to identify the original Product
+unambiguously.
+
+Money uses PostgreSQL exact `numeric(12,2)` through Prisma `Decimal` and
+`@db.Decimal(12, 2)`. Binary floating-point values cannot exactly represent many
+decimal monetary amounts and can introduce comparison or rounding errors.
+Prices are required and constrained to `>= 0`; tax, discounts, price history,
+supplier pricing, margin calculations, and costing methods are outside Phase 3.
+
+Stock quantities use exact `numeric(14,3)` through Prisma `Decimal` and
+`@db.Decimal(14, 3)`. Three fractional digits support stock such as `1.500`
+meters, `2.250` kilograms, and `0.500` litres while also representing whole
+pieces. `quantityOnHand` and `reorderLevel` are constrained to `>= 0` and default
+to zero. Ordinary API inputs must reject values with more precision or magnitude
+than the database representation rather than silently rounding them.
+
+`unit` deliberately remains a required trimmed String. Phase 3C should apply a
+sensible bounded input length and reject blank or control-character-only values,
+but Phase 3A does not introduce a `UnitOfMeasure` table, conversion rules, base
+units, or separate purchase and sales units.
+
+The future Phase 3F low-stock rule is:
+
+```text
+isActive = true AND quantityOnHand <= reorderLevel
+```
+
+`reorderLevel = 0` is valid. No low-stock query or search-specific index is part
+of Phase 3A.
+
+### `InventoryMovement`
+
+PostgreSQL table name: `inventory_movements`
+
+| Field | Conceptual type | Required | Design rule |
+| --- | --- | --- | --- |
+| `id` | UUID | Yes | Primary key using the established UUID convention. |
+| `companyId` | UUID | Yes | Required Company owner and authoritative tenant scope copied from `req.auth.companyId`. |
+| `productId` | UUID | Yes | Required Product in the same Company. |
+| `createdByUserId` | UUID | Yes | User who performed the operation; that User must belong to the same Company. |
+| `type` | `InventoryMovementType` | Yes | Determines whether stock increases or decreases. |
+| `quantity` | Decimal(14,3) | Yes | Strictly positive magnitude; direction is never encoded with a negative number. |
+| `quantityBefore` | Decimal(14,3) | Yes | Non-negative balance immediately before the operation. |
+| `quantityAfter` | Decimal(14,3) | Yes | Non-negative balance immediately after the operation. |
+| `note` | String | No | Optional human explanation; trim supplied text and store `null` rather than a blank-only value. |
+| `createdAt` | Timestamp with time zone | Yes | Immutable creation time using `timestamptz(3)`; no `updatedAt` is needed. |
+
+An InventoryMovement belongs to exactly one Company and Product and records
+exactly one creating User. It is an immutable audit record: normal application
+behavior provides no update or delete operation. A mistake is corrected with a
+new compensating movement; the original row and its before/after values remain
+unchanged.
+
+For Phase 3, `InventoryMovementType` contains only:
+
+- `OPENING_BALANCE` — deliberate initial stock increase after Product creation.
+- `MANUAL_IN` — authorized manual stock increase.
+- `MANUAL_OUT` — authorized manual stock decrease.
+
+The enum can gain workflow-specific values in later schema migrations without
+redesigning the model. Purchase receipt/return and sales fulfilment/return types
+are deliberately deferred until their corresponding workflows exist.
+
+Movement `quantity` is always `> 0`. `OPENING_BALANCE` and `MANUAL_IN` increase
+stock, so `quantityAfter = quantityBefore + quantity`. `MANUAL_OUT` decreases
+stock, so `quantityAfter = quantityBefore - quantity`. Both before and after
+must remain `>= 0`. Phase 3B should encode the non-negative, positive-magnitude,
+and type/direction arithmetic rules as database check constraints in migration
+SQL, with Phase 3E backend validation providing clearer errors first.
+
+Product creation always starts with `quantityOnHand = 0`; Product CRUD does not
+accept opening quantity. If deliberate initial stock is needed, Phase 3E should
+create the Product first and then apply an `OPENING_BALANCE` as the Product's
+first movement from zero. The backend must reject an opening balance after any
+movement already exists or when the Product balance is not zero. A zero opening
+balance needs no movement because movement quantities are strictly positive.
+
+### Current Balance and Traceable History Invariant
+
+SMEFlow deliberately stores both forms of inventory data:
+
+```text
+Product.quantityOnHand  -> current balance for operational reads
+InventoryMovement       -> complete reason-and-actor history of changes
+```
+
+`quantityOnHand` is not an arbitrary Product field. Product creation fixes it at
+zero, and Product update validation must exclude it. The frontend must never
+send an arbitrary stock overwrite. Every stock-changing operation must go
+through backend inventory business logic and create exactly one corresponding
+InventoryMovement.
+
+Negative stock is forbidden. For example, `MANUAL_OUT 12` against a balance of
+`10` must fail without changing either table. This is enforced by Phase 3E
+business logic and by the database constraint `quantityOnHand >= 0` as a final
+safety net.
+
+### Transactional Integrity and Concurrent Updates
+
+Every Phase 3E stock operation must execute the Product balance change and
+InventoryMovement insert in one database transaction. If validation, update, or
+movement creation fails, the complete operation rolls back. The system must
+never commit a movement without its balance change or a balance change without
+its movement.
+
+The recommended Prisma/PostgreSQL approach is an interactive transaction whose
+Product update is an atomic conditional update scoped by `id`,
+`req.auth.companyId`, active status, and—when decreasing stock—
+`quantityOnHand >= requested quantity`. Use an atomic Decimal increment or
+decrement and require exactly one updated row, then read the resulting balance
+and insert the movement before committing. The Product row lock acquired by the
+update is held until commit; a competing stock-out must re-evaluate the
+condition against the committed balance and fail if stock is no longer
+sufficient. Before/after values can be derived exactly from the resulting
+balance and requested magnitude.
+
+Phase 3E must integration-test this with concurrent requests. If Prisma's exact
+generated operations cannot preserve these semantics, an explicitly justified
+PostgreSQL row-locking or serializable-transaction pattern with retry is the
+fallback. A read-then-write sequence outside this transaction is invalid.
+
+### Relationships and Tenant Isolation
+
+```text
+Company  1 -> 0..* Category
+Company  1 -> 0..* Product
+Company  1 -> 0..* InventoryMovement
+Category 1 -> 0..* Product; Product -> 0..1 Category
+Product  1 -> 0..* InventoryMovement
+User     1 -> 0..* created InventoryMovement
+```
+
+Application isolation remains mandatory. Every Product/Inventory query and
+mutation derives Company scope from the database-validated request context:
+
+```text
+req.auth = { userId, companyId, role }
+```
+
+No route, body, query, or frontend-selected `companyId` may choose or override
+that scope. Frontend authorization is a UX aid, not the security boundary.
+
+Phase 3B should also enforce tenant ownership in PostgreSQL rather than relying
+only on UUID uniqueness and application filters:
+
+- `Category` and `Product` retain their existing-style UUID primary key and add
+  candidate keys on `(id, companyId)` for tenant-aware references.
+- `User` keeps its Phase 2 primary key and gains a candidate key on
+  `(id, companyId)`; this does not redesign authentication or membership.
+- optional Product assignment uses `(categoryId, companyId)` ->
+  `Category(id, companyId)`.
+- InventoryMovement uses `(productId, companyId)` ->
+  `Product(id, companyId)` and `(createdByUserId, companyId)` ->
+  `User(id, companyId)`.
+- each company-owned table also has its direct required Company foreign key.
+
+The composite candidate keys create some intentional index overlap with globally
+unique UUID primary keys, but they let ordinary foreign keys make all three
+cross-company relationship examples impossible. This small cost is justified
+for the central tenant boundary and is preferable to triggers or application-only
+integrity. Phase 3B must validate the exact Prisma relation declarations before
+generating its migration.
+
+All Company, Category, Product, movement Product, and movement User foreign keys
+should use the existing `ON DELETE RESTRICT` convention. Do not cascade-delete
+historical business data. Category archival keeps Product links intact; Product
+archival keeps its SKU and movements; User
+deactivation keeps authorship; and Company deletion remains outside the MVP.
+
+### Archive and Authorization Policy
+
+Normal Category and Product lifecycle management uses `isActive` rather than
+hard deletion. Archived Products remain available for history, retain their
+SKU, and cannot normally participate in new transactions or manual adjustments.
+Archived Categories stay related to existing Products and are omitted from new
+active-category selections. Archiving a Category does not automatically archive
+its Products.
+
+Initial Phase 3 authorization is:
+
+| Capability | OWNER | ADMIN | STAFF |
+| --- | --- | --- | --- |
+| View Categories and Products | Yes | Yes | Yes |
+| Search/filter Products and view stock | Yes | Yes | Yes |
+| Create/update/archive Categories | Yes | Yes | No |
+| Create/update/archive Products | Yes | Yes | No |
+| View appropriate inventory movement history | Yes | Yes | Yes |
+| Perform manual stock adjustments | Yes | Yes | No |
+
+All routes require authentication. Phase 3C and Phase 3E must enforce this in
+the backend with the existing role guard or an equally focused policy; hiding UI
+controls is not authorization. Archived rows remain company-scoped and do not
+bypass role checks.
+
+### Phase 3B Index Strategy
+
+Indexes are limited to known ownership, uniqueness, relationship, and listing
+patterns:
+
+- Category: functional unique index on `(companyId, lower(name))`; tenant-aware
+  candidate key `(id, companyId)`; non-unique `(companyId, isActive)` for active
+  lists. No separate `companyId` index is needed because it is the leading part
+  of other Category indexes.
+- Product: unique `(companyId, sku)`; tenant-aware candidate key
+  `(id, companyId)`; non-unique `(companyId, categoryId)` for category-filtered
+  lists and `(companyId, isActive)` for lifecycle-filtered lists. No separate
+  `companyId` index is needed.
+- InventoryMovement: non-unique `(companyId, productId, createdAt)` for a
+  tenant-scoped Product history. PostgreSQL can scan a normal ascending B-tree
+  backward for newest-first results, so an explicit descending duplicate is not
+  justified initially.
+- User: retain the existing `companyId` index and add only the tenant-aware
+  `(id, companyId)` candidate key required by the movement foreign key.
+
+Broad Product search and low-stock expression indexes are deferred to Phase 3F
+and must be based on implemented query behavior. No index is added merely
+because a field exists.
+
+### Phase 3B Constraints
+
+Phase 3B must verify these database constraints in addition to primary keys,
+foreign keys, enum membership, nullability, defaults, and timestamps:
+
+- case-insensitive `UNIQUE (companyId, lower(name))` for Category;
+- `UNIQUE (companyId, sku)` for Product, including inactive rows;
+- required Category name, Product SKU/name/unit stored non-empty and trimmed;
+- Product SKU stored uppercase as well as trimmed;
+- `costPrice >= 0` and `sellingPrice >= 0`;
+- `quantityOnHand >= 0` and `reorderLevel >= 0`;
+- InventoryMovement `quantity > 0`, `quantityBefore >= 0`, and
+  `quantityAfter >= 0`;
+- movement before/after arithmetic consistent with the movement type;
+- defaults of zero for Product quantities and `true` for lifecycle flags;
+- tenant-aware foreign keys preventing cross-company Category, Product, and
+  User relationships.
+
+Frontend validation supplies timely input feedback. Backend validation is
+authoritative for allowed fields, normalization, authorization, Company scope,
+activity, opening-balance rules, movement semantics, and stock availability.
+Database constraints are the final integrity safety net. None of these layers
+replaces the others.
+
+### Explicit Phase 3 Exclusions
+
+Phase 3A does not design or implement product variants, warehouses, multiple
+stock locations, batch or serial tracking, barcodes, bundles, unit conversion,
+stock reservation, inventory valuation, FIFO, LIFO, weighted-average costing,
+tax engines, discounts, price history, supplier pricing, or margin calculation.
+Purchasing and Sales will add their own movement types only with their approved
+workflows. Customer, Supplier, Purchasing, Sales, Dashboard, and AI work remains
+in its later canonical phases; AI V1 remains read-only and may not execute
+arbitrary LLM-generated SQL.
+
+## Future Planned Models
 
 These models belong to later roadmap design milestones and must not be inferred
 as ready for Prisma implementation from this list:
 
-- Phase 3A: `Category`, `Product`, `InventoryMovement`
 - Phase 4A: `Customer`, `Supplier`
 - Phase 5A: `PurchaseOrder`, `PurchaseOrderItem`
 - Phase 6A: `Quotation`, `QuotationItem`, `SalesOrder`, `SalesOrderItem`, `Invoice`
@@ -194,7 +518,6 @@ relationship can enforce isolation safely.
 
 ## Possible Post-MVP Improvements
 
-- Product units
 - Multiple warehouses
 - Customer credit limits
 - Payment records

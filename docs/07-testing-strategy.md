@@ -73,7 +73,11 @@ The most important tests are the ones that protect business data.
 Examples:
 
 1. Receiving the same purchase order twice must not accidentally double stock.
-2. A sales order cannot reduce stock below zero.
-3. A quotation conversion should not create duplicate sales orders.
-4. A user cannot access another company's records.
-5. Invoice totals must equal the associated line-item calculations.
+2. A manual adjustment or future sales fulfilment cannot reduce stock below
+   zero, including when competing stock-out requests run concurrently.
+3. A stock balance change and its InventoryMovement must commit or roll back
+   together.
+4. A quotation conversion should not create duplicate sales orders.
+5. A user cannot access another company's records or connect records across
+   Companies.
+6. Invoice totals must equal the associated line-item calculations.

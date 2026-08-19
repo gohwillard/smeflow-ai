@@ -37,10 +37,13 @@ The current project state is:
 - Phase 2F — Company Profile: ✅ Completed
 - Phase 2G — Protected Frontend Authentication Flow: ✅ Completed
 - Phase 2H — Phase 2 Verification: ✅ Completed
+- Phase 3 — Product and Inventory Module: 🚧 Current
+- Phase 3A — Product & Inventory Domain Design: 🚧 Current
 
-Development is intentionally paused at the completed Phase 2 boundary. No
-milestone is currently active. Phase 3 remains planned and has not started; it
-must not begin without explicit user instruction.
+Phase 3 has officially started. Phase 3A is the current documentation-only
+milestone and its proposed domain design is awaiting user review and approval.
+Phase 3B and all later Phase 3 implementation milestones remain planned and
+must not start without explicit instruction after Phase 3A approval.
 
 ---
 
@@ -389,20 +392,20 @@ was required.
 A new user can register, sign in, access protected pages, and access only data
 belonging to their company.
 
-Phase 2 is complete. Development intentionally pauses here; Phase 3 is planned,
-not current, and not started.
+Phase 2 is complete. Phase 3 has since started with its design-only Phase 3A
+milestone; no Phase 3 implementation work has started.
 
 ---
 
 ## Phase 3 — Product and Inventory Module
 
-**Status:** ⬜ Planned
+**Status:** 🚧 Current
 
 **Goal:** Build the first major operational SME module.
 
 ### Phase 3A — Product & Inventory Domain Design
 
-**Status:** ⬜ Planned
+**Status:** 🚧 Current
 
 Design and review:
 
@@ -414,11 +417,17 @@ Design and review:
 - SKU uniqueness rules
 - Price representation
 - Quantity representation
-- Reorder level
+- Product unit and reorder-level rules
 - Inventory movement types
+- Inventory traceability and negative-stock rules
+- Archive/deactivate behavior and authorization assumptions
+- Transactional integrity and concurrent stock updates
+- Tenant-aware relationships
 - Indexes and constraints
 
-Review the database design before implementation.
+This milestone is documentation only. Its proposed design must be reviewed and
+approved before Phase 3B begins; no Prisma model, migration, API, or frontend
+implementation belongs to Phase 3A.
 
 ### Phase 3B — Product & Inventory Schema Migration
 

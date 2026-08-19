@@ -109,12 +109,14 @@ Do not simply modify product stock without recording why it changed.
 
 Stock changes should create InventoryMovement records.
 
-Examples:
+Phase 3 movement types are limited to:
 
-PURCHASE_RECEIPT
-SALE
-ADJUSTMENT_IN
-ADJUSTMENT_OUT
+OPENING_BALANCE
+MANUAL_IN
+MANUAL_OUT
+
+Purchasing and Sales may add their own movement types only when those workflows
+reach their approved design milestones.
 
 ## AI Rule
 
@@ -319,4 +321,8 @@ Phase 2G — Protected Frontend Authentication Flow is complete. The Vite SPA no
 
 Phase 2H — Phase 2 Verification is complete. The approved Company/User domain, live PostgreSQL schema and migration, registration, login/JWT security, Bearer middleware, current-User database revalidation, Company isolation, `/auth/me`, Company Profile authorization, protected frontend flow, password controls, memory-only token behavior, and OWNER/ADMIN/STAFF UX were fully audited. All 66 backend tests and 24 frontend tests passed, along with frontend lint/build, backend typecheck/build, Prisma validation/generation/migration status, schema-drift comparison, a clean fictional Company A/Company B browser/API/database E2E scenario, visual regression review, security review, and test-data cleanup. No Phase 2 application defect, dependency change, schema change, or migration was required.
 
-Development is intentionally paused after Phase 2. Phase 3 has not started and remains planned. No next development milestone is active; do not begin Phase 3 or any later feature without explicit user instruction.
+Phase 3 — Product and Inventory Module has officially started.
+
+Phase 3A — Product & Inventory Domain Design is the current milestone. It is a documentation-only milestone: the proposed `Category`, `Product`, `InventoryMovement`, ownership, tenant-safety, decimal, traceability, lifecycle, authorization, constraint, index, transaction, and concurrency decisions are documented in `docs/04-database-design.md` and await user review and approval.
+
+Phase 3B — Product & Inventory Schema Migration has not started. Do not add Phase 3 Prisma models, migrations, backend/frontend functionality, or later-phase work until the Phase 3A design is explicitly approved and the next milestone is requested.
