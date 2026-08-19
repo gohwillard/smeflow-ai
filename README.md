@@ -169,7 +169,7 @@ remains read-only, archived Category relationships remain visible, decimal
 values stay strings, Product units are backend-normalized to uppercase, and
 `quantityOnHand` is display-only. The Product list now uses an aligned desktop
 table and stacked mobile cards, and all Product/Category archive and reactivate
-actions use a reusable accessible confirmation dialog. All 69 frontend tests
+actions use a reusable accessible confirmation dialog. All 71 frontend tests
 and 137 backend tests pass, together with the relevant lint, typecheck, builds,
 Prisma validation, and 1440×1000/390×844 visual review. Phase 3D awaits
 user/ChatGPT manual browser verification before approval. Phase 3E has not started.

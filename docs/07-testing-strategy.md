@@ -102,5 +102,5 @@ fixed-scale decimal-string request handling, duplicate and unavailable-record
 errors, reusable archive/reactivation confirmation behavior, focus and Escape
 handling, pending-request deduplication, destructive action semantics,
 read-only stock, and the existing 401, 403, logout, and memory-only-authentication
-behavior. The complete frontend regression suite contains 69 passing tests
+behavior. The complete frontend regression suite contains 71 passing tests
 across 3 test files.

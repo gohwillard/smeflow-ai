@@ -12,6 +12,7 @@ import {
 } from '../api/catalog'
 import { ApiError } from '../api/client'
 import { LoadingScreen } from '../components/LoadingScreen'
+import { ProductCategorySelector } from '../components/ProductCategorySelector'
 import { useAuth } from '../features/auth/auth-context'
 import type { FormEvent } from 'react'
 
@@ -339,22 +340,20 @@ export function ProductFormPage() {
                 <input aria-label="Product name" aria-describedby={fieldErrors.name ? 'product-name-error' : undefined} aria-invalid={fieldErrors.name ? 'true' : undefined} disabled={isSubmitting} maxLength={200} name="name" onChange={(event) => updateField('name', event.target.value)} required value={formValues.name} />
                 {fieldErrors.name && <small className="field-error" id="product-name-error">{fieldErrors.name}</small>}
               </label>
-              <label className="field">
-                <span>Category <span className="optional-label">Optional</span></span>
-                <div className="select-control">
-                  <select aria-label="Category" aria-describedby={fieldErrors.categoryId ? 'category-error' : 'category-help'} aria-invalid={fieldErrors.categoryId ? 'true' : undefined} className="product-category-select" disabled={isSubmitting} name="categoryId" onChange={(event) => updateField('categoryId', event.target.value)} value={formValues.categoryId}>
-                    <option value="">Uncategorized</option>
-                    {inactiveCurrentCategory && (
-                      <option disabled value={currentCategory.id}>{currentCategory.name} (Archived — current)</option>
-                    )}
-                    {activeCategories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
-                  </select>
-                  <svg aria-hidden="true" viewBox="0 0 20 20">
-                    <path d="m6 8 4 4 4-4" />
-                  </svg>
-                </div>
+              <div className="field">
+                <span id="product-category-label">Category <span className="optional-label">Optional</span></span>
+                <ProductCategorySelector
+                  activeCategories={activeCategories}
+                  ariaDescribedBy={fieldErrors.categoryId ? 'category-error' : 'category-help'}
+                  ariaInvalid={Boolean(fieldErrors.categoryId)}
+                  currentArchivedCategory={inactiveCurrentCategory ? currentCategory : undefined}
+                  disabled={isSubmitting}
+                  labelId="product-category-label"
+                  onChange={(categoryId) => updateField('categoryId', categoryId)}
+                  value={formValues.categoryId}
+                />
                 {fieldErrors.categoryId ? <small className="field-error" id="category-error">{fieldErrors.categoryId}</small> : <small className="field-help" id="category-help">{activeCategories.length === 0 ? 'No active Categories are available. Uncategorized remains valid.' : 'Only active Categories can be newly assigned.'}</small>}
-              </label>
+              </div>
               <label className="field">
                 <span>Unit</span>
                 <input aria-label="Unit" aria-describedby={fieldErrors.unit ? 'unit-error' : 'unit-help'} aria-invalid={fieldErrors.unit ? 'true' : undefined} disabled={isSubmitting} maxLength={50} name="unit" onChange={(event) => updateField('unit', event.target.value)} placeholder="pcs, box, kg" required value={formValues.unit} />

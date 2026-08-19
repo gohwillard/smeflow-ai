@@ -22,6 +22,21 @@ function fillProductForm() {
   fireEvent.change(screen.getByLabelText(/Reorder level/), { target: { value: '1.500' } })
 }
 
+function getCategorySelector() {
+  return screen.getByRole('combobox', { name: /Category/ })
+}
+
+function openCategorySelector() {
+  const selector = getCategorySelector()
+  if (selector.getAttribute('aria-expanded') !== 'true') fireEvent.click(selector)
+  return screen.getByRole('listbox', { name: /Category/ })
+}
+
+function chooseCategory(name: string) {
+  const listbox = openCategorySelector()
+  fireEvent.click(within(listbox).getByRole('option', { name }))
+}
+
 describe('Phase 3D Product list', () => {
   it('protects Product list, create, detail, and edit routes', async () => {
     for (const path of ['/products', '/products/new', '/products/product-1', '/products/product-1/edit']) {
@@ -107,14 +122,18 @@ describe('Phase 3D Create Product', () => {
     expect(await screen.findByRole('heading', { name: 'Create Product' })).toBeTruthy()
     expect(screen.getByLabelText('SKU')).toBeTruthy()
     expect(screen.getByLabelText('Product name')).toBeTruthy()
-    expect(screen.getByLabelText(/Category/)).toBeTruthy()
+    expect(getCategorySelector().textContent).toContain('Uncategorized')
     expect(screen.getByLabelText('Unit')).toBeTruthy()
     expect(screen.getByLabelText('Cost price')).toBeTruthy()
     expect(screen.getByLabelText('Selling price')).toBeTruthy()
     expect(screen.getByLabelText(/Reorder level/)).toBeTruthy()
-    expect(screen.getByRole('option', { name: 'Uncategorized' })).toBeTruthy()
-    expect(screen.getByRole('option', { name: 'Power Tools' })).toBeTruthy()
-    expect(screen.queryByRole('option', { name: /Legacy Tools/ })).toBeNull()
+    expect(screen.queryByRole('listbox')).toBeNull()
+    const listbox = openCategorySelector()
+    expect(within(listbox).getByRole('option', { name: 'Uncategorized' })).toBeTruthy()
+    expect(within(listbox).getByRole('option', { name: 'Power Tools' })).toBeTruthy()
+    expect(within(listbox).queryByRole('option', { name: /Legacy Tools/ })).toBeNull()
+    fireEvent.click(within(listbox).getByRole('option', { name: 'Power Tools' }))
+    expect(getCategorySelector().textContent).toContain('Power Tools')
     expect(screen.queryByLabelText(/quantity on hand/i)).toBeNull()
     expect(screen.queryByLabelText(/company/i)).toBeNull()
   })
@@ -122,7 +141,33 @@ describe('Phase 3D Create Product', () => {
   it('supports Uncategorized creation when no active Categories exist', async () => {
     await renderAuthenticatedPath('/products/new', [success({ categories: [archivedCategory] })])
     expect(await screen.findByText('No active Categories are available. Uncategorized remains valid.')).toBeTruthy()
-    expect(screen.getByRole('option', { name: 'Uncategorized' })).toBeTruthy()
+    const listbox = openCategorySelector()
+    expect(within(listbox).getByRole('option', { name: 'Uncategorized' })).toBeTruthy()
+    expect(within(listbox).queryByRole('option', { name: /Legacy Tools/ })).toBeNull()
+  })
+
+  it('supports keyboard selection, Escape, and outside-click closing', async () => {
+    await renderAuthenticatedPath('/products/new', [success({ categories: [activeCategory] })])
+    await screen.findByRole('heading', { name: 'Create Product' })
+    const selector = getCategorySelector()
+
+    selector.focus()
+    fireEvent.keyDown(selector, { key: 'ArrowDown' })
+    expect(selector.getAttribute('aria-expanded')).toBe('true')
+    fireEvent.keyDown(selector, { key: 'ArrowDown' })
+    fireEvent.keyDown(selector, { key: 'Enter' })
+    expect(selector.textContent).toContain('Power Tools')
+    expect(screen.queryByRole('listbox')).toBeNull()
+
+    fireEvent.keyDown(selector, { key: 'Enter' })
+    expect(screen.getByRole('listbox', { name: /Category/ })).toBeTruthy()
+    fireEvent.keyDown(selector, { key: 'Escape' })
+    expect(screen.queryByRole('listbox')).toBeNull()
+
+    fireEvent.keyDown(selector, { key: ' ' })
+    expect(screen.getByRole('listbox', { name: /Category/ })).toBeTruthy()
+    fireEvent.pointerDown(document.body)
+    expect(screen.queryByRole('listbox')).toBeNull()
   })
 
   it('sends exact Decimal strings and safe Product fields, then displays normalized SKU', async () => {
@@ -134,7 +179,7 @@ describe('Phase 3D Create Product', () => {
       .mockResolvedValueOnce(success({ categories: [activeCategory] }))
 
     fillProductForm()
-    fireEvent.change(screen.getByLabelText(/Category/), { target: { value: activeCategory.id } })
+    chooseCategory('Power Tools')
     fireEvent.change(screen.getByLabelText(/Description/), { target: { value: '18V cordless drill' } })
     fireEvent.click(screen.getByRole('button', { name: 'Create Product' }))
 
@@ -394,6 +439,7 @@ describe('Phase 3D Edit Product', () => {
     expect(await screen.findByRole('heading', { name: 'Edit Product' })).toBeTruthy()
     expect(screen.getByLabelText('SKU')).toHaveProperty('value', 'DRILL-001')
     expect(screen.getByLabelText('Product name')).toHaveProperty('value', 'Cordless Drill')
+    expect(getCategorySelector().textContent).toContain('Power Tools')
     expect(screen.getByText('4.500 pcs')).toBeTruthy()
     expect(screen.queryByLabelText(/quantity on hand/i)).toBeNull()
     fetchMock
@@ -433,9 +479,10 @@ describe('Phase 3D Edit Product', () => {
       success({ categories: [activeCategory, archivedCategory] }),
     ])
     await screen.findByRole('heading', { name: 'Edit Product' })
-    const archivedOption = screen.getByRole('option', { name: 'Legacy Tools (Archived — current)' })
-    expect(archivedOption).toHaveProperty('disabled', true)
-    expect(screen.getByLabelText(/Category/)).toHaveProperty('value', archivedCategory.id)
+    expect(getCategorySelector().textContent).toContain('Legacy Tools (Archived — current)')
+    const archivedOption = within(openCategorySelector()).getByRole('option', { name: 'Legacy Tools (Archived — current)' })
+    expect(archivedOption.getAttribute('aria-disabled')).toBe('true')
+    fireEvent.keyDown(getCategorySelector(), { key: 'Escape' })
 
     const updated = { ...product, name: 'Updated Drill' }
     fetchMock
@@ -450,6 +497,23 @@ describe('Phase 3D Edit Product', () => {
     expect(getRequestBody(fetchMock, 4)).not.toHaveProperty('categoryId')
   })
 
+  it('does not allow an archived original Category to be newly selected after changing away', async () => {
+    const product = { ...activeProduct, categoryId: archivedCategory.id }
+    await renderAuthenticatedPath(`/products/${product.id}/edit`, [
+      success({ product }),
+      success({ categories: [activeCategory, archivedCategory] }),
+    ])
+    await screen.findByRole('heading', { name: 'Edit Product' })
+
+    chooseCategory('Power Tools')
+    expect(getCategorySelector().textContent).toContain('Power Tools')
+    const listbox = openCategorySelector()
+    const archivedOption = within(listbox).getByRole('option', { name: 'Legacy Tools (Archived — current)' })
+    expect(archivedOption.getAttribute('aria-disabled')).toBe('true')
+    fireEvent.click(archivedOption)
+    expect(getCategorySelector().textContent).toContain('Power Tools')
+  })
+
   it('changes Category to an active choice or Uncategorized through an explicit null', async () => {
     const fetchMock = await renderAuthenticatedPath(`/products/${activeProduct.id}/edit`, [
       success({ product: activeProduct }),
@@ -462,7 +526,7 @@ describe('Phase 3D Edit Product', () => {
       .mockResolvedValueOnce(success({ product: uncategorized }))
       .mockResolvedValueOnce(success({ categories: [activeCategory] }))
 
-    fireEvent.change(screen.getByLabelText(/Category/), { target: { value: '' } })
+    chooseCategory('Uncategorized')
     fireEvent.click(screen.getByRole('button', { name: 'Save changes' }))
     await screen.findByText('Product DRILL-001 updated successfully.')
     expect(getRequestBody(fetchMock, 4)).toEqual({ categoryId: null })

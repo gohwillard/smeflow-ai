@@ -494,7 +494,7 @@ covered. Product lists use an aligned desktop table and stacked mobile cards.
 `quantityOnHand` is displayed only and is absent from Product request construction.
 The backend now also trims and uppercases Product units on both create and update.
 
-All 69 frontend tests across 3 files and all 137 backend tests across 6 files
+All 71 frontend tests across 3 files and all 137 backend tests across 6 files
 pass, together with frontend lint/build, backend typecheck/build, Prisma
 validation, scope/hygiene review, and 1440×1000/390×844 browser visual review.
 Manual browser verification and user/ChatGPT approval remain required. Phase 3E
