@@ -26,8 +26,10 @@ represent. Phase 3C consumes this approved schema through authenticated,
 tenant-scoped Category and Product APIs. Phase 3E now consumes the existing
 movement model through Product-scoped history and transactional manual-adjustment
 operations. Phase 3F consumes the existing Product columns through authenticated
-SKU/name search and a database-authoritative low-stock comparison. None of these
-milestones changed the Prisma schema or migrations.
+SKU/name search and a database-authoritative low-stock comparison. Phase 3G
+verifies the complete integrated subsystem, live catalog, migration history,
+and schema drift. None of these milestones changed the Phase 3B Prisma schema
+or migrations.
 
 Models assigned to later roadmap phases remain planning context only. Their
 fields, relationships, constraints, and indexes must be designed in their own

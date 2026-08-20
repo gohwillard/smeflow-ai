@@ -43,13 +43,13 @@ The current project state is:
 - Phase 3C — Category & Product Backend: ✅ Completed
 - Phase 3D — Product Frontend: ✅ Completed
 - Phase 3E — Inventory Movement & Manual Adjustment: ✅ Completed
-- Phase 3F — Product Search & Low Stock: 🚧 Implemented and Codex-verified;
-  awaiting manual verification
+- Phase 3F — Product Search & Low Stock: ✅ Completed
+- Phase 3G — Product & Inventory Verification: 🚧 Codex-verified; awaiting
+  final user/ChatGPT approval
 
-Phase 3 is in progress. Phase 3A through Phase 3E are complete. Phase 3F is
-implemented and its automated, integration, security, and visual verification
-passes, but it awaits user/ChatGPT manual verification before final approval.
-Phase 3G and all later milestones have not started.
+Phase 3 is in progress. Phase 3A through Phase 3F are complete. Phase 3G has
+passed Codex verification and awaits the concise final user/ChatGPT acceptance
+check before Phase 3 is formally closed. All later phases have not started.
 
 ---
 
@@ -398,8 +398,8 @@ was required.
 A new user can register, sign in, access protected pages, and access only data
 belonging to their company.
 
-Phase 2 is complete. Phase 3 has since completed Phase 3A through Phase 3E and
-implemented Phase 3F, which awaits its final manual verification.
+Phase 2 is complete. Phase 3 has since completed Phase 3A through Phase 3F and
+Codex-verified Phase 3G, which awaits final approval.
 
 ---
 
@@ -523,7 +523,7 @@ subsequently passed before Phase 3F started.
 
 ### Phase 3F — Product Search & Low Stock
 
-**Status:** 🚧 Implemented and Codex-verified; awaiting manual verification
+**Status:** ✅ Completed
 
 - Strict optional `search` and literal `lowStock=true` parameters on the existing
   authenticated Product list endpoint
@@ -549,12 +549,12 @@ typecheck/build, frontend ESLint/build, Prisma validation/generation/migration
 status, security/scope review, `git diff --check`, and headless-Chrome review at
 1440×1000 and 390×844. No dependency, schema, migration, pagination, automatic
 reorder, notification, Dashboard, AI, stock-transaction change, or Phase 3G work
-was added. Manual API/browser verification and user/ChatGPT approval remain
-required before Phase 3G may start.
+was added. User/ChatGPT manual API and browser verification subsequently passed
+before Phase 3G started.
 
 ### Phase 3G — Product & Inventory Verification
 
-**Status:** ⬜ Planned
+**Status:** 🚧 Codex-verified; awaiting final user/ChatGPT approval
 
 Verify at minimum:
 
@@ -563,6 +563,25 @@ Verify at minimum:
 - Inventory traceability
 - Negative-stock prevention
 - Stock-adjustment correctness
+
+Codex verification passed across the complete integrated Phase 3 subsystem. It
+included repository and scope review; Prisma schema, migration, live-catalog,
+and two no-drift comparisons; Category/Product/Inventory API regression; the
+approved Opening Balance and manual adjustment lifecycle; real transaction
+rollback and concurrent stock-out tests; search, low stock, and combined-filter
+behavior; role and two-Company isolation; strict request injection; exact
+Decimal and error-safety audits; memory-only authentication regression;
+responsive and accessibility review; and documentation/production-readiness
+consistency.
+
+All 207 backend tests across 8 files and all 106 frontend tests across 5 files
+passed. Backend typecheck/build, frontend lint/build, Prisma
+validate/generate/migrate status, `git diff --check`, and visual review at
+1440×1000, 430×932, and 390×844 also passed. A disposable real-API scenario
+verified the exact stock sequence, low-stock transition after Stock In, role
+matrix, and tenant-local failures, then cleaned up all fictional records. No
+application defect, dependency, schema, migration, or new business feature was
+introduced. Phase 4 has not started.
 
 ### Definition of Done
 

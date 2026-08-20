@@ -31,6 +31,14 @@ The system shall allow authorized users to:
 - Assign product categories
 - Define SKU, selling price, cost price and reorder level
 
+For the Phase 3 MVP, Product and Category data is Company-scoped. `OWNER` and
+`ADMIN` may manage and archive these records, while `STAFF` has read-only
+access. Category names are unique case-insensitively within a Company, Product
+SKUs are normalized and remain reserved after archive, and archived Category
+relationships remain visible without allowing new assignment to an archived
+Category. Product search matches partial SKU or Product name
+case-insensitively and may be combined with the low-stock filter.
+
 ### FR-04 Inventory
 
 The system shall:
@@ -41,6 +49,15 @@ The system shall:
 - Support stock-out
 - Prevent negative stock; the SMEFlow MVP does not allow it
 - Display low-stock products
+
+Phase 3 stock changes are limited to `OPENING_BALANCE`, `MANUAL_IN`, and
+`MANUAL_OUT`. Every successful stock change must atomically update the current
+exact Decimal balance and create exactly one immutable `InventoryMovement` with
+backend-derived Company, creator, and before/after values. Opening Balance is
+allowed only for an active zero-stock Product with no existing movement;
+archived Products cannot be adjusted. `OWNER` and `ADMIN` may adjust stock,
+while `STAFF` may only read movement history. Low stock means an active Product
+whose `quantityOnHand <= reorderLevel`, including the valid zero/zero case.
 
 ### FR-05 Customers
 

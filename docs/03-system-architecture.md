@@ -151,3 +151,27 @@ Inventory changes must be caused by backend business operations such as:
 Each change should create an inventory movement record.
 
 This provides traceability and demonstrates real business-system design.
+
+## Current Phase 3 Operational Architecture
+
+The implemented Product and Inventory subsystem follows the modular-monolith
+boundary described above:
+
+```text
+authenticated React route
+  -> typed native-fetch API client
+  -> authenticated Express route and role guard
+  -> controller with strict Zod boundary
+  -> Category, Product, or Inventory service
+  -> Prisma transaction/query
+  -> PostgreSQL constraints and tenant-aware relationships
+```
+
+All Company scope comes from the database-revalidated authentication context;
+the client cannot choose `companyId`. Product CRUD manages master data only and
+cannot write `quantityOnHand`. Controlled inventory commands use Prisma Decimal
+operations inside one interactive transaction to update stock and insert one
+immutable movement. PostgreSQL row locking and a conditional stock predicate
+prevent competing stock-outs from overselling. Product search and the active
+`quantityOnHand <= reorderLevel` rule execute in PostgreSQL, while the frontend
+uses backend-authoritative refetches after stock changes.

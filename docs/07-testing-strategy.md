@@ -152,3 +152,26 @@ its low-stock condition without sending a Product CRUD stock write.
 
 The complete regression suites now contain 207 passing backend tests across 8
 files and 106 passing frontend tests across 5 files.
+
+## Phase 3G Final Verification Coverage
+
+Phase 3G reruns the complete backend and frontend suites rather than only
+Phase 3 tests. Its live PostgreSQL review covers the committed migrations,
+catalog constraints and indexes, enum values, tenant-aware relationships, and
+both migration-to-live and schema-to-live drift comparisons. The existing real
+database regressions re-prove atomic rollback after a Product update and one
+winner from two concurrent `MANUAL_OUT 4.000` requests against `5.000` stock.
+
+A disposable real-API/two-Company scenario additionally verifies the approved
+`0.000 -> 10.000 -> 15.500 -> 12.250 -> 0.000` lifecycle, rejection of a final
+excessive `0.001` Stock Out without a partial write, Opening Balance rules,
+newest-first safe history, all requested search forms, representative low-stock
+cases, search-plus-low-stock AND behavior, filter-aware refetch after Stock In,
+role restrictions, Company isolation, and strict request injection. Responsive
+browser checks cover 1440×1000, 430×932, and 390×844, including mobile Product
+card dividers, lifecycle dialogs, form dropdowns, the non-resizing inventory
+dropdown, STAFF read-only presentation, focus behavior, storage hygiene, and
+intentional refresh-to-login behavior.
+
+At Phase 3G Codex verification, all 207 backend tests across 8 files and all
+106 frontend tests across 5 files pass.

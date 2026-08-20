@@ -133,7 +133,8 @@ Dashboard / AI Insights
 - [x] Phase 3C Category and Product backend complete
 - [x] Phase 3D Product frontend complete
 - [x] Phase 3E Inventory Movement and Manual Adjustment complete
-- [x] Phase 3F Product Search and Low Stock implemented and Codex-verified
+- [x] Phase 3F Product Search and Low Stock complete
+- [x] Phase 3G final verification Codex-verified
 - [x] Inventory module implemented
 - [ ] Sales workflow implemented
 - [ ] AI assistant implemented
@@ -190,8 +191,8 @@ stock-out and forced rollback regressions, together with frontend lint/build,
 backend typecheck/build, Prisma validation/generation/status, and
 1440×1000/390×844 visual review. No schema or migration changed.
 
-Phase 3F — Product Search & Low Stock is implemented and Codex-verified,
-awaiting user/ChatGPT manual API and browser verification before final approval.
+Phase 3F — Product Search & Low Stock is complete after user/ChatGPT manual API
+and browser approval.
 The existing authenticated `GET /api/v1/products` endpoint now strictly accepts
 optional `search` and `lowStock=true` query parameters. SKU/name search is
 trimmed, case-insensitive, substring-based, and Company-scoped. Low-stock
@@ -204,7 +205,24 @@ lifecycle status. All 207 backend tests and 106 frontend tests pass, together
 with backend typecheck/build, frontend ESLint/build, Prisma
 validation/generation/migration status, and 1440×1000/390×844 visual review. No
 dependency, schema, migration, pagination, reorder automation, notification,
-Dashboard, AI, or Phase 3G work was added.
+Dashboard, or AI work was added.
+
+Phase 3G — Phase 3 Final Verification is Codex-verified, awaiting a concise
+final user/ChatGPT acceptance check before Phase 3 is formally closed. The
+complete Category, Product, Inventory, search, and low-stock subsystem passed
+scope, live PostgreSQL catalog, migration/drift, role, Company-isolation,
+strict-validation, exact-Decimal, transaction, concurrency, error-safety,
+authentication-regression, accessibility, responsive, and production-readiness
+review. A disposable real-API/two-Company scenario re-proved the full approved
+stock sequence, Opening Balance rules, failed-operation rollback, search cases,
+low-stock cases, combined filters, filtered stock-refresh behavior, STAFF
+restrictions, and tenant-local failures, then removed all fictional records.
+All 207 backend tests across 8 files and 106 frontend tests across 5 files pass,
+along with backend typecheck/build, frontend lint/build, Prisma
+validation/generation/migration status, two no-drift comparisons, and visual
+review at 1440×1000, 430×932, and 390×844. No application defect, dependency,
+schema, migration, or new business feature was introduced. Phase 4 has not
+started.
 
 ## Local Development
 
