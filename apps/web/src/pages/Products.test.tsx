@@ -1,5 +1,6 @@
 import { fireEvent, screen, within } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
+import type { InventoryMovement, Product } from '../api/catalog'
 import {
   activeCategory,
   activeProduct,
@@ -12,6 +13,37 @@ import {
   renderUnauthenticated,
   success,
 } from '../test/catalog-test-utils'
+
+const zeroStockProduct: Product = {
+  ...activeProduct,
+  id: 'product-zero-stock',
+  sku: 'NEW-001',
+  name: 'New Product',
+  quantityOnHand: '0.000',
+}
+
+function inventoryMovement(
+  id: string,
+  type: InventoryMovement['type'],
+  quantity: string,
+  before: string,
+  after: string,
+): InventoryMovement {
+  return {
+    id,
+    type,
+    quantity,
+    quantityBefore: before,
+    quantityAfter: after,
+    note: null,
+    createdAt: '2026-08-20T03:00:00.000Z',
+    createdBy: {
+      id: 'user-owner',
+      firstName: 'Olivia',
+      lastName: 'Owner',
+    },
+  }
+}
 
 function fillProductForm() {
   fireEvent.change(screen.getByLabelText('SKU'), { target: { value: 'drill-001' } })
@@ -72,6 +104,7 @@ describe('Phase 3D Product list', () => {
     expect(screen.getByText('Uncategorized')).toBeTruthy()
     expect(screen.getByText('4.500')).toBeTruthy()
     expect(screen.getAllByText('15.99')).toHaveLength(2)
+    expect(screen.getByRole('columnheader', { name: 'Actions' })).toBeTruthy()
     expect(screen.getByText('Archived')).toBeTruthy()
     expect(screen.getByText('Stock is read only here')).toBeTruthy()
   })
@@ -91,6 +124,9 @@ describe('Phase 3D Product list', () => {
     ], role)
     expect(await screen.findByRole('link', { name: 'Create Product' })).toBeTruthy()
     expect(screen.getByRole('link', { name: 'Edit' })).toBeTruthy()
+    const adjustment = screen.getByRole('button', { name: 'Adjust Stock' })
+    expect(adjustment.className).toContain('text-button--operation')
+    expect(adjustment.className).not.toContain('text-button--danger')
     expect(screen.getByRole('button', { name: 'Archive' }).className).toContain('text-button--danger')
   })
 
@@ -102,6 +138,7 @@ describe('Phase 3D Product list', () => {
     const productCell = await screen.findByRole('cell', { name: /Legacy Saw/ })
     expect(productCell.getAttribute('data-label')).toBe('Product')
     expect(screen.getByRole('button', { name: 'Reactivate' }).className).toContain('text-button--positive')
+    expect(screen.queryByRole('button', { name: 'Adjust Stock' })).toBeNull()
   })
 
   it('keeps STAFF Product list and direct form access read-only', async () => {
@@ -112,7 +149,124 @@ describe('Phase 3D Product list', () => {
     expect(await screen.findByText('Read only')).toBeTruthy()
     expect(screen.queryByRole('link', { name: 'Create Product' })).toBeNull()
     expect(screen.queryByRole('link', { name: 'Edit' })).toBeNull()
+    expect(screen.queryByRole('button', { name: 'Adjust Stock' })).toBeNull()
     expect(screen.queryByRole('button', { name: 'Archive' })).toBeNull()
+  })
+
+  it('loads the latest Product and history before opening an eligible quick adjustment', async () => {
+    const fetchMock = await renderAuthenticatedPath('/products', [
+      success({ products: [zeroStockProduct] }),
+      success({ categories: [] }),
+    ])
+    await screen.findByText('New Product')
+    fetchMock
+      .mockResolvedValueOnce(success({ product: zeroStockProduct }))
+      .mockResolvedValueOnce(success({ movements: [] }))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Adjust Stock' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Adjust Stock' })
+
+    expect(within(dialog).getByText('0.000 pcs')).toBeTruthy()
+    expect(within(dialog).getByRole('combobox', { name: 'Adjustment type' }).textContent)
+      .toContain('Opening Balance')
+    expect(fetchMock.mock.calls[4]?.[0]).toContain(`/products/${zeroStockProduct.id}`)
+    expect(fetchMock.mock.calls[5]?.[0]).toContain('inventory-movements')
+  })
+
+  it('does not guess Opening Balance eligibility from zero stock alone', async () => {
+    const priorMovement = inventoryMovement(
+      'movement-prior-out',
+      'MANUAL_OUT',
+      '1.000',
+      '1.000',
+      '0.000',
+    )
+    const fetchMock = await renderAuthenticatedPath('/products', [
+      success({ products: [zeroStockProduct] }),
+      success({ categories: [] }),
+    ])
+    await screen.findByText('New Product')
+    fetchMock
+      .mockResolvedValueOnce(success({ product: zeroStockProduct }))
+      .mockResolvedValueOnce(success({ movements: [priorMovement] }))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Adjust Stock' }))
+    const selector = await screen.findByRole('combobox', { name: 'Adjustment type' })
+    expect(selector.textContent).toContain('Stock In')
+    fireEvent.click(selector)
+    expect(screen.queryByRole('option', { name: 'Opening Balance' })).toBeNull()
+  })
+
+  it('updates list stock from the adjustment response and refetches without Product CRUD stock writes', async () => {
+    const movement = inventoryMovement(
+      'movement-list-in',
+      'MANUAL_IN',
+      '2.500',
+      '4.500',
+      '7.000',
+    )
+    const updatedProduct = { ...activeProduct, quantityOnHand: '7.000' }
+    const fetchMock = await renderAuthenticatedPath('/products', [
+      success({ products: [activeProduct] }),
+      success({ categories: [activeCategory] }),
+    ])
+    await screen.findByText('Cordless Drill')
+    fetchMock
+      .mockResolvedValueOnce(success({ product: activeProduct }))
+      .mockResolvedValueOnce(success({ movements: [] }))
+      .mockResolvedValueOnce(success({
+        product: { id: activeProduct.id, quantityOnHand: '7.000' },
+        movement,
+      }, 201))
+      .mockResolvedValueOnce(success({ products: [updatedProduct] }))
+
+    fireEvent.click(screen.getByRole('button', { name: 'Adjust Stock' }))
+    await screen.findByRole('dialog', { name: 'Adjust Stock' })
+    fireEvent.change(screen.getByLabelText('Quantity'), { target: { value: '2.500' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save Adjustment' }))
+
+    expect(await screen.findByText('Stock adjusted successfully for DRILL-001. Current stock is 7.000 pcs.')).toBeTruthy()
+    const productRow = screen.getByRole('row', { name: /Cordless Drill/ })
+    expect(within(productRow).getByText('7.000')).toBeTruthy()
+    expect(fetchMock.mock.calls[6]?.[0]).toContain('inventory-adjustments')
+    expect(fetchMock.mock.calls[6]?.[1]?.method).toBe('POST')
+    expect(getRequestBody(fetchMock, 6)).toEqual({
+      type: 'MANUAL_IN',
+      quantity: '2.500',
+    })
+    expect(fetchMock.mock.calls[7]?.[0]).toMatch(/\/products$/)
+    expect(
+      fetchMock.mock.calls.some(
+        ([url, options]) =>
+          String(url).match(/\/products\/?$/) &&
+          (options?.method === 'POST' || options?.method === 'PATCH'),
+      ),
+    ).toBe(false)
+  })
+
+  it('keeps inventory errors inside the reused quick-adjustment dialog', async () => {
+    const fetchMock = await renderAuthenticatedPath('/products', [
+      success({ products: [activeProduct] }),
+      success({ categories: [activeCategory] }),
+    ])
+    await screen.findByText('Cordless Drill')
+    fetchMock
+      .mockResolvedValueOnce(success({ product: activeProduct }))
+      .mockResolvedValueOnce(success({ movements: [] }))
+      .mockResolvedValueOnce(
+        apiError(409, 'INSUFFICIENT_STOCK', 'Insufficient stock for this adjustment'),
+      )
+
+    fireEvent.click(screen.getByRole('button', { name: 'Adjust Stock' }))
+    await screen.findByRole('dialog', { name: 'Adjust Stock' })
+    const selector = screen.getByRole('combobox', { name: 'Adjustment type' })
+    fireEvent.click(selector)
+    fireEvent.click(screen.getByRole('option', { name: 'Stock Out' }))
+    fireEvent.change(screen.getByLabelText('Quantity'), { target: { value: '9.000' } })
+    fireEvent.click(screen.getByRole('button', { name: 'Save Adjustment' }))
+
+    expect(await screen.findByText('Insufficient stock for this adjustment.')).toBeTruthy()
+    expect(screen.getByRole('dialog', { name: 'Adjust Stock' })).toBeTruthy()
   })
 })
 

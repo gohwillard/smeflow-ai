@@ -80,6 +80,21 @@ async function openAdjustmentDialog() {
   return screen.getByRole('dialog', { name: 'Adjust Stock' })
 }
 
+function getAdjustmentTypeSelector() {
+  return screen.getByRole('combobox', { name: 'Adjustment type' })
+}
+
+function openAdjustmentTypeSelector() {
+  const selector = getAdjustmentTypeSelector()
+  if (selector.getAttribute('aria-expanded') !== 'true') fireEvent.click(selector)
+  return screen.getByRole('listbox', { name: 'Adjustment type' })
+}
+
+function chooseAdjustmentType(name: string) {
+  const listbox = openAdjustmentTypeSelector()
+  fireEvent.click(within(listbox).getByRole('option', { name }))
+}
+
 function fillAdjustment(quantity: string, note = '') {
   fireEvent.change(screen.getByLabelText('Quantity'), {
     target: { value: quantity },
@@ -172,16 +187,18 @@ describe('Phase 3E inventory adjustment workflow', () => {
       expect(screen.getByLabelText(/Note/)).toBeTruthy()
       expect(screen.getByText('Optional')).toBeTruthy()
       expect(screen.getByRole('button', { name: 'Save Adjustment' })).toBeTruthy()
-      expect(document.activeElement).toBe(screen.getByLabelText('Adjustment type'))
+      expect(document.activeElement).toBe(getAdjustmentTypeSelector())
     },
   )
 
   it('offers Opening Balance only for a zero-stock Product with no history', async () => {
     const firstView = await renderProductInventory(openingProduct)
     await openAdjustmentDialog()
-    expect(screen.getByRole('option', { name: 'Opening Balance' })).toBeTruthy()
-    expect(screen.getByRole('option', { name: 'Stock In' })).toBeTruthy()
-    expect(screen.getByRole('option', { name: 'Stock Out' })).toBeTruthy()
+    expect(getAdjustmentTypeSelector().textContent).toContain('Opening Balance')
+    const listbox = openAdjustmentTypeSelector()
+    expect(within(listbox).getByRole('option', { name: 'Opening Balance' })).toBeTruthy()
+    expect(within(listbox).getByRole('option', { name: 'Stock In' })).toBeTruthy()
+    expect(within(listbox).getByRole('option', { name: 'Stock Out' })).toBeTruthy()
     firstView.mockClear()
 
     // A recorded movement makes Opening Balance ineligible even if stock is zero.
@@ -193,8 +210,57 @@ describe('Phase 3E inventory adjustment workflow', () => {
       movement('movement-zero', 'MANUAL_OUT', '1.000', '1.000', '0.000'),
     ])
     await openAdjustmentDialog()
-    expect(screen.queryByRole('option', { name: 'Opening Balance' })).toBeNull()
-    expect(screen.getByLabelText('Adjustment type')).toHaveProperty('value', 'MANUAL_IN')
+    expect(getAdjustmentTypeSelector().textContent).toContain('Stock In')
+    const listbox = openAdjustmentTypeSelector()
+    expect(within(listbox).queryByRole('option', { name: 'Opening Balance' })).toBeNull()
+  })
+
+  it('selects each eligible business option without closing the parent dialog', async () => {
+    await renderProductInventory(openingProduct)
+    await openAdjustmentDialog()
+
+    chooseAdjustmentType('Stock Out')
+    expect(getAdjustmentTypeSelector().textContent).toContain('Stock Out')
+    chooseAdjustmentType('Stock In')
+    expect(getAdjustmentTypeSelector().textContent).toContain('Stock In')
+    chooseAdjustmentType('Opening Balance')
+    expect(getAdjustmentTypeSelector().textContent).toContain('Opening Balance')
+    expect(screen.getByRole('dialog', { name: 'Adjust Stock' })).toBeTruthy()
+  })
+
+  it('closes the selector on outside interaction while keeping the dialog open', async () => {
+    await renderProductInventory()
+    await openAdjustmentDialog()
+    const selector = getAdjustmentTypeSelector()
+    openAdjustmentTypeSelector()
+
+    fireEvent.pointerDown(screen.getByLabelText('Quantity'))
+    expect(screen.queryByRole('listbox', { name: 'Adjustment type' })).toBeNull()
+    expect(selector.getAttribute('aria-expanded')).toBe('false')
+    expect(screen.getByRole('dialog', { name: 'Adjust Stock' })).toBeTruthy()
+  })
+
+  it('supports keyboard selection and gives Escape to the selector before the dialog', async () => {
+    await renderProductInventory()
+    await openAdjustmentDialog()
+    const selector = getAdjustmentTypeSelector()
+
+    fireEvent.keyDown(selector, { key: 'ArrowDown' })
+    expect(screen.getByRole('listbox', { name: 'Adjustment type' })).toBeTruthy()
+    fireEvent.keyDown(selector, { key: 'ArrowDown' })
+    fireEvent.keyDown(selector, { key: 'Enter' })
+    expect(selector.textContent).toContain('Stock Out')
+    expect(screen.queryByRole('listbox', { name: 'Adjustment type' })).toBeNull()
+    expect(document.activeElement).toBe(selector)
+
+    fireEvent.keyDown(selector, { key: ' ' })
+    expect(screen.getByRole('listbox', { name: 'Adjustment type' })).toBeTruthy()
+    fireEvent.keyDown(selector, { key: 'Escape' })
+    expect(screen.queryByRole('listbox', { name: 'Adjustment type' })).toBeNull()
+    expect(screen.getByRole('dialog', { name: 'Adjust Stock' })).toBeTruthy()
+
+    fireEvent.keyDown(selector, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).toBeNull()
   })
 
   it('cancels without a request and restores focus', async () => {
@@ -228,9 +294,8 @@ describe('Phase 3E inventory adjustment workflow', () => {
       .mockResolvedValueOnce(success({ movements: [stockInMovement] }))
 
     await openAdjustmentDialog()
-    fireEvent.change(screen.getByLabelText('Adjustment type'), {
-      target: { value: 'MANUAL_IN' },
-    })
+    chooseAdjustmentType('Stock Out')
+    chooseAdjustmentType('Stock In')
     fillAdjustment('5.500', '  Physical count correction  ')
     fireEvent.click(screen.getByRole('button', { name: 'Save Adjustment' }))
 
@@ -267,9 +332,7 @@ describe('Phase 3E inventory adjustment workflow', () => {
       .mockResolvedValueOnce(success({ movements: [stockOut] }))
 
     await openAdjustmentDialog()
-    fireEvent.change(screen.getByLabelText('Adjustment type'), {
-      target: { value: 'MANUAL_OUT' },
-    })
+    chooseAdjustmentType('Stock Out')
     fillAdjustment('3.250', '   ')
     fireEvent.click(screen.getByRole('button', { name: 'Save Adjustment' }))
 
@@ -293,6 +356,8 @@ describe('Phase 3E inventory adjustment workflow', () => {
       .mockResolvedValueOnce(success({ movements: [opening] }))
 
     await openAdjustmentDialog()
+    chooseAdjustmentType('Stock In')
+    chooseAdjustmentType('Opening Balance')
     fillAdjustment('7')
     fireEvent.click(screen.getByRole('button', { name: 'Save Adjustment' }))
     expect(await screen.findByText('Opening Balance recorded successfully. Current stock is 7.000 pcs.')).toBeTruthy()
@@ -307,9 +372,7 @@ describe('Phase 3E inventory adjustment workflow', () => {
       apiError(409, 'INSUFFICIENT_STOCK', 'Insufficient stock for this adjustment'),
     )
     await openAdjustmentDialog()
-    fireEvent.change(screen.getByLabelText('Adjustment type'), {
-      target: { value: 'MANUAL_OUT' },
-    })
+    chooseAdjustmentType('Stock Out')
     fillAdjustment('9.000')
     fireEvent.click(screen.getByRole('button', { name: 'Save Adjustment' }))
     expect(await screen.findByText('Insufficient stock for this adjustment.')).toBeTruthy()
@@ -343,9 +406,6 @@ describe('Phase 3E inventory adjustment workflow', () => {
       .mockResolvedValueOnce(success({ product: { ...activeProduct, quantityOnHand: '5.500' } }))
       .mockResolvedValueOnce(success({ movements: [stockInMovement] }))
     await openAdjustmentDialog()
-    fireEvent.change(screen.getByLabelText('Adjustment type'), {
-      target: { value: 'MANUAL_IN' },
-    })
     fillAdjustment('1.000')
     const submit = screen.getByRole('button', { name: 'Save Adjustment' })
     fireEvent.click(submit)

@@ -2,14 +2,20 @@ import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import {
   archiveProduct,
+  createInventoryAdjustment,
   getCategories,
+  getInventoryMovements,
+  getProduct,
   getProducts,
   updateProduct,
   type Category,
+  type InventoryAdjustmentInput,
+  type InventoryMovement,
   type Product,
 } from '../api/catalog'
 import { ApiError } from '../api/client'
 import { ConfirmationDialog } from '../components/ConfirmationDialog'
+import { InventoryAdjustmentDialog } from '../components/InventoryAdjustmentDialog'
 import { LifecycleBadge } from '../components/LifecycleBadge'
 import { LoadingScreen } from '../components/LoadingScreen'
 import { useAuth } from '../features/auth/auth-context'
@@ -25,6 +31,11 @@ function getCategoryLabel(product: Product, categories: Category[]): string {
   return `${category.name}${category.isActive ? '' : ' (Archived)'}`
 }
 
+type QuickAdjustment = {
+  product: Product
+  movements: InventoryMovement[]
+}
+
 export function ProductsPage() {
   const [products, setProducts] = useState<Product[] | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
@@ -32,6 +43,8 @@ export function ProductsPage() {
   const [actionError, setActionError] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
   const [lifecycleTarget, setLifecycleTarget] = useState<Product | null>(null)
+  const [quickAdjustment, setQuickAdjustment] = useState<QuickAdjustment | null>(null)
+  const [openingAdjustmentProductId, setOpeningAdjustmentProductId] = useState<string | null>(null)
   const [pendingProductId, setPendingProductId] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
   const { runAuthenticated, user } = useAuth()
@@ -70,8 +83,90 @@ export function ProductsPage() {
   }, [retryCount, runAuthenticated])
 
   function requestLifecycleChange(product: Product) {
-    if (!canManage || pendingProductId || lifecycleTarget) return
+    if (
+      !canManage ||
+      pendingProductId ||
+      lifecycleTarget ||
+      quickAdjustment ||
+      openingAdjustmentProductId
+    ) return
     setLifecycleTarget(product)
+  }
+
+  async function openQuickAdjustment(product: Product) {
+    if (
+      !canManage ||
+      !product.isActive ||
+      lifecycleTarget ||
+      pendingProductId ||
+      quickAdjustment ||
+      openingAdjustmentProductId
+    ) return
+
+    setOpeningAdjustmentProductId(product.id)
+    setActionError(null)
+    setSuccessMessage(null)
+
+    try {
+      const [refreshedProduct, movements] = await runAuthenticated(
+        (accessToken) =>
+          Promise.all([
+            getProduct(accessToken, product.id),
+            getInventoryMovements(accessToken, product.id),
+          ]),
+      )
+      setProducts((current) => replaceProduct(current ?? [], refreshedProduct))
+
+      if (!refreshedProduct.isActive) {
+        setActionError('Archived Products cannot receive inventory adjustments.')
+        return
+      }
+
+      setQuickAdjustment({ product: refreshedProduct, movements })
+    } catch (error) {
+      if (error instanceof ApiError && error.status === 403) {
+        setActionError('You do not have permission to adjust inventory.')
+      } else {
+        setActionError(
+          error instanceof ApiError
+            ? error.message
+            : 'The inventory adjustment could not be opened. Please try again.',
+        )
+      }
+    } finally {
+      setOpeningAdjustmentProductId(null)
+    }
+  }
+
+  async function submitInventoryAdjustment(input: InventoryAdjustmentInput) {
+    const target = quickAdjustment?.product
+    if (!target) return
+
+    const result = await runAuthenticated((accessToken) =>
+      createInventoryAdjustment(accessToken, target.id, input),
+    )
+    const updatedProduct = {
+      ...target,
+      quantityOnHand: result.product.quantityOnHand,
+    }
+
+    setProducts((current) => replaceProduct(current ?? [], updatedProduct))
+    setQuickAdjustment(null)
+    setActionError(null)
+    setSuccessMessage(
+      `Stock adjusted successfully for ${target.sku}. Current stock is ${result.product.quantityOnHand} ${target.unit}.`,
+    )
+
+    try {
+      const refreshedProducts = await runAuthenticated((accessToken) =>
+        getProducts(accessToken),
+      )
+      setProducts(refreshedProducts)
+    } catch {
+      setActionError(
+        'The adjustment was saved, but the latest Product list could not be reloaded.',
+      )
+    }
   }
 
   async function confirmLifecycleChange() {
@@ -178,7 +273,9 @@ export function ProductsPage() {
                   <th scope="col">Stock</th>
                   <th scope="col">Reorder level</th>
                   <th scope="col">Status</th>
-                  <th scope="col"><span className="visually-hidden">Actions</span></th>
+                  <th scope="col">
+                    <span className="product-table__actions-label">Actions</span>
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -201,9 +298,30 @@ export function ProductsPage() {
                         {canManage && (
                           <>
                             <Link className="text-link" to={`/products/${product.id}/edit`}>Edit</Link>
+                            {product.isActive && (
+                              <button
+                                className="text-button text-button--operation"
+                                disabled={
+                                  openingAdjustmentProductId !== null ||
+                                  pendingProductId !== null ||
+                                  lifecycleTarget !== null
+                                }
+                                onClick={() => void openQuickAdjustment(product)}
+                                type="button"
+                              >
+                                {openingAdjustmentProductId === product.id
+                                  ? 'Opening…'
+                                  : 'Adjust Stock'}
+                              </button>
+                            )}
                             <button
                               className={`text-button ${product.isActive ? 'text-button--danger' : 'text-button--positive'}`}
-                              disabled={pendingProductId === product.id || lifecycleTarget !== null}
+                              disabled={
+                                pendingProductId === product.id ||
+                                lifecycleTarget !== null ||
+                                openingAdjustmentProductId !== null ||
+                                quickAdjustment !== null
+                              }
                               onClick={() => requestLifecycleChange(product)}
                               type="button"
                             >
@@ -227,7 +345,7 @@ export function ProductsPage() {
 
       <aside className="notice-card">
         <strong>Stock is read only here</strong>
-        <span>Inventory changes will be handled by traceable inventory operations in a later milestone.</span>
+        <span>Use Adjust Stock to record a traceable inventory operation. Product editing cannot overwrite stock.</span>
       </aside>
 
       {lifecycleTarget && (
@@ -244,6 +362,18 @@ export function ProductsPage() {
           onConfirm={confirmLifecycleChange}
           pendingLabel={lifecycleTarget.isActive ? 'Archiving Product…' : 'Reactivating Product…'}
           title={lifecycleTarget.isActive ? 'Archive Product?' : 'Reactivate Product?'}
+        />
+      )}
+
+      {quickAdjustment && canManage && (
+        <InventoryAdjustmentDialog
+          onCancel={() => setQuickAdjustment(null)}
+          onSubmit={submitInventoryAdjustment}
+          openingBalanceAvailable={
+            quickAdjustment.product.quantityOnHand === '0.000' &&
+            quickAdjustment.movements.length === 0
+          }
+          product={quickAdjustment.product}
         />
       )}
     </section>

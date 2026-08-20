@@ -6,6 +6,7 @@ import type {
   Product,
 } from '../api/catalog'
 import { ApiError } from '../api/client'
+import { FormCombobox } from './FormCombobox'
 
 type InventoryAdjustmentDialogProps = {
   product: Product
@@ -15,6 +16,11 @@ type InventoryAdjustmentDialogProps = {
 }
 
 const quantityPattern = /^\d{1,11}(?:\.\d{1,3})?$/u
+const adjustmentTypeOptions = [
+  { value: 'OPENING_BALANCE', label: 'Opening Balance' },
+  { value: 'MANUAL_IN', label: 'Stock In' },
+  { value: 'MANUAL_OUT', label: 'Stock Out' },
+]
 
 function adjustmentError(error: unknown): string {
   if (error instanceof ApiError) {
@@ -55,8 +61,9 @@ export function InventoryAdjustmentDialog({
   const [isSubmitting, setIsSubmitting] = useState(false)
   const titleId = useId()
   const descriptionId = useId()
+  const typeLabelId = useId()
   const dialogRef = useRef<HTMLDivElement>(null)
-  const typeSelectRef = useRef<HTMLSelectElement>(null)
+  const typeTriggerRef = useRef<HTMLButtonElement>(null)
   const previousFocusRef = useRef<HTMLElement | null>(null)
   const submissionStartedRef = useRef(false)
 
@@ -65,7 +72,7 @@ export function InventoryAdjustmentDialog({
       document.activeElement instanceof HTMLElement ? document.activeElement : null
     const previousOverflow = document.body.style.overflow
     document.body.style.overflow = 'hidden'
-    typeSelectRef.current?.focus()
+    typeTriggerRef.current?.focus()
 
     return () => {
       document.body.style.overflow = previousOverflow
@@ -74,6 +81,8 @@ export function InventoryAdjustmentDialog({
   }, [])
 
   function handleKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.defaultPrevented) return
+
     if (event.key === 'Escape' && !isSubmitting) {
       event.preventDefault()
       onCancel()
@@ -83,7 +92,7 @@ export function InventoryAdjustmentDialog({
     if (event.key !== 'Tab') return
     const focusable = Array.from(
       dialogRef.current?.querySelectorAll<HTMLElement>(
-        'button:not(:disabled), input:not(:disabled), select:not(:disabled), textarea:not(:disabled)',
+        'button:not(:disabled):not([tabindex="-1"]), input:not(:disabled), textarea:not(:disabled)',
       ) ?? [],
     )
     if (focusable.length === 0) {
@@ -167,21 +176,21 @@ export function InventoryAdjustmentDialog({
         {submitError && <div className="alert alert--error" role="alert">{submitError}</div>}
 
         <form className="inventory-dialog__form" onSubmit={handleSubmit}>
-          <label className="field">
-            Adjustment type
-            <select
+          <div className="field">
+            <span id={typeLabelId}>Adjustment type</span>
+            <FormCombobox
               disabled={isSubmitting}
-              onChange={(event) => setType(event.target.value as InventoryMovementType)}
-              ref={typeSelectRef}
+              labelId={typeLabelId}
+              onChange={(value) => setType(value as InventoryMovementType)}
+              options={
+                openingBalanceAvailable
+                  ? adjustmentTypeOptions
+                  : adjustmentTypeOptions.slice(1)
+              }
+              ref={typeTriggerRef}
               value={type}
-            >
-              {openingBalanceAvailable && (
-                <option value="OPENING_BALANCE">Opening Balance</option>
-              )}
-              <option value="MANUAL_IN">Stock In</option>
-              <option value="MANUAL_OUT">Stock Out</option>
-            </select>
-          </label>
+            />
+          </div>
 
           <label className="field">
             Quantity
