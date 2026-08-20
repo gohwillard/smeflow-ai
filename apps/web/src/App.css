@@ -925,6 +925,7 @@ a:hover {
   display: flex;
   align-items: center;
   gap: 0.7rem;
+  margin-right: 0.75rem;
   padding: 0.65rem 0.8rem;
   border: 1px solid #d4e1dd;
   border-radius: 0.7rem;
@@ -992,7 +993,7 @@ a:hover {
 }
 
 .product-table {
-  --product-actions-track-width: 15.5625rem;
+  --product-actions-track-width: 16.5rem;
   table-layout: fixed;
 }
 
@@ -1443,6 +1444,7 @@ a:hover {
 
   .low-stock-filter {
     justify-content: flex-start;
+    margin-right: 0;
   }
 
   .product-form__grid--three {
@@ -1549,8 +1551,7 @@ a:hover {
     box-shadow: 0 1rem 2.5rem rgba(20, 57, 62, 0.07);
   }
 
-  .product-table td,
-  .product-table td:last-child {
+  .product-table.data-table tbody tr td {
     display: grid;
     grid-template-columns: minmax(6.6rem, 0.42fr) minmax(0, 1fr);
     align-items: center;
@@ -1573,7 +1574,7 @@ a:hover {
     padding-top: 1rem;
   }
 
-  .product-table td:last-child {
+  .product-table.data-table tbody tr td:last-child {
     padding-bottom: 1rem;
     border-bottom: 0;
   }
