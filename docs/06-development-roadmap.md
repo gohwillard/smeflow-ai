@@ -41,13 +41,14 @@ The current project state is:
 - Phase 3A — Product & Inventory Domain Design: ✅ Completed
 - Phase 3B — Product & Inventory Schema Migration: ✅ Completed
 - Phase 3C — Category & Product Backend: ✅ Completed
-- Phase 3D — Product Frontend: 🚧 Implemented and Codex-verified; awaiting
-  manual browser verification
+- Phase 3D — Product Frontend: ✅ Completed
+- Phase 3E — Inventory Movement & Manual Adjustment: 🚧 Implemented and
+  Codex-verified; awaiting manual verification
 
-Phase 3 is in progress. Phase 3A, Phase 3B, and Phase 3C are complete. Phase 3D
-is implemented and its automated and visual verification passes, but it awaits
-user/ChatGPT manual browser verification before approval. Phase 3E and all later
-Phase 3 milestones remain planned and have not started.
+Phase 3 is in progress. Phase 3A through Phase 3D are complete. Phase 3E is
+implemented and its automated, integration, security, and visual verification
+passes, but it awaits user/ChatGPT manual verification before final approval.
+Phase 3F and all later milestones have not started.
 
 ---
 
@@ -396,9 +397,8 @@ was required.
 A new user can register, sign in, access protected pages, and access only data
 belonging to their company.
 
-Phase 2 is complete. Phase 3 has since completed its Phase 3A design and Phase
-3B database-schema foundation, and Phase 3C backend implementation is awaiting
-manual verification. No Phase 3 frontend functionality has started.
+Phase 2 is complete. Phase 3 has since completed Phase 3A through Phase 3D and
+implemented Phase 3E, which awaits its final manual verification.
 
 ---
 
@@ -473,7 +473,7 @@ Phase 3D began.
 
 ### Phase 3D — Product Frontend
 
-**Status:** 🚧 Implemented and Codex-verified; awaiting manual browser verification
+**Status:** ✅ Completed
 
 - Product list
 - Create product
@@ -494,26 +494,31 @@ covered. Product lists use an aligned desktop table and stacked mobile cards.
 `quantityOnHand` is displayed only and is absent from Product request construction.
 The backend now also trims and uppercases Product units on both create and update.
 
-All 71 frontend tests across 3 files and all 137 backend tests across 6 files
-pass, together with frontend lint/build, backend typecheck/build, Prisma
-validation, scope/hygiene review, and 1440×1000/390×844 browser visual review.
-Manual browser verification and user/ChatGPT approval remain required. Phase 3E
-has not started.
+All Phase 3D automated and visual checks passed, followed by user/ChatGPT manual
+browser approval. Its Product CRUD stock-write prohibition remains unchanged in
+Phase 3E.
 
 ### Phase 3E — Inventory Movement & Manual Adjustment
 
-**Status:** ⬜ Planned
+**Status:** 🚧 Implemented and Codex-verified; awaiting manual verification
 
-- Inventory movement records
-- Stock-in adjustment
-- Stock-out adjustment
-- Backend-controlled stock changes
-- Transactional integrity
-- Prevention of invalid negative stock according to the approved business rules
+- Product-scoped immutable InventoryMovement history with safe creator fields
+- Controlled Opening Balance, Stock In, and Stock Out operations
+- Company and creator scope derived from authenticated request context
+- OWNER/ADMIN adjustment authorization and STAFF read-only access
+- Exact positive decimal-string request and fixed-scale response contracts
+- Atomic conditional Product balance update plus one movement insert
+- Concurrency-safe negative-stock prevention through PostgreSQL row locking
+- Active-Product enforcement and readable archived history
+- Responsive Product-detail history and accessible adjustment dialog
+- Real concurrency and forced transaction-rollback integration regressions
 
-The frontend must never arbitrarily overwrite stock quantity. Every stock change
-must be controlled by backend business logic and recorded as an inventory
-movement.
+The frontend never arbitrarily overwrites stock quantity. Every successful stock
+change is controlled by backend business logic and records exactly one movement.
+All 176 backend tests and 88 frontend tests pass with typecheck, lint, builds,
+Prisma validation/generation/status, security/scope review, and
+1440×1000/390×844 visual review. Manual API/browser verification and
+user/ChatGPT approval remain required before Phase 3F may start.
 
 ### Phase 3F — Product Search & Low Stock
 

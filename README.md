@@ -131,8 +131,9 @@ Dashboard / AI Insights
 - [x] Phase 3A Product and Inventory domain design approved
 - [x] Phase 3B Product and Inventory schema migration complete
 - [x] Phase 3C Category and Product backend complete
-- [x] Phase 3D Product frontend implemented and Codex-verified
-- [ ] Inventory module implemented
+- [x] Phase 3D Product frontend complete
+- [x] Phase 3E Inventory Movement and Manual Adjustment implemented and Codex-verified
+- [x] Inventory module implemented
 - [ ] Sales workflow implemented
 - [ ] AI assistant implemented
 - [ ] Production deployment completed
@@ -162,17 +163,32 @@ complete. Prisma and PostgreSQL now contain the approved `Category`, `Product`,
 foreign keys, exact decimal types, business uniqueness rules, indexes, and
 database checks through migration `20260819112747_add_product_inventory`.
 Phase 3C — Category & Product Backend is complete after manual API verification.
-Phase 3D — Product Frontend is implemented and Codex-verified. Protected
+Phase 3D — Product Frontend is complete after manual browser approval. Protected
 Product list, create, detail, and edit routes plus Category management now use
 the Phase 3C APIs. OWNER and ADMIN receive lifecycle-management controls, STAFF
 remains read-only, archived Category relationships remain visible, decimal
 values stay strings, Product units are backend-normalized to uppercase, and
 `quantityOnHand` is display-only. The Product list now uses an aligned desktop
 table and stacked mobile cards, and all Product/Category archive and reactivate
-actions use a reusable accessible confirmation dialog. All 71 frontend tests
-and 137 backend tests pass, together with the relevant lint, typecheck, builds,
-Prisma validation, and 1440×1000/390×844 visual review. Phase 3D awaits
-user/ChatGPT manual browser verification before approval. Phase 3E has not started.
+actions use a reusable accessible confirmation dialog. Its regression coverage
+remains verified.
+
+Phase 3E — Inventory Movement & Manual Adjustment is implemented and
+Codex-verified, awaiting user/ChatGPT manual verification before final approval.
+Authenticated Product-scoped history is immutable, Company-isolated,
+newest-first, and available to all three roles. OWNER and ADMIN can perform
+controlled Opening Balance, Stock In, and Stock Out operations; STAFF remains
+read-only. Each successful operation uses exact decimal-string input, an atomic
+conditional Product update and InventoryMovement insert in one
+Prisma/PostgreSQL transaction, and backend-derived Company, creator, and
+before/after balances. Archived Products remain historically readable but
+cannot be adjusted. The Product detail UI now includes loading, empty, error,
+and populated history states plus an accessible role-aware adjustment dialog.
+All 176 backend tests and 88 frontend tests pass, including real concurrent
+stock-out and forced rollback regressions, together with frontend lint/build,
+backend typecheck/build, Prisma validation/generation/status, and
+1440×1000/390×844 visual review. No schema or migration changed, and Phase 3F
+has not started.
 
 ## Local Development
 

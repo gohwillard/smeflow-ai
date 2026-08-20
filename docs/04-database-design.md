@@ -22,9 +22,10 @@ Phase 3A approved the `Category`, `Product`, `InventoryMovement`, and
 design in Prisma schema and migration
 `20260819112747_add_product_inventory`, including customized PostgreSQL SQL for
 the expression index and check constraints that Prisma Schema Language cannot
-represent. Phase 3C now consumes this approved schema through authenticated,
-tenant-scoped Category and Product APIs. It did not change the Prisma schema or
-migrations and did not implement inventory services or frontend functionality.
+represent. Phase 3C consumes this approved schema through authenticated,
+tenant-scoped Category and Product APIs. Phase 3E now consumes the existing
+movement model through Product-scoped history and transactional manual-adjustment
+operations. Neither milestone changed the Prisma schema or migrations.
 
 Models assigned to later roadmap phases remain planning context only. Their
 fields, relationships, constraints, and indexes must be designed in their own

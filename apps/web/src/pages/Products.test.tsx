@@ -293,7 +293,11 @@ describe('Phase 3D Create Product', () => {
 describe('Phase 3D Product details and lifecycle', () => {
   it('shows a detail loading state and all important business fields', async () => {
     const request = deferredResponse()
-    await renderAuthenticatedPath(`/products/${activeProduct.id}`, [request.promise, success({ categories: [activeCategory] })])
+    await renderAuthenticatedPath(`/products/${activeProduct.id}`, [
+      request.promise,
+      success({ categories: [activeCategory] }),
+      success({ movements: [] }),
+    ])
     expect(await screen.findByText('Loading Product details…')).toBeTruthy()
     request.resolve(success({ product: activeProduct }))
 
@@ -310,13 +314,14 @@ describe('Phase 3D Product details and lifecycle', () => {
           element?.tagName === 'DD' && element.textContent?.trim() === '1.500 pcs',
       ),
     ).toBeTruthy()
-    expect(screen.getByText('Current stock is read only')).toBeTruthy()
+    expect(screen.getByText('Product stock is protected')).toBeTruthy()
   })
 
   it('shows a safe not-found state', async () => {
     await renderAuthenticatedPath('/products/missing', [
       apiError(404, 'PRODUCT_NOT_FOUND', 'Product was not found'),
       success({ categories: [] }),
+      apiError(404, 'PRODUCT_NOT_FOUND', 'Product was not found'),
     ])
     expect(await screen.findByRole('heading', { name: 'Product not found' })).toBeTruthy()
     expect(screen.getByText('This Product does not exist or is unavailable to your Company.')).toBeTruthy()
@@ -326,6 +331,7 @@ describe('Phase 3D Product details and lifecycle', () => {
     await renderAuthenticatedPath(`/products/${activeProduct.id}`, [
       success({ product: activeProduct }),
       success({ categories: [activeCategory] }),
+      success({ movements: [] }),
     ], role)
     expect(await screen.findByRole('link', { name: 'Edit Product' })).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Archive Product' })).toBeTruthy()
@@ -335,6 +341,7 @@ describe('Phase 3D Product details and lifecycle', () => {
     await renderAuthenticatedPath(`/products/${archivedProduct.id}`, [
       success({ product: archivedProduct }),
       success({ categories: [] }),
+      success({ movements: [] }),
     ], 'STAFF')
     expect(await screen.findByRole('heading', { name: 'Legacy Saw' })).toBeTruthy()
     expect(screen.getByText('Read only')).toBeTruthy()
@@ -347,6 +354,7 @@ describe('Phase 3D Product details and lifecycle', () => {
     const fetchMock = await renderAuthenticatedPath(`/products/${activeProduct.id}`, [
       success({ product: activeProduct }),
       success({ categories: [activeCategory] }),
+      success({ movements: [] }),
     ])
     await screen.findByRole('heading', { name: 'Cordless Drill' })
     const request = deferredResponse()
@@ -356,13 +364,13 @@ describe('Phase 3D Product details and lifecycle', () => {
     expect(trigger.className).toContain('button--danger')
     fireEvent.click(trigger)
     const dialog = screen.getByRole('dialog', { name: 'Archive Product?' })
-    expect(fetchMock).toHaveBeenCalledTimes(4)
+    expect(fetchMock).toHaveBeenCalledTimes(5)
     expect(document.activeElement).toBe(within(dialog).getByRole('button', { name: 'Cancel' }))
 
     const confirm = within(dialog).getByRole('button', { name: 'Archive Product' })
     fireEvent.click(confirm)
     fireEvent.click(confirm)
-    expect(fetchMock).toHaveBeenCalledTimes(5)
+    expect(fetchMock).toHaveBeenCalledTimes(6)
     expect(within(dialog).getByRole('button', { name: 'Archiving Product…' })).toHaveProperty('disabled', true)
 
     request.resolve(success({ product: { ...activeProduct, isActive: false } }))
@@ -370,13 +378,14 @@ describe('Phase 3D Product details and lifecycle', () => {
     expect(screen.getByRole('heading', { name: 'Cordless Drill' })).toBeTruthy()
     expect(screen.getByText('4.500')).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Reactivate Product' })).toBeTruthy()
-    expect(fetchMock.mock.calls[4]?.[1]?.method).toBe('DELETE')
+    expect(fetchMock.mock.calls[5]?.[1]?.method).toBe('DELETE')
   })
 
   it('cancels with Cancel or Escape, sends no lifecycle request, and restores focus', async () => {
     const fetchMock = await renderAuthenticatedPath(`/products/${activeProduct.id}`, [
       success({ product: activeProduct }),
       success({ categories: [activeCategory] }),
+      success({ movements: [] }),
     ])
     await screen.findByRole('heading', { name: 'Cordless Drill' })
     const trigger = screen.getByRole('button', { name: 'Archive Product' })
@@ -392,13 +401,13 @@ describe('Phase 3D Product details and lifecycle', () => {
     expect(document.activeElement).toBe(cancel)
     fireEvent.click(cancel)
     expect(screen.queryByRole('dialog')).toBeNull()
-    expect(fetchMock).toHaveBeenCalledTimes(4)
+    expect(fetchMock).toHaveBeenCalledTimes(5)
     expect(document.activeElement).toBe(trigger)
 
     fireEvent.click(trigger)
     fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' })
     expect(screen.queryByRole('dialog')).toBeNull()
-    expect(fetchMock).toHaveBeenCalledTimes(4)
+    expect(fetchMock).toHaveBeenCalledTimes(5)
     expect(document.activeElement).toBe(trigger)
   })
 
@@ -406,6 +415,7 @@ describe('Phase 3D Product details and lifecycle', () => {
     const fetchMock = await renderAuthenticatedPath(`/products/${archivedProduct.id}`, [
       success({ product: archivedProduct }),
       success({ categories: [] }),
+      success({ movements: [] }),
     ])
     await screen.findByRole('heading', { name: 'Legacy Saw' })
     fetchMock.mockResolvedValueOnce(success({ product: { ...archivedProduct, isActive: true } }))
@@ -413,10 +423,10 @@ describe('Phase 3D Product details and lifecycle', () => {
     fireEvent.click(trigger)
 
     let dialog = screen.getByRole('dialog', { name: 'Reactivate Product?' })
-    expect(fetchMock).toHaveBeenCalledTimes(4)
+    expect(fetchMock).toHaveBeenCalledTimes(5)
     fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }))
     expect(screen.queryByRole('dialog')).toBeNull()
-    expect(fetchMock).toHaveBeenCalledTimes(4)
+    expect(fetchMock).toHaveBeenCalledTimes(5)
 
     fireEvent.click(trigger)
     dialog = screen.getByRole('dialog', { name: 'Reactivate Product?' })
@@ -425,8 +435,8 @@ describe('Phase 3D Product details and lifecycle', () => {
     fireEvent.click(confirm)
 
     expect(await screen.findByText('Product SAW-OLD reactivated successfully.')).toBeTruthy()
-    expect(fetchMock.mock.calls[4]?.[1]?.method).toBe('PATCH')
-    expect(getRequestBody(fetchMock, 4)).toEqual({ isActive: true })
+    expect(fetchMock.mock.calls[5]?.[1]?.method).toBe('PATCH')
+    expect(getRequestBody(fetchMock, 5)).toEqual({ isActive: true })
   })
 })
 

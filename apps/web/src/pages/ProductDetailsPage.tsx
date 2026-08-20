@@ -2,14 +2,20 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useParams } from 'react-router'
 import {
   archiveProduct,
+  createInventoryAdjustment,
   getCategories,
+  getInventoryMovements,
   getProduct,
   updateProduct,
   type Category,
+  type InventoryAdjustmentInput,
+  type InventoryMovement,
+  type InventoryMovementType,
   type Product,
 } from '../api/catalog'
 import { ApiError } from '../api/client'
 import { ConfirmationDialog } from '../components/ConfirmationDialog'
+import { InventoryAdjustmentDialog } from '../components/InventoryAdjustmentDialog'
 import { LifecycleBadge } from '../components/LifecycleBadge'
 import { LoadingScreen } from '../components/LoadingScreen'
 import { useAuth } from '../features/auth/auth-context'
@@ -30,12 +36,20 @@ function categoryDisplay(product: Product, categories: Category[]): string {
   return `${category.name}${category.isActive ? '' : ' (Archived)'}`
 }
 
+function movementTypeLabel(type: InventoryMovementType): string {
+  if (type === 'OPENING_BALANCE') return 'Opening Balance'
+  if (type === 'MANUAL_IN') return 'Stock In'
+  return 'Stock Out'
+}
+
 export function ProductDetailsPage() {
   const { productId = '' } = useParams()
   const location = useLocation()
   const locationState = location.state as ProductLocationState | null
   const [product, setProduct] = useState<Product | null>(null)
   const [categories, setCategories] = useState<Category[]>([])
+  const [movements, setMovements] = useState<InventoryMovement[] | null>(null)
+  const [movementError, setMovementError] = useState<string | null>(null)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [notFound, setNotFound] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
@@ -44,7 +58,9 @@ export function ProductDetailsPage() {
   )
   const [isUpdatingLifecycle, setIsUpdatingLifecycle] = useState(false)
   const [isLifecycleDialogOpen, setIsLifecycleDialogOpen] = useState(false)
+  const [isAdjustmentDialogOpen, setIsAdjustmentDialogOpen] = useState(false)
   const [retryCount, setRetryCount] = useState(0)
+  const [movementRetryCount, setMovementRetryCount] = useState(0)
   const { runAuthenticated, user } = useAuth()
   const lifecycleRequestRef = useRef(false)
   const canManage = user?.role === 'OWNER' || user?.role === 'ADMIN'
@@ -85,6 +101,32 @@ export function ProductDetailsPage() {
     return () => controller.abort()
   }, [productId, retryCount, runAuthenticated])
 
+  useEffect(() => {
+    const controller = new AbortController()
+
+    async function loadMovements() {
+      setMovements(null)
+      setMovementError(null)
+
+      try {
+        const loadedMovements = await runAuthenticated((accessToken) =>
+          getInventoryMovements(accessToken, productId, controller.signal),
+        )
+        setMovements(loadedMovements)
+      } catch (error) {
+        if (error instanceof Error && error.name === 'AbortError') return
+        setMovementError(
+          error instanceof ApiError
+            ? error.message
+            : 'Inventory movements could not be loaded. Please try again.',
+        )
+      }
+    }
+
+    void loadMovements()
+    return () => controller.abort()
+  }, [movementRetryCount, productId, runAuthenticated])
+
   async function changeLifecycle() {
     if (!product || !canManage || isUpdatingLifecycle || lifecycleRequestRef.current) return
 
@@ -120,6 +162,46 @@ export function ProductDetailsPage() {
       lifecycleRequestRef.current = false
       setIsUpdatingLifecycle(false)
       setIsLifecycleDialogOpen(false)
+    }
+  }
+
+  async function submitInventoryAdjustment(input: InventoryAdjustmentInput) {
+    if (!product) return
+
+    const result = await runAuthenticated((accessToken) =>
+      createInventoryAdjustment(accessToken, product.id, input),
+    )
+
+    setProduct((current) =>
+      current
+        ? { ...current, quantityOnHand: result.product.quantityOnHand }
+        : current,
+    )
+    setMovements((current) => [
+      result.movement,
+      ...(current ?? []).filter((movement) => movement.id !== result.movement.id),
+    ])
+    setMovementError(null)
+    setActionError(null)
+    setIsAdjustmentDialogOpen(false)
+    setSuccessMessage(
+      `${movementTypeLabel(result.movement.type)} recorded successfully. Current stock is ${result.product.quantityOnHand} ${product.unit}.`,
+    )
+
+    try {
+      const [refreshedProduct, refreshedMovements] = await runAuthenticated(
+        (accessToken) =>
+          Promise.all([
+            getProduct(accessToken, product.id),
+            getInventoryMovements(accessToken, product.id),
+          ]),
+      )
+      setProduct(refreshedProduct)
+      setMovements(refreshedMovements)
+    } catch {
+      setMovementError(
+        'The adjustment was saved, but the latest inventory could not be reloaded. Try refreshing the history.',
+      )
     }
   }
 
@@ -203,9 +285,83 @@ export function ProductDetailsPage() {
           </article>
 
           <aside className="notice-card">
-            <strong>Current stock is read only</strong>
-            <span>Stock changes are deliberately excluded from Product editing and require traceable inventory operations.</span>
+            <strong>Product stock is protected</strong>
+            <span>Stock cannot be overwritten in Product editing. Authorized adjustments create a traceable inventory movement.</span>
           </aside>
+
+          <article className="management-card inventory-history" aria-labelledby="inventory-history-heading">
+            <div className="section-heading">
+              <div>
+                <p className="card-label">Inventory audit trail</p>
+                <h2 id="inventory-history-heading">Inventory Movements</h2>
+              </div>
+              {canManage && product.isActive && (
+                <button
+                  className="button button--primary"
+                  onClick={() => setIsAdjustmentDialogOpen(true)}
+                  type="button"
+                >
+                  Adjust Stock
+                </button>
+              )}
+            </div>
+
+            {movements === null && !movementError && (
+              <div className="inventory-history__state" role="status">
+                <span className="spinner" aria-hidden="true" />
+                <span>Loading inventory movements…</span>
+              </div>
+            )}
+
+            {movementError && (
+              <div className="alert alert--error" role="alert">
+                <span>{movementError}</span>
+                <button
+                  className="text-button"
+                  onClick={() => setMovementRetryCount((value) => value + 1)}
+                  type="button"
+                >
+                  Try again
+                </button>
+              </div>
+            )}
+
+            {movements?.length === 0 && !movementError && (
+              <div className="inventory-history__empty">
+                <strong>No inventory movements yet</strong>
+                <span>This Product has no recorded stock changes.</span>
+              </div>
+            )}
+
+            {movements && movements.length > 0 && (
+              <div className="table-scroll inventory-table-scroll">
+                <table className="data-table inventory-table">
+                  <thead>
+                    <tr>
+                      <th>Movement</th>
+                      <th>Quantity</th>
+                      <th>Balance change</th>
+                      <th>Note</th>
+                      <th>Performed by</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {movements.map((movement) => (
+                      <tr key={movement.id}>
+                        <td data-label="Movement"><strong>{movementTypeLabel(movement.type)}</strong></td>
+                        <td data-label="Quantity">{movement.quantity} {product.unit}</td>
+                        <td data-label="Balance change">{movement.quantityBefore} → {movement.quantityAfter}</td>
+                        <td data-label="Note">{movement.note ?? '—'}</td>
+                        <td data-label="Performed by">{movement.createdBy.firstName} {movement.createdBy.lastName}</td>
+                        <td data-label="Date">{formatDate(movement.createdAt)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </article>
 
           {isLifecycleDialogOpen && (
             <ConfirmationDialog
@@ -221,6 +377,17 @@ export function ProductDetailsPage() {
               onConfirm={changeLifecycle}
               pendingLabel={product.isActive ? 'Archiving Product…' : 'Reactivating Product…'}
               title={product.isActive ? 'Archive Product?' : 'Reactivate Product?'}
+            />
+          )}
+
+          {isAdjustmentDialogOpen && product.isActive && canManage && (
+            <InventoryAdjustmentDialog
+              onCancel={() => setIsAdjustmentDialogOpen(false)}
+              onSubmit={submitInventoryAdjustment}
+              openingBalanceAvailable={
+                product.quantityOnHand === '0.000' && movements?.length === 0
+              }
+              product={product}
             />
           )}
         </>

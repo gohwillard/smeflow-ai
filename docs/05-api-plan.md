@@ -350,16 +350,123 @@ cross-Company IDs both return HTTP 404 `CATEGORY_NOT_FOUND`.
 
 ## Inventory
 
-The Phase 3E adjustment contract must derive Company scope from
-`req.auth.companyId`, allow manual adjustments only for `OWNER` and `ADMIN`, and
-atomically update Product stock with an immutable InventoryMovement. `STAFF`
-remains read-only for the initial MVP.
+Implemented in Phase 3E:
 
 ```text
-GET    /inventory
-GET    /inventory/movements
-POST   /inventory/adjustments
+GET    /products/:productId/inventory-movements
+POST   /products/:productId/inventory-adjustments
 ```
+
+Both routes require Bearer authentication, validate `productId` as a UUID, and
+derive Company scope exclusively from `req.auth.companyId`. Cross-Company and
+missing Product IDs both return HTTP 404 `PRODUCT_NOT_FOUND`. There is no generic
+InventoryMovement create, update, or delete API.
+
+### Retrieve Product Inventory Movement History
+
+`OWNER`, `ADMIN`, and `STAFF` may call:
+
+```text
+GET /api/v1/products/:productId/inventory-movements
+```
+
+The endpoint returns the Product's immutable movements in deterministic
+newest-first order using `createdAt DESC, id DESC`. Archived Product history
+remains readable. Each movement contains only safe audit fields:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "movements": [
+      {
+        "id": "9ca7fcbe-eac6-4864-944f-47eb077114f6",
+        "type": "MANUAL_IN",
+        "quantity": "5.500",
+        "quantityBefore": "4.500",
+        "quantityAfter": "10.000",
+        "note": "Physical count correction",
+        "createdAt": "2026-08-20T02:00:00.000Z",
+        "createdBy": {
+          "id": "1e44b878-cfc5-45da-83aa-fe1163b56b8d",
+          "firstName": "Amina",
+          "lastName": "Rahman"
+        }
+      }
+    ]
+  }
+}
+```
+
+The response omits `companyId`, `createdByUserId`, user email, password material,
+and authentication internals. A Product without movements returns an empty array.
+
+### Perform a Controlled Inventory Adjustment
+
+Only `OWNER` and `ADMIN` may call:
+
+```text
+POST /api/v1/products/:productId/inventory-adjustments
+```
+
+`STAFF` receives HTTP 403 `FORBIDDEN`. The strict request body accepts only:
+
+```json
+{
+  "type": "MANUAL_IN",
+  "quantity": "5.500",
+  "note": "Physical count correction"
+}
+```
+
+`type` is limited to `OPENING_BALANCE`, `MANUAL_IN`, and `MANUAL_OUT`.
+`quantity` must be a positive decimal string with at most 11 integer digits and
+3 fractional digits. Numeric JSON values, zero, negative, blank, excessive-scale,
+excessive-precision, unsupported types, and unknown fields are rejected with
+HTTP 400 `VALIDATION_ERROR`. `note` is optional, accepts `null`, is trimmed, and
+normalizes blank text to `null`.
+
+The backend derives `companyId`, `productId`, `createdByUserId`,
+`quantityBefore`, and `quantityAfter`. A successful HTTP 201 response returns the
+authoritative new balance and created safe movement:
+
+```json
+{
+  "status": "success",
+  "data": {
+    "product": {
+      "id": "ae7c26d2-a801-4814-91cc-7b9ab8d652e0",
+      "quantityOnHand": "10.000"
+    },
+    "movement": {
+      "id": "9ca7fcbe-eac6-4864-944f-47eb077114f6",
+      "type": "MANUAL_IN",
+      "quantity": "5.500",
+      "quantityBefore": "4.500",
+      "quantityAfter": "10.000",
+      "note": "Physical count correction",
+      "createdAt": "2026-08-20T02:00:00.000Z",
+      "createdBy": {
+        "id": "1e44b878-cfc5-45da-83aa-fe1163b56b8d",
+        "firstName": "Amina",
+        "lastName": "Rahman"
+      }
+    }
+  }
+}
+```
+
+`OPENING_BALANCE` requires an active Product at exactly zero stock with no prior
+movement. `MANUAL_IN` adds the positive quantity. `MANUAL_OUT` uses an atomic
+stock-sufficiency condition and never allows a negative balance. Archived
+Products return HTTP 409 `PRODUCT_INACTIVE`; invalid opening balance returns
+HTTP 409 `OPENING_BALANCE_NOT_ALLOWED`; insufficient stock returns HTTP 409
+`INSUFFICIENT_STOCK`.
+
+The conditional Product update and exactly one InventoryMovement insert run in
+one Prisma interactive transaction. PostgreSQL holds the updated Product row
+lock through commit, so a competing operation re-evaluates its condition against
+the committed balance. Both records commit together or both roll back.
 
 ## Customers
 

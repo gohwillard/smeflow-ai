@@ -51,10 +51,45 @@ export type ProductUpdateInput = Partial<
   ProductCreateInput & { isActive: boolean }
 >
 
+export type InventoryMovementType =
+  | 'OPENING_BALANCE'
+  | 'MANUAL_IN'
+  | 'MANUAL_OUT'
+
+export type InventoryMovement = {
+  id: string
+  type: InventoryMovementType
+  quantity: string
+  quantityBefore: string
+  quantityAfter: string
+  note: string | null
+  createdAt: string
+  createdBy: {
+    id: string
+    firstName: string
+    lastName: string
+  }
+}
+
+export type InventoryAdjustmentInput = {
+  type: InventoryMovementType
+  quantity: string
+  note?: string | null
+}
+
+export type InventoryAdjustmentResult = {
+  product: {
+    id: string
+    quantityOnHand: string
+  }
+  movement: InventoryMovement
+}
+
 type CategoriesData = { categories: Category[] }
 type CategoryData = { category: Category }
 type ProductsData = { products: Product[] }
 type ProductData = { product: Product }
+type InventoryMovementsData = { movements: InventoryMovement[] }
 
 function isNullableString(value: unknown): value is string | null {
   return value === null || typeof value === 'string'
@@ -92,6 +127,45 @@ function isProduct(value: unknown): value is Product {
     typeof product.isActive === 'boolean' &&
     typeof product.createdAt === 'string' &&
     typeof product.updatedAt === 'string'
+  )
+}
+
+function isInventoryMovement(value: unknown): value is InventoryMovement {
+  if (typeof value !== 'object' || value === null) return false
+  const movement = value as Record<string, unknown>
+  const createdBy = movement.createdBy
+
+  return (
+    typeof movement.id === 'string' &&
+    ['OPENING_BALANCE', 'MANUAL_IN', 'MANUAL_OUT'].includes(
+      String(movement.type),
+    ) &&
+    typeof movement.quantity === 'string' &&
+    typeof movement.quantityBefore === 'string' &&
+    typeof movement.quantityAfter === 'string' &&
+    isNullableString(movement.note) &&
+    typeof movement.createdAt === 'string' &&
+    typeof createdBy === 'object' &&
+    createdBy !== null &&
+    typeof (createdBy as Record<string, unknown>).id === 'string' &&
+    typeof (createdBy as Record<string, unknown>).firstName === 'string' &&
+    typeof (createdBy as Record<string, unknown>).lastName === 'string'
+  )
+}
+
+function isInventoryAdjustmentResult(
+  value: unknown,
+): value is InventoryAdjustmentResult {
+  if (typeof value !== 'object' || value === null) return false
+  const result = value as Record<string, unknown>
+  const product = result.product
+
+  return (
+    typeof product === 'object' &&
+    product !== null &&
+    typeof (product as Record<string, unknown>).id === 'string' &&
+    typeof (product as Record<string, unknown>).quantityOnHand === 'string' &&
+    isInventoryMovement(result.movement)
   )
 }
 
@@ -228,4 +302,37 @@ export async function archiveProduct(
       accessToken,
     }),
   )
+}
+
+export async function getInventoryMovements(
+  accessToken: string,
+  productId: string,
+  signal?: AbortSignal,
+): Promise<InventoryMovement[]> {
+  const data = await apiRequest<InventoryMovementsData>(
+    `/products/${productId}/inventory-movements`,
+    { accessToken, signal },
+  )
+
+  return Array.isArray(data.movements) &&
+    data.movements.every(isInventoryMovement)
+    ? data.movements
+    : unexpectedResponse()
+}
+
+export async function createInventoryAdjustment(
+  accessToken: string,
+  productId: string,
+  input: InventoryAdjustmentInput,
+): Promise<InventoryAdjustmentResult> {
+  const data = await apiRequest<InventoryAdjustmentResult>(
+    `/products/${productId}/inventory-adjustments`,
+    {
+      method: 'POST',
+      accessToken,
+      body: input,
+    },
+  )
+
+  return isInventoryAdjustmentResult(data) ? data : unexpectedResponse()
 }
