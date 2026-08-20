@@ -5,6 +5,7 @@ import { getAuthenticatedRequestContext } from "../../shared/http/auth-context.j
 import {
   productCreateSchema,
   productIdParamsSchema,
+  productListQuerySchema,
   productUpdateSchema,
 } from "./product.schema.js";
 import {
@@ -86,8 +87,21 @@ export async function retrieveProducts(
   response: Response,
   next: NextFunction,
 ): Promise<void> {
+  const validationResult = productListQuerySchema.safeParse(request.query);
+  if (!validationResult.success) {
+    sendValidationError(
+      response,
+      "Product query is invalid",
+      validationResult.error,
+    );
+    return;
+  }
+
   try {
-    const products = await listProducts(getAuthenticatedRequestContext(request));
+    const products = await listProducts(
+      getAuthenticatedRequestContext(request),
+      validationResult.data,
+    );
     response.status(200).json({ status: "success", data: { products } });
   } catch (error) {
     next(error);

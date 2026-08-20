@@ -4,6 +4,7 @@ import type { AuthenticatedRequestContext } from "../../shared/http/auth-context
 
 import type {
   ProductCreateInput,
+  ProductListQuery,
   ProductUpdateInput,
 } from "./product.schema.js";
 
@@ -88,9 +89,30 @@ async function requireAssignableCategory(
   }
 }
 
-export async function listProducts(auth: AuthenticatedRequestContext) {
+export async function listProducts(
+  auth: AuthenticatedRequestContext,
+  query: ProductListQuery = {},
+) {
   const products = await prisma.product.findMany({
-    where: { companyId: auth.companyId },
+    where: {
+      companyId: auth.companyId,
+      ...(query.search
+        ? {
+            OR: [
+              { sku: { contains: query.search, mode: "insensitive" } },
+              { name: { contains: query.search, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+      ...(query.lowStock
+        ? {
+            isActive: true,
+            quantityOnHand: {
+              lte: prisma.product.fields.reorderLevel,
+            },
+          }
+        : {}),
+    },
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     select: productSelect,
   });

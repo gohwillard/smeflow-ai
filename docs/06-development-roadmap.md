@@ -42,13 +42,14 @@ The current project state is:
 - Phase 3B — Product & Inventory Schema Migration: ✅ Completed
 - Phase 3C — Category & Product Backend: ✅ Completed
 - Phase 3D — Product Frontend: ✅ Completed
-- Phase 3E — Inventory Movement & Manual Adjustment: 🚧 Implemented and
-  Codex-verified; awaiting manual verification
+- Phase 3E — Inventory Movement & Manual Adjustment: ✅ Completed
+- Phase 3F — Product Search & Low Stock: 🚧 Implemented and Codex-verified;
+  awaiting manual verification
 
-Phase 3 is in progress. Phase 3A through Phase 3D are complete. Phase 3E is
+Phase 3 is in progress. Phase 3A through Phase 3E are complete. Phase 3F is
 implemented and its automated, integration, security, and visual verification
 passes, but it awaits user/ChatGPT manual verification before final approval.
-Phase 3F and all later milestones have not started.
+Phase 3G and all later milestones have not started.
 
 ---
 
@@ -397,8 +398,8 @@ was required.
 A new user can register, sign in, access protected pages, and access only data
 belonging to their company.
 
-Phase 2 is complete. Phase 3 has since completed Phase 3A through Phase 3D and
-implemented Phase 3E, which awaits its final manual verification.
+Phase 2 is complete. Phase 3 has since completed Phase 3A through Phase 3E and
+implemented Phase 3F, which awaits its final manual verification.
 
 ---
 
@@ -500,7 +501,7 @@ Phase 3E.
 
 ### Phase 3E — Inventory Movement & Manual Adjustment
 
-**Status:** 🚧 Implemented and Codex-verified; awaiting manual verification
+**Status:** ✅ Completed
 
 - Product-scoped immutable InventoryMovement history with safe creator fields
 - Controlled Opening Balance, Stock In, and Stock Out operations
@@ -517,18 +518,39 @@ The frontend never arbitrarily overwrites stock quantity. Every successful stock
 change is controlled by backend business logic and records exactly one movement.
 All 176 backend tests and 88 frontend tests pass with typecheck, lint, builds,
 Prisma validation/generation/status, security/scope review, and
-1440×1000/390×844 visual review. Manual API/browser verification and
-user/ChatGPT approval remain required before Phase 3F may start.
+1440×1000/390×844 visual review. User/ChatGPT manual API and browser verification
+subsequently passed before Phase 3F started.
 
 ### Phase 3F — Product Search & Low Stock
 
-**Status:** ⬜ Planned
+**Status:** 🚧 Implemented and Codex-verified; awaiting manual verification
 
-- Product search
-- Useful filters
-- Low-stock indicator
-- Reorder-level logic
-- Evidence-based indexes where required
+- Strict optional `search` and literal `lowStock=true` parameters on the existing
+  authenticated Product list endpoint
+- Trimmed case-insensitive substring search over SKU and Product name
+- Company scope derived only from `req.auth.companyId` for search, low stock, and
+  combined queries
+- Database-authoritative exact Decimal rule:
+  `isActive = true AND quantityOnHand <= reorderLevel`
+- Prisma typed field-reference comparison with no raw SQL or JavaScript Number
+  conversion
+- Search and low-stock filters combined with AND semantics while preserving
+  deterministic Product order and the safe response contract
+- Responsive explicit-search and low-stock-only controls with clear/reset and
+  distinct filtered no-result behavior
+- Restrained low-stock inventory indicator separate from Product lifecycle
+- Filter-aware Product list refetch after inventory adjustments and filtered
+  lifecycle changes
+- OWNER/ADMIN management preserved and STAFF discovery kept read-only
+- No new index because the current MVP behavior provides no measured need
+
+All 207 backend tests and 106 frontend tests pass, together with backend
+typecheck/build, frontend ESLint/build, Prisma validation/generation/migration
+status, security/scope review, `git diff --check`, and headless-Chrome review at
+1440×1000 and 390×844. No dependency, schema, migration, pagination, automatic
+reorder, notification, Dashboard, AI, stock-transaction change, or Phase 3G work
+was added. Manual API/browser verification and user/ChatGPT approval remain
+required before Phase 3G may start.
 
 ### Phase 3G — Product & Inventory Verification
 

@@ -130,3 +130,25 @@ client-side exact-decimal validation; and duplicate-submission prevention.
 
 The complete regression suites now contain 176 passing backend tests across 7
 files and 88 passing frontend tests across 4 files.
+
+## Phase 3F Coverage
+
+Phase 3F backend integration tests cover authentication; OWNER, ADMIN, and STAFF
+read access; exact, partial, case-insensitive, and whitespace-normalized SKU and
+Product-name search; empty results; archived normal-search matches; strict and
+unknown query rejection; two-Company isolation; unchanged Product data; normal
+list compatibility; the active low-stock cases below, equal to, and above
+reorder; the approved zero/zero case; archived exclusion; literal
+`lowStock=true` validation; deterministic results; and search plus low stock with
+AND semantics. The low-stock query executes against PostgreSQL using Prisma's
+typed exact-Decimal field reference.
+
+Phase 3F frontend tests cover accessible search and low-stock controls for all
+roles; encoded SKU and Product-name requests; clear/reset behavior; backend
+low-stock enable/disable requests; active, equal, above, zero/zero, and archived
+badge behavior; combined-filter preservation; filtered no-result recovery; and
+filter-aware inventory refetch that removes a Product after Stock In resolves
+its low-stock condition without sending a Product CRUD stock write.
+
+The complete regression suites now contain 207 passing backend tests across 8
+files and 106 passing frontend tests across 5 files.

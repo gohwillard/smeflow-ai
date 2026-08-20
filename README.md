@@ -132,7 +132,8 @@ Dashboard / AI Insights
 - [x] Phase 3B Product and Inventory schema migration complete
 - [x] Phase 3C Category and Product backend complete
 - [x] Phase 3D Product frontend complete
-- [x] Phase 3E Inventory Movement and Manual Adjustment implemented and Codex-verified
+- [x] Phase 3E Inventory Movement and Manual Adjustment complete
+- [x] Phase 3F Product Search and Low Stock implemented and Codex-verified
 - [x] Inventory module implemented
 - [ ] Sales workflow implemented
 - [ ] AI assistant implemented
@@ -173,8 +174,8 @@ table and stacked mobile cards, and all Product/Category archive and reactivate
 actions use a reusable accessible confirmation dialog. Its regression coverage
 remains verified.
 
-Phase 3E — Inventory Movement & Manual Adjustment is implemented and
-Codex-verified, awaiting user/ChatGPT manual verification before final approval.
+Phase 3E — Inventory Movement & Manual Adjustment is complete after
+user/ChatGPT manual API and browser approval.
 Authenticated Product-scoped history is immutable, Company-isolated,
 newest-first, and available to all three roles. OWNER and ADMIN can perform
 controlled Opening Balance, Stock In, and Stock Out operations; STAFF remains
@@ -187,8 +188,23 @@ and populated history states plus an accessible role-aware adjustment dialog.
 All 176 backend tests and 88 frontend tests pass, including real concurrent
 stock-out and forced rollback regressions, together with frontend lint/build,
 backend typecheck/build, Prisma validation/generation/status, and
-1440×1000/390×844 visual review. No schema or migration changed, and Phase 3F
-has not started.
+1440×1000/390×844 visual review. No schema or migration changed.
+
+Phase 3F — Product Search & Low Stock is implemented and Codex-verified,
+awaiting user/ChatGPT manual API and browser verification before final approval.
+The existing authenticated `GET /api/v1/products` endpoint now strictly accepts
+optional `search` and `lowStock=true` query parameters. SKU/name search is
+trimmed, case-insensitive, substring-based, and Company-scoped. Low-stock
+filtering is enforced by PostgreSQL through Prisma's typed column reference as
+`isActive = true AND quantityOnHand <= reorderLevel`, including the approved
+zero/zero case and excluding archived Products. The responsive Product list now
+provides explicit search, clear/reset, a low-stock-only control, distinct
+filtered empty states, and restrained warning badges without replacing Product
+lifecycle status. All 207 backend tests and 106 frontend tests pass, together
+with backend typecheck/build, frontend ESLint/build, Prisma
+validation/generation/migration status, and 1440×1000/390×844 visual review. No
+dependency, schema, migration, pagination, reorder automation, notification,
+Dashboard, AI, or Phase 3G work was added.
 
 ## Local Development
 

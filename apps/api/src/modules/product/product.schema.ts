@@ -50,6 +50,22 @@ export const productIdParamsSchema = z
   })
   .strict();
 
+export const productListQuerySchema = z
+  .object({
+    search: z
+      .string()
+      .trim()
+      .max(200, "Search must be at most 200 characters")
+      .refine(
+        (value) => !/[\u0000-\u001F\u007F]/u.test(value),
+        "Search must not contain control characters",
+      )
+      .transform((value) => value || undefined)
+      .optional(),
+    lowStock: z.literal("true").transform(() => true).optional(),
+  })
+  .strict();
+
 export const productCreateSchema = z
   .object({
     categoryId: z.uuid("Category ID must be a valid UUID").nullable().optional(),
@@ -83,3 +99,4 @@ export const productUpdateSchema = z
 
 export type ProductCreateInput = z.infer<typeof productCreateSchema>;
 export type ProductUpdateInput = z.infer<typeof productUpdateSchema>;
+export type ProductListQuery = z.infer<typeof productListQuerySchema>;

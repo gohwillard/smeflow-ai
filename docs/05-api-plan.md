@@ -256,7 +256,7 @@ returned.
 
 ## Products
 
-Implemented in Phase 3C:
+Implemented in Phase 3C and extended in Phase 3F:
 
 ```text
 GET    /products
@@ -270,8 +270,29 @@ All routes require Bearer authentication and derive Company scope exclusively
 from `req.auth.companyId`. `OWNER`, `ADMIN`, and `STAFF` may list and retrieve.
 Only `OWNER` and `ADMIN` may create, update, or archive; `STAFF` receives HTTP
 403 `FORBIDDEN` for writes. Lists include active and archived records in
-deterministic creation order. Search, filters, pagination, and low-stock queries
-remain deferred.
+deterministic `createdAt ASC, id ASC` order. Phase 3F extends only the existing
+list endpoint with optional `search` and `lowStock=true` query parameters;
+pagination remains deferred.
+
+`search` is trimmed, limited to 200 characters, and treats a blank value as no
+search. It performs a case-insensitive PostgreSQL substring match against SKU or
+Product name. Normal search may return active or archived Products. `lowStock`
+accepts only the literal string `true`; values such as `false`, `1`, `yes`, and
+unknown query parameters return HTTP 400 `VALIDATION_ERROR`.
+
+When `lowStock=true`, PostgreSQL returns only:
+
+```text
+isActive = true AND quantityOnHand <= reorderLevel
+```
+
+Prisma's typed Product field reference compares the two exact `numeric(14,3)`
+columns directly. This includes active Products at equality and the valid
+`0.000 <= 0.000` case, while excluding archived Products. `search` and
+`lowStock=true` combine with AND semantics. Every variant remains scoped only by
+the authenticated `req.auth.companyId`; clients cannot supply `companyId`.
+The safe Product response contract is unchanged and does not duplicate a derived
+low-stock field.
 
 Create accepts only `categoryId` (optional UUID or `null`), `sku`, `name`,
 `description` (optional string or `null`), `unit`, `costPrice`, `sellingPrice`,

@@ -51,6 +51,11 @@ export type ProductUpdateInput = Partial<
   ProductCreateInput & { isActive: boolean }
 >
 
+export type ProductListFilters = {
+  search?: string
+  lowStock?: true
+}
+
 export type InventoryMovementType =
   | 'OPENING_BALANCE'
   | 'MANUAL_IN'
@@ -240,9 +245,15 @@ export async function archiveCategory(
 
 export async function getProducts(
   accessToken: string,
+  filters: ProductListFilters = {},
   signal?: AbortSignal,
 ): Promise<Product[]> {
-  const data = await apiRequest<ProductsData>('/products', {
+  const query = new URLSearchParams()
+  if (filters.search) query.set('search', filters.search)
+  if (filters.lowStock) query.set('lowStock', 'true')
+  const path = `/products${query.size > 0 ? `?${query.toString()}` : ''}`
+
+  const data = await apiRequest<ProductsData>(path, {
     accessToken,
     signal,
   })

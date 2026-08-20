@@ -25,7 +25,9 @@ the expression index and check constraints that Prisma Schema Language cannot
 represent. Phase 3C consumes this approved schema through authenticated,
 tenant-scoped Category and Product APIs. Phase 3E now consumes the existing
 movement model through Product-scoped history and transactional manual-adjustment
-operations. Neither milestone changed the Prisma schema or migrations.
+operations. Phase 3F consumes the existing Product columns through authenticated
+SKU/name search and a database-authoritative low-stock comparison. None of these
+milestones changed the Prisma schema or migrations.
 
 Models assigned to later roadmap phases remain planning context only. Their
 fields, relationships, constraints, and indexes must be designed in their own
@@ -256,14 +258,17 @@ sensible bounded input length and reject blank or control-character-only values,
 but Phase 3A does not introduce a `UnitOfMeasure` table, conversion rules, base
 units, or separate purchase and sales units.
 
-The future Phase 3F low-stock rule is:
+The implemented Phase 3F low-stock rule is:
 
 ```text
 isActive = true AND quantityOnHand <= reorderLevel
 ```
 
-`reorderLevel = 0` is valid. No low-stock query or search-specific index is part
-of Phase 3A.
+`reorderLevel = 0` is valid. Phase 3F expresses the exact column-to-column
+comparison through Prisma's typed Product field reference, so PostgreSQL compares
+the two `numeric(14,3)` values directly. The current MVP dataset and simple
+substring behavior did not provide evidence for a new search or low-stock index,
+so Phase 3F added none.
 
 ### `InventoryMovement`
 
@@ -449,8 +454,9 @@ patterns:
 - User: retain the existing `companyId` index and add only the tenant-aware
   `(id, companyId)` candidate key required by the movement foreign key.
 
-Broad Product search and low-stock expression indexes are deferred to Phase 3F
-and must be based on implemented query behavior. No index is added merely
+Broad Product search and low-stock expression indexes were reviewed in Phase 3F.
+The implemented MVP queries do not yet justify an additional index; future
+indexing must be based on measured query behavior. No index is added merely
 because a field exists.
 
 ### Phase 3B Constraints
