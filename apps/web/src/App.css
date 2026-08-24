@@ -1051,6 +1051,55 @@ a:hover {
   justify-content: flex-start;
 }
 
+.party-table {
+  table-layout: fixed;
+}
+
+.party-table th,
+.party-table td {
+  white-space: normal;
+}
+
+.party-table th:first-child,
+.party-table td:first-child {
+  width: 20%;
+}
+
+.party-table th:nth-child(2),
+.party-table td:nth-child(2) {
+  width: 15%;
+}
+
+.party-table th:nth-child(3),
+.party-table td:nth-child(3) {
+  width: 18%;
+}
+
+.party-table th:nth-child(4),
+.party-table td:nth-child(4) {
+  width: 13%;
+}
+
+.party-table th:nth-child(5),
+.party-table td:nth-child(5) {
+  width: 10%;
+}
+
+.party-table th:last-child,
+.party-table td:last-child {
+  width: 24%;
+}
+
+.party-table__wrap,
+.party-detail-grid dd {
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+}
+
+.party-table__actions {
+  justify-content: flex-start;
+}
+
 .product-link {
   display: block;
   color: #164f48;
@@ -1514,36 +1563,45 @@ a:hover {
     align-self: flex-start;
   }
 
-  .product-table-card {
+  .product-table-card,
+  .party-table-card {
     overflow: visible;
     border: 0;
     background: transparent;
     box-shadow: none;
   }
 
-  .product-table-card .table-scroll {
+  .product-table-card .table-scroll,
+  .party-table-card .table-scroll {
     overflow: visible;
   }
 
   .product-table,
   .product-table tbody,
   .product-table tr,
-  .product-table td {
+  .product-table td,
+  .party-table,
+  .party-table tbody,
+  .party-table tr,
+  .party-table td {
     display: block;
     width: 100%;
   }
 
   .product-table colgroup,
-  .product-table thead {
+  .product-table thead,
+  .party-table thead {
     display: none;
   }
 
-  .product-table tbody {
+  .product-table tbody,
+  .party-table tbody {
     display: grid;
     gap: 1rem;
   }
 
-  .product-table tr {
+  .product-table tr,
+  .party-table tr {
     overflow: hidden;
     border: 1px solid #d5e3df;
     border-radius: 1rem;
@@ -1551,8 +1609,10 @@ a:hover {
     box-shadow: 0 1rem 2.5rem rgba(20, 57, 62, 0.07);
   }
 
-  .product-table.data-table tbody tr td {
+  .product-table.data-table tbody tr td,
+  .party-table.data-table tbody tr td {
     display: grid;
+    width: 100%;
     grid-template-columns: minmax(6.6rem, 0.42fr) minmax(0, 1fr);
     align-items: center;
     gap: 1rem;
@@ -1561,7 +1621,8 @@ a:hover {
     white-space: normal;
   }
 
-  .product-table td::before {
+  .product-table td::before,
+  .party-table td::before {
     content: attr(data-label);
     color: #708283;
     font-size: 0.7rem;
@@ -1570,16 +1631,19 @@ a:hover {
     text-transform: uppercase;
   }
 
-  .product-table td:first-child {
+  .product-table td:first-child,
+  .party-table td:first-child {
     padding-top: 1rem;
   }
 
-  .product-table.data-table tbody tr td:last-child {
+  .product-table.data-table tbody tr td:last-child,
+  .party-table.data-table tbody tr td:last-child {
     padding-bottom: 1rem;
     border-bottom: 0;
   }
 
-  .product-table__actions {
+  .product-table__actions,
+  .party-table__actions {
     width: auto;
     min-width: 0;
     margin-left: 0;
@@ -1588,7 +1652,8 @@ a:hover {
     row-gap: 0.7rem;
   }
 
-  .product-table td .status-badge {
+  .product-table td .status-badge,
+  .party-table td .status-badge {
     justify-self: start;
   }
 

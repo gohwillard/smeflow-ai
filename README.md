@@ -140,7 +140,9 @@ Dashboard / AI Insights
 - [x] Phase 4 Customers and Suppliers officially started
 - [x] Phase 4A Customer and Supplier domain design approved
 - [x] Phase 4B Customer and Supplier schema migration complete
-- [ ] Phase 4C Customer and Supplier backend implemented and awaiting manual approval
+- [x] Phase 4C Customer and Supplier backend complete
+- [ ] Phase 4D Customer and Supplier frontend implemented and awaiting manual browser approval
+- [ ] Phase 4E Customer and Supplier search and filtering not started
 - [ ] Sales workflow implemented
 - [ ] AI assistant implemented
 - [ ] Production deployment completed
@@ -230,16 +232,25 @@ review at 1440×1000, 430×932, and 390×844. No application defect, dependency,
 schema, migration, or new business feature was introduced during verification.
 
 Phase 4 — Customers and Suppliers is current. Phase 4A — Customer & Supplier
-Domain Design is complete and approved. Phase 4B — Customer & Supplier Schema
-Migration is complete. Phase 4C — Customer & Supplier Backend is implemented and
-Codex-verified, awaiting manual API/database approval. Authenticated list,
-detail, create, partial-update, idempotent archive, and explicit reactivation
-routes enforce strict normalization, safe response selection, OWNER/ADMIN
-writes, STAFF reads, and database-validated Company scope. All 316 backend tests
-across 10 files pass, together with backend typecheck/build and Prisma
-validation/generation/migration status. Exactly three migrations remain and the
-schema is up to date. No frontend, search, pagination, Purchasing, Sales,
-Dashboard, or AI work was added; Phase 4D and Phase 5 have not started.
+Domain Design, Phase 4B — Customer & Supplier Schema Migration, and Phase 4C —
+Customer & Supplier Backend are complete and approved. The authenticated Phase
+4C APIs enforce strict normalization, safe response selection, OWNER/ADMIN
+writes, STAFF reads, tenant-local not-found behavior, and database-validated
+Company scope. Their 316 backend tests across 10 files remain the approved
+backend baseline.
+
+Phase 4D — Customer & Supplier Frontend is current, implemented, and
+Codex-verified, awaiting manual browser approval. Protected Customer and
+Supplier list, create, detail, and edit routes use typed native-fetch helpers,
+backend-authoritative archive/reactivate responses, accessible custom
+confirmation dialogs, OWNER/ADMIN controls, STAFF read-only presentation, and
+responsive desktop-table/mobile-card layouts. Optional-field clearing sends
+`null`; ordinary edit PATCH requests are diff-only and never include lifecycle
+or Company scope. All 138 frontend tests across 7 files pass, including 32
+focused Phase 4D tests, together with frontend lint and the TypeScript-backed
+production build. No dependency, backend, Prisma schema, migration,
+search/filter, pagination, transaction-history, Purchasing, Sales, Dashboard,
+or AI work was added. Phase 4E, Phase 4F, and Phase 5 have not started.
 
 ## Local Development
 

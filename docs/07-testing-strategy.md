@@ -217,3 +217,23 @@ The complete backend regression suite contains 316 passing tests across 10 test
 files. Phase 4C also passes backend typecheck/build and Prisma validation,
 generation, and migration status with exactly three migrations. Frontend tests
 were not run because Phase 4C changes no frontend code or contract.
+
+## Phase 4D Coverage
+
+Phase 4D adds 32 Customer and Supplier frontend tests across two independent
+files. Both modules cover protected list/create/detail/edit routes; loading,
+empty, error, and tenant-safe not-found states; active and archived records;
+responsive table-to-card labels; OWNER and ADMIN management controls; STAFF
+read-only list, detail, empty-state, and direct-form behavior; accessible form
+fields and required-name validation; backend field-error mapping; safe create
+payloads without `companyId` or lifecycle fields; authoritative detail reloads;
+diff-only edit requests; optional-field clearing through `null`; archived-record
+editing without implicit reactivation; custom archive/reactivate dialogs;
+destructive versus positive styling; DELETE archive requests; and reactivation
+PATCH requests containing only `{ isActive: true }`.
+
+The complete frontend regression suite contains 138 passing tests across 7 test
+files. Frontend lint and the TypeScript-backed production build pass. Responsive
+markup and CSS are implemented for desktop tables and narrow-screen stacked
+cards; manual browser verification at desktop, 430×932, and 390×844 remains
+required before Phase 4D approval.

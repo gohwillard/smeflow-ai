@@ -651,7 +651,7 @@ checks passed. Phase 4B received manual approval before Phase 4C began.
 
 ### Phase 4C — Customer & Supplier Backend
 
-**Status:** 🚧 Current
+**Status:** ✅ Completed
 
 - authenticated Customer list, detail, create, update, archive, and reactivate
   APIs;
@@ -668,15 +668,15 @@ checks passed. Phase 4B received manual approval before Phase 4C began.
 This milestone is backend only. It does not implement Customer or Supplier
 frontend work, search, pagination, Purchasing, Sales, Dashboard, or AI.
 
-The backend implementation is Codex-verified and awaits manual API/database
-approval. All 316 backend tests across 10 files pass, including 109 focused
-Customer/Supplier tests. Backend typecheck/build, Prisma validation/generation,
-and migration status also pass; exactly three migrations remain and the schema
-is up to date.
+The backend implementation passed Codex verification and the subsequent manual
+API/database approval. All 316 backend tests across 10 files pass, including 109
+focused Customer/Supplier tests. Backend typecheck/build, Prisma
+validation/generation, and migration status also pass; exactly three migrations
+remain and the schema is up to date.
 
 ### Phase 4D — Customer & Supplier Frontend
 
-**Status:** ⬜ Planned
+**Status:** 🚧 Current
 
 - Customer and Supplier lists and details;
 - create and edit forms;
@@ -685,6 +685,18 @@ is up to date.
 - loading, empty, error, and submission states;
 - responsive and accessible presentation; and
 - focused frontend tests.
+
+The frontend implementation is Codex-verified and awaits required manual
+browser approval. Protected Customer and Supplier list/create/detail/edit
+routes use the established memory-only authentication and native-fetch layers.
+OWNER and ADMIN receive create, edit, archive, and reactivate controls; STAFF is
+read-only. Optional fields can be cleared to `null`, ordinary edit requests are
+diff-only and lifecycle-neutral, lifecycle dialogs reuse the approved
+accessible confirmation component, and lists use desktop tables that become
+stacked mobile cards. All 138 frontend tests across 7 files pass, including 32
+focused Phase 4D tests, together with frontend lint and production build. No
+dependency, backend, schema, migration, list query parameter, search/filter,
+pagination, Phase 4F, Phase 5, or AI work was added.
 
 ### Phase 4E — Customer & Supplier Search and Filtering
 
