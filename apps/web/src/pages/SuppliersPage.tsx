@@ -12,6 +12,7 @@ import {
 import { ConfirmationDialog } from '../components/ConfirmationDialog'
 import { LifecycleBadge } from '../components/LifecycleBadge'
 import { LoadingScreen } from '../components/LoadingScreen'
+import { StatusFilter } from '../components/StatusFilter'
 import { useAuth } from '../features/auth/auth-context'
 
 export function SuppliersPage() {
@@ -209,21 +210,11 @@ export function SuppliersPage() {
             )}
           </div>
         </form>
-        <label className="party-status-filter" htmlFor="supplier-status-filter">
-          Lifecycle status
-          <select
-            disabled={suppliersLoading}
-            id="supplier-status-filter"
-            onChange={(event) =>
-              setStatusFilter(event.target.value as PartnerLifecycleStatus | '')
-            }
-            value={statusFilter}
-          >
-            <option value="">All</option>
-            <option value="active">Active</option>
-            <option value="archived">Archived</option>
-          </select>
-        </label>
+        <StatusFilter
+          disabled={suppliersLoading}
+          onChange={setStatusFilter}
+          value={statusFilter}
+        />
       </div>
 
       {suppliersLoading && suppliers && (

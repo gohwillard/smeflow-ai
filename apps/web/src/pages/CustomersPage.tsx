@@ -12,6 +12,7 @@ import { ApiError } from '../api/client'
 import { ConfirmationDialog } from '../components/ConfirmationDialog'
 import { LifecycleBadge } from '../components/LifecycleBadge'
 import { LoadingScreen } from '../components/LoadingScreen'
+import { StatusFilter } from '../components/StatusFilter'
 import { useAuth } from '../features/auth/auth-context'
 
 export function CustomersPage() {
@@ -209,21 +210,11 @@ export function CustomersPage() {
             )}
           </div>
         </form>
-        <label className="party-status-filter" htmlFor="customer-status-filter">
-          Lifecycle status
-          <select
-            disabled={customersLoading}
-            id="customer-status-filter"
-            onChange={(event) =>
-              setStatusFilter(event.target.value as PartnerLifecycleStatus | '')
-            }
-            value={statusFilter}
-          >
-            <option value="">All</option>
-            <option value="active">Active</option>
-            <option value="archived">Archived</option>
-          </select>
-        </label>
+        <StatusFilter
+          disabled={customersLoading}
+          onChange={setStatusFilter}
+          value={statusFilter}
+        />
       </div>
 
       {customersLoading && customers && (

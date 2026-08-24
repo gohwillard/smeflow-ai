@@ -53,6 +53,20 @@ function expectNoCompanyId(url: unknown) {
   expect(String(url)).not.toContain('companyId')
 }
 
+function getStatusFilter() {
+  return screen.getByRole('combobox', { name: 'Status' })
+}
+
+function openStatusFilter() {
+  const filter = getStatusFilter()
+  if (filter.getAttribute('aria-expanded') !== 'true') fireEvent.click(filter)
+  return screen.getByRole('listbox', { name: 'Status' })
+}
+
+function chooseStatus(label: 'All' | 'Active' | 'Archived') {
+  fireEvent.click(within(openStatusFilter()).getByRole('option', { name: label }))
+}
+
 describe('Phase 4E Customer search and lifecycle filters', () => {
   it.each(['OWNER', 'ADMIN', 'STAFF'] as const)(
     'renders accessible Customer discovery controls for %s',
@@ -69,10 +83,57 @@ describe('Phase 4E Customer search and lifecycle filters', () => {
           'Search by name, registration number, contact person, email, or phone',
         ),
       ).toBeTruthy()
-      expect(screen.getByLabelText('Lifecycle status')).toBeTruthy()
+      expect(getStatusFilter().textContent).toContain('All')
+      expect(screen.queryByText('Lifecycle status')).toBeNull()
       if (role === 'STAFF') expect(screen.getByText('Read only')).toBeTruthy()
     },
   )
+
+  it('uses the shared custom Status menu with options, selection, and keyboard support', async () => {
+    const fetchMock = await renderAuthenticatedPath('/customers', [
+      success({ customers: [activeCustomer] }),
+    ])
+    await screen.findByText('Alice Hardware')
+    fetchMock.mockResolvedValueOnce(success({ customers: [activeCustomer] }))
+    const filter = getStatusFilter()
+
+    filter.focus()
+    fireEvent.keyDown(filter, { key: 'ArrowDown' })
+    const listbox = screen.getByRole('listbox', { name: 'Status' })
+    expect(listbox.className).toBe('form-combobox__options')
+    expect(within(listbox).getAllByRole('option').map((option) => option.textContent))
+      .toEqual(['All✓', 'Active', 'Archived'])
+    expect(
+      within(listbox).getByRole('option', { name: 'All' }).getAttribute(
+        'aria-selected',
+      ),
+    ).toBe('true')
+
+    fireEvent.keyDown(filter, { key: 'ArrowDown' })
+    fireEvent.keyDown(filter, { key: 'Enter' })
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4))
+    expect(filter.textContent).toContain('Active')
+    expect(document.activeElement).toBe(filter)
+    expect(screen.queryByRole('listbox', { name: 'Status' })).toBeNull()
+  })
+
+  it('closes the shared Status menu with Escape or an outside pointer', async () => {
+    await renderAuthenticatedPath('/customers', [
+      success({ customers: [activeCustomer] }),
+    ])
+    await screen.findByText('Alice Hardware')
+    const filter = getStatusFilter()
+
+    fireEvent.keyDown(filter, { key: 'Enter' })
+    expect(screen.getByRole('listbox', { name: 'Status' })).toBeTruthy()
+    fireEvent.keyDown(filter, { key: 'Escape' })
+    expect(screen.queryByRole('listbox', { name: 'Status' })).toBeNull()
+
+    fireEvent.keyDown(filter, { key: ' ' })
+    expect(screen.getByRole('listbox', { name: 'Status' })).toBeTruthy()
+    fireEvent.pointerDown(document.body)
+    expect(screen.queryByRole('listbox', { name: 'Status' })).toBeNull()
+  })
 
   it('submits a trimmed, encoded Customer search without Company scope', async () => {
     const fetchMock = await renderAuthenticatedPath('/customers', [
@@ -96,22 +157,20 @@ describe('Phase 4E Customer search and lifecycle filters', () => {
   it.each([
     ['Active', 'active'],
     ['Archived', 'archived'],
-  ])('sends the Customer %s lifecycle filter as status=%s', async (_label, status) => {
+  ])('sends the Customer %s lifecycle filter as status=%s', async (label, status) => {
     const fetchMock = await renderAuthenticatedPath('/customers', [
       success({ customers: [activeCustomer, archivedCustomer] }),
     ])
     await screen.findByText('Alice Hardware')
     fetchMock.mockResolvedValueOnce(success({ customers: [] }))
 
-    fireEvent.change(screen.getByLabelText('Lifecycle status'), {
-      target: { value: status },
-    })
+    chooseStatus(label as 'Active' | 'Archived')
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4))
     expect(fetchMock.mock.calls[3]?.[0]).toMatch(
       new RegExp(`/customers\\?status=${status}$`),
     )
-    expect(screen.getByLabelText('Lifecycle status')).toHaveProperty('value', status)
+    expect(getStatusFilter().textContent).toContain(label)
   })
 
   it('maps Customer All to an omitted status query', async () => {
@@ -125,13 +184,9 @@ describe('Phase 4E Customer search and lifecycle filters', () => {
         success({ customers: [activeCustomer, archivedCustomer] }),
       )
 
-    fireEvent.change(screen.getByLabelText('Lifecycle status'), {
-      target: { value: 'active' },
-    })
+    chooseStatus('Active')
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4))
-    fireEvent.change(screen.getByLabelText('Lifecycle status'), {
-      target: { value: '' },
-    })
+    chooseStatus('All')
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(5))
     expect(fetchMock.mock.calls[4]?.[0]).toMatch(/\/customers$/)
@@ -147,9 +202,7 @@ describe('Phase 4E Customer search and lifecycle filters', () => {
       .mockResolvedValueOnce(success({ customers: [activeCustomer] }))
       .mockResolvedValueOnce(success({ customers: [activeCustomer] }))
 
-    fireEvent.change(screen.getByLabelText('Lifecycle status'), {
-      target: { value: 'active' },
-    })
+    chooseStatus('Active')
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4))
     fireEvent.change(screen.getByLabelText('Search Customers'), {
       target: { value: 'alice' },
@@ -179,9 +232,7 @@ describe('Phase 4E Customer search and lifecycle filters', () => {
         success({ customers: [activeCustomer, archivedCustomer] }),
       )
 
-    fireEvent.change(screen.getByLabelText('Lifecycle status'), {
-      target: { value: 'active' },
-    })
+    chooseStatus('Active')
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4))
     fireEvent.change(screen.getByLabelText('Search Customers'), {
       target: { value: 'missing' },
@@ -196,7 +247,7 @@ describe('Phase 4E Customer search and lifecycle filters', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Clear all filters' }))
     await screen.findByText('Archived Alice')
     expect(screen.getByLabelText('Search Customers')).toHaveProperty('value', '')
-    expect(screen.getByLabelText('Lifecycle status')).toHaveProperty('value', '')
+    expect(getStatusFilter().textContent).toContain('All')
     expect(fetchMock.mock.calls[5]?.[0]).toMatch(/\/customers$/)
   })
 
@@ -208,9 +259,7 @@ describe('Phase 4E Customer search and lifecycle filters', () => {
     )
     await screen.findByText('Alice Hardware')
     fetchMock.mockResolvedValueOnce(success({ customers: [activeCustomer] }))
-    fireEvent.change(screen.getByLabelText('Lifecycle status'), {
-      target: { value: 'active' },
-    })
+    chooseStatus('Active')
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4))
     expect(fetchMock.mock.calls[3]?.[0]).toMatch(/\/customers\?status=active$/)
     expect(screen.queryByRole('button', { name: 'Archive' })).toBeNull()
@@ -228,9 +277,7 @@ describe('Phase 4E Customer search and lifecycle filters', () => {
       )
       .mockResolvedValueOnce(success({ customers: [] }))
 
-    fireEvent.change(screen.getByLabelText('Lifecycle status'), {
-      target: { value: 'active' },
-    })
+    chooseStatus('Active')
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4))
     fireEvent.click(screen.getByRole('button', { name: 'Archive' }))
     const dialog = screen.getByRole('dialog', { name: 'Archive Customer?' })
@@ -258,7 +305,8 @@ describe('Phase 4E Supplier search and lifecycle filters', () => {
       )
 
       expect(await screen.findByLabelText('Search Suppliers')).toBeTruthy()
-      expect(screen.getByLabelText('Lifecycle status')).toBeTruthy()
+      expect(getStatusFilter().textContent).toContain('All')
+      expect(screen.queryByText('Lifecycle status')).toBeNull()
       if (role === 'STAFF') expect(screen.getByText('Read only')).toBeTruthy()
     },
   )
@@ -285,15 +333,13 @@ describe('Phase 4E Supplier search and lifecycle filters', () => {
   it.each([
     ['Active', 'active'],
     ['Archived', 'archived'],
-  ])('sends the Supplier %s lifecycle filter as status=%s', async (_label, status) => {
+  ])('sends the Supplier %s lifecycle filter as status=%s', async (label, status) => {
     const fetchMock = await renderAuthenticatedPath('/suppliers', [
       success({ suppliers: [activeSupplier, archivedSupplier] }),
     ])
     await screen.findByText('Alpha Industrial')
     fetchMock.mockResolvedValueOnce(success({ suppliers: [] }))
-    fireEvent.change(screen.getByLabelText('Lifecycle status'), {
-      target: { value: status },
-    })
+    chooseStatus(label as 'Active' | 'Archived')
 
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4))
     expect(fetchMock.mock.calls[3]?.[0]).toMatch(
@@ -311,13 +357,9 @@ describe('Phase 4E Supplier search and lifecycle filters', () => {
       .mockResolvedValueOnce(
         success({ suppliers: [activeSupplier, archivedSupplier] }),
       )
-    fireEvent.change(screen.getByLabelText('Lifecycle status'), {
-      target: { value: 'active' },
-    })
+    chooseStatus('Active')
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4))
-    fireEvent.change(screen.getByLabelText('Lifecycle status'), {
-      target: { value: '' },
-    })
+    chooseStatus('All')
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(5))
     expect(fetchMock.mock.calls[4]?.[0]).toMatch(/\/suppliers$/)
   })
@@ -331,9 +373,7 @@ describe('Phase 4E Supplier search and lifecycle filters', () => {
       .mockResolvedValueOnce(success({ suppliers: [activeSupplier] }))
       .mockResolvedValueOnce(success({ suppliers: [activeSupplier] }))
       .mockResolvedValueOnce(success({ suppliers: [activeSupplier] }))
-    fireEvent.change(screen.getByLabelText('Lifecycle status'), {
-      target: { value: 'active' },
-    })
+    chooseStatus('Active')
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4))
     fireEvent.change(screen.getByLabelText('Search Suppliers'), {
       target: { value: 'alpha' },
@@ -362,9 +402,7 @@ describe('Phase 4E Supplier search and lifecycle filters', () => {
       .mockResolvedValueOnce(
         success({ suppliers: [activeSupplier, archivedSupplier] }),
       )
-    fireEvent.change(screen.getByLabelText('Lifecycle status'), {
-      target: { value: 'archived' },
-    })
+    chooseStatus('Archived')
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4))
     fireEvent.change(screen.getByLabelText('Search Suppliers'), {
       target: { value: 'missing' },
@@ -389,9 +427,7 @@ describe('Phase 4E Supplier search and lifecycle filters', () => {
     )
     await screen.findByText('Alpha Industrial')
     fetchMock.mockResolvedValueOnce(success({ suppliers: [activeSupplier] }))
-    fireEvent.change(screen.getByLabelText('Lifecycle status'), {
-      target: { value: 'active' },
-    })
+    chooseStatus('Active')
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4))
     expect(fetchMock.mock.calls[3]?.[0]).toMatch(/\/suppliers\?status=active$/)
     expect(screen.queryByRole('button', { name: 'Archive' })).toBeNull()
@@ -409,9 +445,7 @@ describe('Phase 4E Supplier search and lifecycle filters', () => {
       )
       .mockResolvedValueOnce(success({ suppliers: [] }))
 
-    fireEvent.change(screen.getByLabelText('Lifecycle status'), {
-      target: { value: 'archived' },
-    })
+    chooseStatus('Archived')
     await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4))
     fireEvent.click(screen.getByRole('button', { name: 'Reactivate' }))
     const dialog = screen.getByRole('dialog', { name: 'Reactivate Supplier?' })

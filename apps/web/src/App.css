@@ -952,8 +952,7 @@ a:hover {
   box-shadow: 0 0 0 0.22rem rgba(23, 131, 110, 0.13);
 }
 
-.party-search input:focus,
-.party-status-filter select:focus {
+.party-search input:focus {
   border-color: #17836e;
   box-shadow: 0 0 0 0.22rem rgba(23, 131, 110, 0.13);
 }
@@ -964,8 +963,7 @@ a:hover {
   cursor: not-allowed;
 }
 
-.party-search input:disabled,
-.party-status-filter select:disabled {
+.party-search input:disabled {
   color: #667c7e;
   background: #eef3f1;
   cursor: not-allowed;
@@ -979,15 +977,8 @@ a:hover {
   font-weight: 700;
 }
 
-.party-status-filter select {
+.party-status-filter .form-combobox {
   min-width: 12rem;
-  min-height: 3rem;
-  padding: 0.72rem 2.25rem 0.72rem 0.85rem;
-  border: 1px solid #b9ccc7;
-  border-radius: 0.65rem;
-  color: #17383c;
-  background: #ffffff;
-  outline: none;
 }
 
 .low-stock-filter {
@@ -1648,7 +1639,7 @@ a:hover {
   .product-search__controls .button,
   .party-search input,
   .party-search__controls .button,
-  .party-status-filter select {
+  .party-status-filter .form-combobox {
     width: 100%;
   }
 
