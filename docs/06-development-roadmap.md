@@ -50,16 +50,16 @@ The current project state is:
 - Phase 4B — Customer & Supplier Schema Migration: ✅ Completed
 - Phase 4C — Customer & Supplier Backend: ✅ Completed
 - Phase 4D — Customer & Supplier Frontend: ✅ Completed
-- Phase 4E — Customer & Supplier Search and Filtering: 🚧 Current
-- Phase 4F — Related Transaction History Foundation: ⬜ Planned
+- Phase 4E — Customer & Supplier Search and Filtering: ✅ Completed
+- Phase 4F — Related Transaction History Foundation: 🚧 Current
 - Phase 4G — Phase 4 Verification: ⬜ Planned
 
 Phase 3 is complete following its final acceptance. Phase 4A received manual
 approval and is complete. Phase 4B received manual approval and is complete.
 Phase 4C is complete after manual API/database approval, and Phase 4D is
-complete after manual browser approval. Phase 4E is implemented and
-Codex-verified, awaiting manual browser/API approval. Phase 4F and later
-milestones have not started.
+complete after manual browser approval. Phase 4E received manual browser/API
+approval and is complete. Phase 4F is implemented and Codex-verified, awaiting
+manual browser approval. Phase 4G and later milestones have not started.
 
 ---
 
@@ -606,7 +606,7 @@ low-stock items.
 
 ## Phase 4 — Customers and Suppliers
 
-**Status:** ✅ Completed
+**Status:** 🚧 Current
 
 **Goal:** Create the external-party master data required for purchasing and
 sales.
@@ -682,7 +682,7 @@ remain and the schema is up to date.
 
 ### Phase 4D — Customer & Supplier Frontend
 
-**Status:** 🚧 Current
+**Status:** ✅ Completed
 
 - Customer and Supplier lists and details;
 - create and edit forms;
@@ -707,14 +707,14 @@ pagination, Phase 4F, Phase 5, or AI work was added.
 
 ### Phase 4E — Customer & Supplier Search and Filtering
 
-**Status:** 🚧 Current
+**Status:** ✅ Completed
 
 Add strictly validated, Company-scoped Customer and Supplier search/filter
 contracts and their corresponding frontend controls. Do not add pagination or
 specialized database indexing without an approved contract and supporting
 evidence.
 
-The implementation is Codex-verified and awaits manual browser/API approval.
+The implementation received manual browser/API approval and is complete.
 Both existing list endpoints accept only optional trimmed `search` and
 `status=active|archived`; omission of status includes both lifecycle states.
 Search is a case-insensitive PostgreSQL substring match across exactly name,
@@ -734,10 +734,30 @@ index, Phase 4F, Phase 5, or AI work was added.
 
 ### Phase 4F — Related Transaction History Foundation
 
-**Status:** ⬜ Planned
+**Status:** 🚧 Current
 
 Prepare customer and supplier detail structures for future transaction history.
 Do not invent or prematurely implement purchasing or sales records.
+
+The implementation adds one restrained, read-only Transaction History section
+to each existing Customer and Supplier detail page. It tells all authenticated
+roles that Customer history will appear with Sales workflows and Supplier
+history will appear with Purchasing workflows. These sections use only the
+already authorized detail response: no history API, fake record, counter,
+metric, disabled future action, or generic Transaction abstraction exists.
+
+The documented foundation preserves the existing tenant-aware
+`(id, companyId)` Customer/Supplier candidate keys for future composite foreign
+keys, requires active same-Company parties for new future documents, retains
+archived parties for existing historical references, and requires later
+transaction domains to snapshot mutable party details where historical accuracy
+needs it. The Prisma schema and all three migrations remain unchanged.
+
+Six focused role cases were added to the existing Customer/Supplier frontend
+test files. All 171 frontend tests across 8 files pass, together with frontend
+lint/build and Prisma validation/generation/migration status. Phase 4F is
+implemented and Codex-verified, awaiting manual review at desktop, 430×932, and
+390×844. Phase 4G has not started.
 
 ### Phase 4G — Phase 4 Verification
 

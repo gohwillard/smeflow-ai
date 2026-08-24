@@ -243,6 +243,18 @@ export function CustomerDetailsPage() {
             </dl>
           </article>
 
+          <section
+            className="management-card future-history"
+            aria-labelledby="customer-transaction-history-heading"
+          >
+            <p className="card-label">Future sales records</p>
+            <h2 id="customer-transaction-history-heading">Transaction History</h2>
+            <p>
+              Customer transaction history will appear here when Sales workflows
+              are available.
+            </p>
+          </section>
+
           {isLifecycleDialogOpen && (
             <ConfirmationDialog
               confirmLabel={

@@ -266,5 +266,24 @@ files and 163 passing frontend tests across 8 files. Backend typecheck/build,
 frontend lint/build, Prisma validation/generation/migration status, and
 repository hygiene checks pass. Responsive source review confirms the discovery
 controls use the existing desktop grid and stack vertically at the established
-52rem and 36rem breakpoints; final manual Phase 4E browser review at desktop,
-430×932, and 390×844 remains required for approval.
+52rem and 36rem breakpoints. The subsequent manual browser/API review approved
+Phase 4E without further application, schema, migration, or dependency changes.
+
+## Phase 4F Coverage
+
+Phase 4F frontend tests verify that `OWNER`, `ADMIN`, and `STAFF` all see the
+truthful read-only Transaction History foundation on both Customer and Supplier
+detail pages. They assert the workflow-specific future-state wording and prove
+that each page makes only its existing detail request rather than calling a
+fake history endpoint. The complete frontend suite must remain green, together
+with lint and the TypeScript-backed production build. Backend application tests
+are not added for non-existent transaction APIs. At Phase 4F Codex verification,
+all 171 frontend tests across 8 files pass, together with frontend lint and the
+production build.
+
+When Purchasing and Sales are implemented, their own integration tests must
+prove that Company A documents cannot reference Company B parties, archived
+parties cannot be selected for new documents, existing documents remain readable
+after later party archival, master-data edits do not rewrite stored snapshots,
+referenced parties cannot be physically deleted, and `STAFF` history access
+follows the approved read-only role policy.

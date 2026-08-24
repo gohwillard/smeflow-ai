@@ -246,6 +246,30 @@ describe('Phase 4D Customer create and edit', () => {
 })
 
 describe('Phase 4D Customer detail and lifecycle', () => {
+  it.each(['OWNER', 'ADMIN', 'STAFF'] as const)(
+    'shows the truthful Phase 4F history foundation to %s without requesting a history API',
+    async (role) => {
+      const fetchMock = await renderAuthenticatedPath(
+        `/customers/${activeCustomer.id}`,
+        [success({ customer: activeCustomer })],
+        role,
+      )
+
+      expect(
+        await screen.findByRole('heading', { name: 'Transaction History' }),
+      ).toBeTruthy()
+      expect(
+        screen.getByText(
+          'Customer transaction history will appear here when Sales workflows are available.',
+        ),
+      ).toBeTruthy()
+      expect(fetchMock).toHaveBeenCalledTimes(3)
+      expect(fetchMock.mock.calls[2]?.[0]).toMatch(
+        /\/customers\/customer-active$/,
+      )
+    },
+  )
+
   it('shows all detail fields, null placeholders, archived status, and safe not-found UX', async () => {
     await renderAuthenticatedPath(`/customers/${archivedCustomer.id}`, [
       success({ customer: archivedCustomer }),

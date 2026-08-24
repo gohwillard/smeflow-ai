@@ -239,6 +239,18 @@ export function SupplierDetailsPage() {
             </dl>
           </article>
 
+          <section
+            className="management-card future-history"
+            aria-labelledby="supplier-transaction-history-heading"
+          >
+            <p className="card-label">Future purchasing records</p>
+            <h2 id="supplier-transaction-history-heading">Transaction History</h2>
+            <p>
+              Supplier transaction history will appear here when Purchasing
+              workflows are available.
+            </p>
+          </section>
+
           {isLifecycleDialogOpen && (
             <ConfirmationDialog
               confirmLabel={

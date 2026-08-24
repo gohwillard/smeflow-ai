@@ -142,7 +142,8 @@ Dashboard / AI Insights
 - [x] Phase 4B Customer and Supplier schema migration complete
 - [x] Phase 4C Customer and Supplier backend complete
 - [x] Phase 4D Customer and Supplier frontend complete
-- [ ] Phase 4E Customer and Supplier search and filtering implemented and awaiting manual approval
+- [x] Phase 4E Customer and Supplier search and filtering complete
+- [ ] Phase 4F Transaction History Foundation implemented and awaiting manual approval
 - [ ] Sales workflow implemented
 - [ ] AI assistant implemented
 - [ ] Production deployment completed
@@ -253,8 +254,8 @@ production build. No dependency, backend, Prisma schema, migration,
 search/filter, pagination, transaction-history, Purchasing, Sales, Dashboard,
 or AI work was added.
 
-Phase 4E — Customer & Supplier Search and Filtering is implemented and
-Codex-verified, awaiting manual browser/API approval. Both authenticated list
+Phase 4E — Customer & Supplier Search and Filtering is complete after manual
+browser/API approval. Both authenticated list
 APIs now strictly accept only optional trimmed `search` and
 `status=active|archived`; omitted status includes both lifecycle states. Search
 uses case-insensitive PostgreSQL substring matching across name, registration
@@ -266,8 +267,19 @@ changes for every role. All 407 backend tests across 12 files and 163 frontend
 tests across 8 files pass, together with backend typecheck/build, frontend
 lint/build, and Prisma validation/generation/migration status. No dependency,
 schema, migration, pagination, sorting, specialized index, transaction history,
-Purchasing, Sales, Dashboard, or AI work was added. Phase 4F and Phase 5 remain
-not started.
+Purchasing, Sales, Dashboard, or AI work was added.
+
+Phase 4F — Related Transaction History Foundation is implemented and
+Codex-verified, awaiting manual browser approval. Customer and Supplier detail
+pages now contain restrained read-only Transaction History sections for all
+authenticated roles. The Customer section truthfully points to future Sales
+workflows, and the Supplier section points to future Purchasing workflows. No
+history API, fake record, count, total, transaction model, schema change, or
+migration was added. Documentation now fixes the future active-party,
+archived-reference, same-Company composite foreign-key, and immutable snapshot
+rules without implementing Purchasing or Sales. All 171 frontend tests across 8
+files pass, together with frontend lint/build and Prisma
+validation/generation/migration status. Phase 4G and Phase 5 remain not started.
 
 ## Local Development
 

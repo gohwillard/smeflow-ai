@@ -741,6 +741,22 @@ a:hover {
   line-height: 1.55;
 }
 
+.future-history {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.future-history h2,
+.future-history p {
+  margin: 0;
+}
+
+.future-history > p:last-child {
+  max-width: 42rem;
+  color: #617778;
+  line-height: 1.6;
+}
+
 .category-list {
   display: grid;
   gap: 0.85rem;

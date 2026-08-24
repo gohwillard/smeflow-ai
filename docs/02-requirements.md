@@ -103,6 +103,15 @@ Quotations, Sales Orders, and Invoices must retain the relevant master-data
 foreign key and, where their own approved design requires it, snapshot the
 identity/contact/address values needed for historical document accuracy.
 
+Phase 4F adds only a read-only, authenticated transaction-history foundation to
+the existing Customer and Supplier detail pages. `OWNER`, `ADMIN`, and `STAFF`
+see the same truthful current state: Customer history will become available with
+Sales workflows, and Supplier history will become available with Purchasing
+workflows. Phase 4 provides no transaction-history endpoint or fabricated
+record. Future transaction creation must accept only an active same-Company
+party, while an existing historical document remains readable and related if
+that party is later archived.
+
 ### FR-07 Quotations
 
 The system shall allow users to:

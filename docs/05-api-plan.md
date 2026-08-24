@@ -593,6 +593,23 @@ pagination/sort parameters, Boolean lifecycle aliases, and Product-only filters
 are rejected with HTTP 400 `VALIDATION_ERROR`. No pagination, full-text search,
 specialized index, extension, or schema change is introduced.
 
+## Phase 4F Detail-Page History Foundation
+
+Phase 4F adds no REST endpoint. In particular, it does not add empty
+`/customers/:customerId/transactions` or
+`/suppliers/:supplierId/transactions` responses without a real data source.
+The existing authenticated, Company-scoped Customer and Supplier detail APIs
+remain the only requests used by their detail pages.
+
+All three roles see a read-only Transaction History section on each successfully
+loaded detail page. The Customer section states that real history will appear
+when Sales workflows are available; the Supplier section states that real
+history will appear when Purchasing workflows are available. The UI returns no
+fake records, counts, totals, balances, or dates. Future history contracts must
+be designed in their owning Phase 5 or Phase 6 module and must preserve Company
+isolation, active-party selection for new documents, archived-party historical
+references, and approved immutable party snapshots.
+
 ## Quotations
 
 ```text

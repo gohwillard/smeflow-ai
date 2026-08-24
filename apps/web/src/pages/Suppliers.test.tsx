@@ -236,6 +236,30 @@ describe('Phase 4D Supplier create and edit', () => {
 })
 
 describe('Phase 4D Supplier detail and lifecycle', () => {
+  it.each(['OWNER', 'ADMIN', 'STAFF'] as const)(
+    'shows the truthful Phase 4F history foundation to %s without requesting a history API',
+    async (role) => {
+      const fetchMock = await renderAuthenticatedPath(
+        `/suppliers/${activeSupplier.id}`,
+        [success({ supplier: activeSupplier })],
+        role,
+      )
+
+      expect(
+        await screen.findByRole('heading', { name: 'Transaction History' }),
+      ).toBeTruthy()
+      expect(
+        screen.getByText(
+          'Supplier transaction history will appear here when Purchasing workflows are available.',
+        ),
+      ).toBeTruthy()
+      expect(fetchMock).toHaveBeenCalledTimes(3)
+      expect(fetchMock.mock.calls[2]?.[0]).toMatch(
+        /\/suppliers\/supplier-active$/,
+      )
+    },
+  )
+
   it('renders full Supplier details and nullable fields for archived STAFF access', async () => {
     await renderAuthenticatedPath(
       `/suppliers/${archivedSupplier.id}`,

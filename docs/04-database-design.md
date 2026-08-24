@@ -37,7 +37,10 @@ schema and migration `20260824025721_add_customer_supplier`. Phase 4C consumes
 the unchanged schema through authenticated, Company-scoped Customer and
 Supplier APIs; Phase 4D supplies their frontend; and Phase 4E uses the existing
 columns for database-authoritative search and lifecycle filtering. No Phase 4E
-schema, migration, extension, or specialized index was needed.
+schema, migration, extension, or specialized index was needed. Phase 4F uses
+the already approved tenant-aware candidate keys as documented future
+relationship groundwork and adds only truthful detail-page presentation; it
+also requires no schema or migration change.
 
 Models assigned to later roadmap phases remain planning context only. Their
 fields, relationships, constraints, and indexes must be designed in their own
@@ -720,6 +723,39 @@ identity, contact, and address values into immutable document snapshot fields at
 an explicitly designed document stage. The exact snapshot fields and timing
 belong to the Purchase Order, Quotation, Sales Order, and Invoice design
 milestones. Phase 4A does not add any transaction or snapshot column.
+
+### Phase 4F Transaction History Foundation
+
+Phase 4F does not change the database. The existing Customer and Supplier UUID
+primary keys plus `UNIQUE (id, companyId)` candidate keys are the complete
+relational foundation needed before the later transaction domains are designed.
+Those candidate keys intentionally allow a future document to carry its own
+required `companyId` and use a composite foreign key such as:
+
+```text
+(supplierId, companyId) -> Supplier(id, companyId)
+(customerId, companyId) -> Customer(id, companyId)
+```
+
+This lets PostgreSQL reject a cross-Company party relationship even if
+application validation regresses. The exact Purchase Order, Quotation, Sales
+Order, and Invoice relationships remain decisions for Phases 5 and 6; Phase 4F
+creates none of those models or columns.
+
+The lifecycle and historical rules remain:
+
+- new future transactions normally require an active same-Company Customer or
+  Supplier;
+- archiving never deletes the party or breaks an existing historical reference;
+- all authenticated roles may read the eventual Company-scoped history;
+- changing mutable party master data must not rewrite snapshot values stored on
+  a historically significant document; and
+- real history exists only when the owning Purchasing or Sales module persists
+  real business documents.
+
+Accordingly, Phase 4F adds no history table, generic Transaction abstraction,
+placeholder row, endpoint, Prisma schema change, or migration. The three
+existing migrations remain the complete migration history at this milestone.
 
 ### Phase 4B Index and Constraint Direction
 

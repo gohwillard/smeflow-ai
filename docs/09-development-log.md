@@ -311,3 +311,21 @@
 - **Known issues:** No application defect is known. A documentation inconsistency still described transaction-history presentation as Phase 4E; it was corrected to canonical Phase 4F. The initial sandboxed database test attempt was blocked by local PostgreSQL permissions and passed when rerun with the approved database connection.
 - **Scope:** Phase 4F transaction history, Phase 5 Purchasing, pagination, sorting APIs, new database models, Dashboard, and AI remain not started. No commit or push was performed.
 - **Next milestone:** Manually verify Phase 4E search, lifecycle filters, combined queries, Company isolation, lifecycle refetches, and responsive controls. Do not start Phase 4F automatically.
+
+## Phase 4E — Manual Approval
+
+- **Status:** Complete and manually approved.
+- **Approved:** Customer and Supplier search, All/Active/Archived filtering, combined queries, Company isolation, lifecycle-aware refetches, STAFF discovery access, and responsive controls passed user/ChatGPT browser and API review.
+- **Verified baseline:** The approved Phase 4E baseline contained 407 passing backend tests across 12 files and 163 passing frontend tests across 8 files, together with backend typecheck/build, frontend lint/build, and Prisma validation/generation/migration status.
+- **Scope:** Phase 4E closed without a dependency, schema, migration, pagination, sorting API, specialized index, related history, Purchasing, Sales, Dashboard, or AI change.
+- **Next milestone:** Phase 4F — Related Transaction History Foundation.
+
+## Phase 4F — Related Transaction History Foundation
+
+- **Status:** Implemented and Codex-verified; awaiting manual browser approval. It is not officially complete.
+- **Implemented:** Added a restrained read-only Transaction History section to the existing Customer and Supplier detail pages. `OWNER`, `ADMIN`, and `STAFF` see the same legitimate current state: Customer history will appear when Sales workflows are available, and Supplier history will appear when Purchasing workflows are available. No additional frontend request or history API is used.
+- **Technical decisions:** Interpreted the canonical wording—“Prepare customer and supplier detail structures for future transaction history. Do not invent or prematurely implement purchasing or sales records.”—as a frontend presentation and documentation foundation. Preserved separate future Purchasing/Sales ownership rather than adding a generic Transaction abstraction. Documented active same-Company party selection for new documents, archived-party historical references, restrictive deletion, `(id, companyId)` composite foreign-key groundwork, and immutable party snapshots where later document designs require historical accuracy.
+- **Verification:** Added six role-parameterized cases to the two existing Customer/Supplier frontend files; their focused run passed 38 tests. The complete frontend suite passed 171 tests across 8 files, and frontend ESLint and the TypeScript-backed Vite production build passed. Prisma schema validation and Client generation passed; migration status reports exactly three migrations and an up-to-date database. `git diff --check`, changed-path, secret/generated-file, dependency, schema/migration, fake-data/API, and later-phase scope reviews passed. Backend application tests were not rerun because no backend application or database contract changed.
+- **Scope:** No backend application file, dependency, Prisma schema, migration, history endpoint, fake transaction record, generic transaction table/abstraction, Purchase Order, Goods Receipt, Quotation, Sales Order, Invoice, payment/accounting behavior, InventoryMovement type, stock behavior, Dashboard, or AI feature was added. Phase 4D UI and Phase 4E search/filter behavior remain unchanged. Phase 4G, Phase 5, and Phase 6 were not started. No commit or push was performed.
+- **Known issues:** No implementation or architecture blocker was found. Manual responsive review remains required at desktop, 430×932, and 390×844 before Phase 4F can be marked complete.
+- **Next milestone:** Manually verify the two detail-page foundation cards for all three roles and active/archived parties. Do not start Phase 4G automatically.

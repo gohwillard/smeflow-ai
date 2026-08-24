@@ -209,3 +209,19 @@ transaction documents must keep the relevant foreign key while snapshotting
 mutable party identity/contact/address values when their own domain design
 requires historical document accuracy. No transactional model or snapshot
 field is introduced during Phase 4A.
+
+Phase 4F prepares only the existing Customer and Supplier detail-page
+structures. Each page contains an authenticated, read-only Transaction History
+section that states when its real owning workflow will become available. The
+section calls no history endpoint and exposes no fake counts, totals, balances,
+or documents because Purchasing and Sales do not exist yet. All roles can see
+this current-state foundation. Future history aggregation remains inside the
+owning Purchasing or Sales module; Phase 4 does not introduce a generic
+Transaction or activity-feed module.
+
+When those later modules are designed, their services must scope the party and
+document by the database-revalidated Company context. Their schemas should use
+the existing `(id, companyId)` Customer/Supplier candidate keys to enforce
+same-Company relationships, retain references to subsequently archived parties,
+require active parties for new documents, and store approved party snapshots so
+later master-data edits cannot rewrite historical document truth.
