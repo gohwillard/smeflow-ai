@@ -66,7 +66,21 @@ export const supplierIdParamsSchema = z
   })
   .strict();
 
-export const supplierListQuerySchema = z.object({}).strict();
+export const supplierListQuerySchema = z
+  .object({
+    search: z
+      .string()
+      .trim()
+      .min(1, "Search must not be blank")
+      .max(320, "Search must be at most 320 characters")
+      .refine(
+        (value) => !singleLineControlCharacterPattern.test(value),
+        "Search must not contain control characters",
+      )
+      .optional(),
+    status: z.enum(["active", "archived"]).optional(),
+  })
+  .strict();
 
 export const supplierCreateSchema = z
   .object({
@@ -101,3 +115,4 @@ export const supplierUpdateSchema = z
 
 export type SupplierCreateInput = z.infer<typeof supplierCreateSchema>;
 export type SupplierUpdateInput = z.infer<typeof supplierUpdateSchema>;
+export type SupplierListQuery = z.infer<typeof supplierListQuerySchema>;

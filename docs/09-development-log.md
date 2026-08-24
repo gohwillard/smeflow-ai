@@ -292,3 +292,22 @@
 - **Verification:** Added three role-parameterized Home cases to the existing application tests. All 141 frontend tests across 7 files pass, along with frontend ESLint and the TypeScript-backed production build. Final diff and scope checks passed.
 - **Scope:** No Customer/Supplier module behavior, Product/Category behavior, authentication persistence, backend, API, Prisma schema, migration, package, search/filter, pagination, count/statistic, Phase 4E, Phase 5, or later-phase functionality changed.
 - **Next milestone:** Manually re-review the Home dashboard together with the outstanding Phase 4D Customer/Supplier responsive UI. Do not start Phase 4E automatically.
+
+## Phase 4D — Manual Approval
+
+- **Status:** Complete and manually approved.
+- **Approved:** The protected Customer/Supplier workflows, OWNER/ADMIN and STAFF presentation, lifecycle dialogs, Home shortcuts, desktop tables, 430×932 and 390×844 mobile cards, compact actions, shared 22% identity column, detail-header cleanup, and metadata-divider remediation passed user/ChatGPT browser review.
+- **Verified baseline:** The final Phase 4D repository baseline contained 141 passing frontend tests across 7 files, together with frontend ESLint and the TypeScript-backed production build.
+- **Scope:** Phase 4D closed without a backend, dependency, Prisma schema, migration, search/filter, pagination, related-history, Purchasing, Sales, Dashboard metric, or AI change.
+- **Next milestone:** Phase 4E — Customer & Supplier Search and Filtering.
+
+## Phase 4E — Customer & Supplier Search and Filtering
+
+- **Status:** Implemented and Codex-verified; awaiting manual browser/API approval. It is not officially complete.
+- **Implemented:** Extended only `GET /api/v1/customers` and `GET /api/v1/suppliers` with optional trimmed `search` and exact lowercase `status=active|archived`. Omitted status includes active and archived rows. PostgreSQL performs case-insensitive substring matching over exactly name, registration number, contact person, email, and phone. Search, lifecycle, and authenticated Company scope combine with AND semantics while safe response shapes and deterministic ordering remain unchanged.
+- **Frontend:** Added explicit applied search, All/Active/Archived selects, Clear search, filtered Clear all, distinct base-empty and filtered-empty states, all-role discovery access, responsive stacked controls, and authoritative refetches with the current filters after Customer/Supplier archive or reactivation. Existing Phase 4D table proportions, compact actions, detail polish, responsive cards, custom dialogs, and role behavior remain intact.
+- **Technical decisions:** Reused Zod, Prisma, PostgreSQL `contains` with insensitive mode, native `URLSearchParams`, React component state, and existing CSS breakpoints. Query schemas remain strict; `companyId`, pagination, sorting, Boolean lifecycle aliases, Product filters, repeated/blank/overlong searches, and unknown fields are rejected. No client-side record filtering, status arithmetic, new abstraction, dependency, full-text search, extension, specialized index, schema change, or migration was introduced.
+- **Verification:** Added 91 focused backend integration cases across two new files and 22 focused frontend cases in one new file. All 407 backend tests across 12 files and all 163 frontend tests across 8 files pass. Backend typecheck/build, frontend lint/build, Prisma validate/generate/migrate status, Node.js 22 verification, unchanged-schema/migration checks, exact three-migration count, and `git diff --check` pass. Responsive source review confirms controls stack at the existing 52rem and 36rem breakpoints; manual Phase 4E browser/API review remains outstanding.
+- **Known issues:** No application defect is known. A documentation inconsistency still described transaction-history presentation as Phase 4E; it was corrected to canonical Phase 4F. The initial sandboxed database test attempt was blocked by local PostgreSQL permissions and passed when rerun with the approved database connection.
+- **Scope:** Phase 4F transaction history, Phase 5 Purchasing, pagination, sorting APIs, new database models, Dashboard, and AI remain not started. No commit or push was performed.
+- **Next milestone:** Manually verify Phase 4E search, lifecycle filters, combined queries, Company isolation, lifecycle refetches, and responsive controls. Do not start Phase 4F automatically.

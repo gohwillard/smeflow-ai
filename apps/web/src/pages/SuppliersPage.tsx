@@ -1,22 +1,18 @@
-import { useEffect, useRef, useState } from 'react'
+import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import { ApiError } from '../api/client'
 import {
   archiveSupplier,
   getSuppliers,
   updateSupplier,
+  type PartnerLifecycleStatus,
   type Supplier,
+  type SupplierListFilters,
 } from '../api/partners'
 import { ConfirmationDialog } from '../components/ConfirmationDialog'
 import { LifecycleBadge } from '../components/LifecycleBadge'
 import { LoadingScreen } from '../components/LoadingScreen'
 import { useAuth } from '../features/auth/auth-context'
-
-function replaceSupplier(suppliers: Supplier[], next: Supplier): Supplier[] {
-  return suppliers.map((supplier) =>
-    supplier.id === next.id ? next : supplier,
-  )
-}
 
 export function SuppliersPage() {
   const [suppliers, setSuppliers] = useState<Supplier[] | null>(null)
@@ -26,20 +22,36 @@ export function SuppliersPage() {
   const [lifecycleTarget, setLifecycleTarget] = useState<Supplier | null>(null)
   const [pendingSupplierId, setPendingSupplierId] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
+  const [suppliersLoading, setSuppliersLoading] = useState(true)
+  const [searchDraft, setSearchDraft] = useState('')
+  const [appliedSearch, setAppliedSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<PartnerLifecycleStatus | ''>('')
   const lifecycleRequestRef = useRef(false)
   const { runAuthenticated, user } = useAuth()
   const canManage = user?.role === 'OWNER' || user?.role === 'ADMIN'
+  const filters: SupplierListFilters = {
+    ...(appliedSearch ? { search: appliedSearch } : {}),
+    ...(statusFilter ? { status: statusFilter } : {}),
+  }
+  const hasFilters = appliedSearch.length > 0 || statusFilter !== ''
 
   useEffect(() => {
     const controller = new AbortController()
 
     async function loadSuppliers() {
+      setSuppliersLoading(true)
       setLoadError(null)
-      setSuppliers(null)
       try {
         setSuppliers(
           await runAuthenticated((accessToken) =>
-            getSuppliers(accessToken, controller.signal),
+            getSuppliers(
+              accessToken,
+              {
+                ...(appliedSearch ? { search: appliedSearch } : {}),
+                ...(statusFilter ? { status: statusFilter } : {}),
+              },
+              controller.signal,
+            ),
           ),
         )
       } catch (error) {
@@ -49,12 +61,32 @@ export function SuppliersPage() {
             ? error.message
             : 'Suppliers could not be loaded. Please try again.',
         )
+      } finally {
+        if (!controller.signal.aborted) setSuppliersLoading(false)
       }
     }
 
     void loadSuppliers()
     return () => controller.abort()
-  }, [retryCount, runAuthenticated])
+  }, [appliedSearch, retryCount, runAuthenticated, statusFilter])
+
+  function applySearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const normalizedSearch = searchDraft.trim()
+    setSearchDraft(normalizedSearch)
+    setAppliedSearch(normalizedSearch)
+  }
+
+  function clearSearch() {
+    setSearchDraft('')
+    setAppliedSearch('')
+  }
+
+  function clearAllFilters() {
+    setSearchDraft('')
+    setAppliedSearch('')
+    setStatusFilter('')
+  }
 
   async function confirmLifecycleChange() {
     const supplier = lifecycleTarget
@@ -78,10 +110,20 @@ export function SuppliersPage() {
           ? archiveSupplier(accessToken, supplier.id)
           : updateSupplier(accessToken, supplier.id, { isActive: true }),
       )
-      setSuppliers((current) => replaceSupplier(current ?? [], updated))
       setSuccessMessage(
         `Supplier ${updated.name} ${updated.isActive ? 'reactivated' : 'archived'} successfully.`,
       )
+
+      try {
+        const refreshedSuppliers = await runAuthenticated((accessToken) =>
+          getSuppliers(accessToken, filters),
+        )
+        setSuppliers(refreshedSuppliers)
+      } catch {
+        setActionError(
+          'The Supplier was updated, but the filtered list could not be reloaded.',
+        )
+      }
     } catch (error) {
       setActionError(
         error instanceof ApiError && error.status === 403
@@ -141,7 +183,54 @@ export function SuppliersPage() {
         </div>
       )}
 
-      {suppliers?.length === 0 && !loadError && (
+      <div className="party-filters" aria-label="Supplier search and filters">
+        <form className="party-search" onSubmit={applySearch}>
+          <label htmlFor="supplier-search">Search Suppliers</label>
+          <div className="party-search__controls">
+            <input
+              id="supplier-search"
+              maxLength={320}
+              onChange={(event) => setSearchDraft(event.target.value)}
+              placeholder="Search by name, registration number, contact person, email, or phone"
+              type="search"
+              value={searchDraft}
+            />
+            <button
+              className="button button--secondary"
+              disabled={suppliersLoading}
+              type="submit"
+            >
+              Search
+            </button>
+            {(searchDraft || appliedSearch) && (
+              <button className="text-button" onClick={clearSearch} type="button">
+                Clear search
+              </button>
+            )}
+          </div>
+        </form>
+        <label className="party-status-filter" htmlFor="supplier-status-filter">
+          Lifecycle status
+          <select
+            disabled={suppliersLoading}
+            id="supplier-status-filter"
+            onChange={(event) =>
+              setStatusFilter(event.target.value as PartnerLifecycleStatus | '')
+            }
+            value={statusFilter}
+          >
+            <option value="">All</option>
+            <option value="active">Active</option>
+            <option value="archived">Archived</option>
+          </select>
+        </label>
+      </div>
+
+      {suppliersLoading && suppliers && (
+        <p className="catalog-loading" role="status">Updating Suppliers…</p>
+      )}
+
+      {suppliers?.length === 0 && !hasFilters && !suppliersLoading && !loadError && (
         <div className="empty-state">
           <p className="card-label">No Suppliers</p>
           <h2>Your Supplier list is empty</h2>
@@ -158,7 +247,18 @@ export function SuppliersPage() {
         </div>
       )}
 
-      {suppliers && suppliers.length > 0 && !loadError && (
+      {suppliers?.length === 0 && hasFilters && !suppliersLoading && !loadError && (
+        <div className="empty-state">
+          <p className="card-label">No matches</p>
+          <h2>No Suppliers match your current search or filter</h2>
+          <p>Try different Supplier details, or clear the active filters.</p>
+          <button className="button button--secondary" onClick={clearAllFilters} type="button">
+            Clear all filters
+          </button>
+        </div>
+      )}
+
+      {suppliers && suppliers.length > 0 && !suppliersLoading && !loadError && (
         <div className="table-card party-table-card">
           <div className="table-scroll">
             <table className="data-table party-table">

@@ -70,7 +70,10 @@ export async function retrieveSuppliers(
   }
 
   try {
-    const suppliers = await listSuppliers(getAuthenticatedRequestContext(request));
+    const suppliers = await listSuppliers(
+      getAuthenticatedRequestContext(request),
+      validationResult.data,
+    );
     response.status(200).json({ status: "success", data: { suppliers } });
   } catch (error) {
     next(error);

@@ -48,11 +48,17 @@ The current project state is:
 - Phase 4 — Customers and Suppliers: 🚧 Current
 - Phase 4A — Customer & Supplier Domain Design: ✅ Completed
 - Phase 4B — Customer & Supplier Schema Migration: ✅ Completed
-- Phase 4C — Customer & Supplier Backend: 🚧 Current
+- Phase 4C — Customer & Supplier Backend: ✅ Completed
+- Phase 4D — Customer & Supplier Frontend: ✅ Completed
+- Phase 4E — Customer & Supplier Search and Filtering: 🚧 Current
+- Phase 4F — Related Transaction History Foundation: ⬜ Planned
+- Phase 4G — Phase 4 Verification: ⬜ Planned
 
 Phase 3 is complete following its final acceptance. Phase 4A received manual
 approval and is complete. Phase 4B received manual approval and is complete.
-Phase 4C is the current backend-only milestone; Phase 4D and all later
+Phase 4C is complete after manual API/database approval, and Phase 4D is
+complete after manual browser approval. Phase 4E is implemented and
+Codex-verified, awaiting manual browser/API approval. Phase 4F and later
 milestones have not started.
 
 ---
@@ -600,7 +606,7 @@ low-stock items.
 
 ## Phase 4 — Customers and Suppliers
 
-**Status:** 🚧 Current
+**Status:** ✅ Completed
 
 **Goal:** Create the external-party master data required for purchasing and
 sales.
@@ -686,26 +692,45 @@ remain and the schema is up to date.
 - responsive and accessible presentation; and
 - focused frontend tests.
 
-The frontend implementation is Codex-verified and awaits required manual
-browser approval. Protected Customer and Supplier list/create/detail/edit
+The frontend implementation received the required manual browser approval.
+Protected Customer and Supplier list/create/detail/edit
 routes use the established memory-only authentication and native-fetch layers.
 OWNER and ADMIN receive create, edit, archive, and reactivate controls; STAFF is
 read-only. Optional fields can be cleared to `null`, ordinary edit requests are
 diff-only and lifecycle-neutral, lifecycle dialogs reuse the approved
 accessible confirmation component, and lists use desktop tables that become
-stacked mobile cards. All 138 frontend tests across 7 files pass, including 32
+stacked mobile cards. Its final approved baseline contained 141 frontend tests
+across 7 files, including 32
 focused Phase 4D tests, together with frontend lint and production build. No
 dependency, backend, schema, migration, list query parameter, search/filter,
 pagination, Phase 4F, Phase 5, or AI work was added.
 
 ### Phase 4E — Customer & Supplier Search and Filtering
 
-**Status:** ⬜ Planned
+**Status:** 🚧 Current
 
 Add strictly validated, Company-scoped Customer and Supplier search/filter
 contracts and their corresponding frontend controls. Do not add pagination or
 specialized database indexing without an approved contract and supporting
 evidence.
+
+The implementation is Codex-verified and awaits manual browser/API approval.
+Both existing list endpoints accept only optional trimmed `search` and
+`status=active|archived`; omission of status includes both lifecycle states.
+Search is a case-insensitive PostgreSQL substring match across exactly name,
+registration number, contact person, email, and phone. Search, lifecycle, and
+the authenticated `req.auth.companyId` scope combine with AND semantics while
+existing deterministic ordering and safe response shapes remain unchanged.
+
+The Customer and Supplier list pages use explicit applied search state,
+All/Active/Archived selects, clear-search and clear-all behavior, distinct
+filtered empty states, and authoritative refetches with the current filters
+after archive/reactivation. OWNER, ADMIN, and STAFF may search and filter; write
+authorization remains unchanged. All 407 backend tests across 12 files and 163
+frontend tests across 8 files pass, together with backend typecheck/build,
+frontend lint/build, Prisma validation/generation/migration status, and hygiene
+checks. No dependency, schema, migration, pagination, sorting API, specialized
+index, Phase 4F, Phase 5, or AI work was added.
 
 ### Phase 4F — Related Transaction History Foundation
 

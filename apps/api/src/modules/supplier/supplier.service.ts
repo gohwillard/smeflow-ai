@@ -4,6 +4,7 @@ import type { AuthenticatedRequestContext } from "../../shared/http/auth-context
 
 import type {
   SupplierCreateInput,
+  SupplierListQuery,
   SupplierUpdateInput,
 } from "./supplier.schema.js";
 
@@ -35,9 +36,38 @@ function isRecordNotFoundError(error: unknown): boolean {
   );
 }
 
-export function listSuppliers(auth: AuthenticatedRequestContext) {
+export function listSuppliers(
+  auth: AuthenticatedRequestContext,
+  query: SupplierListQuery = {},
+) {
   return prisma.supplier.findMany({
-    where: { companyId: auth.companyId },
+    where: {
+      companyId: auth.companyId,
+      ...(query.status
+        ? { isActive: query.status === "active" }
+        : {}),
+      ...(query.search
+        ? {
+            OR: [
+              { name: { contains: query.search, mode: "insensitive" } },
+              {
+                registrationNumber: {
+                  contains: query.search,
+                  mode: "insensitive",
+                },
+              },
+              {
+                contactPerson: {
+                  contains: query.search,
+                  mode: "insensitive",
+                },
+              },
+              { email: { contains: query.search, mode: "insensitive" } },
+              { phone: { contains: query.search, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    },
     orderBy: [{ createdAt: "asc" }, { id: "asc" }],
     select: supplierSelect,
   });

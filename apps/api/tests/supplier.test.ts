@@ -497,7 +497,7 @@ describe("Supplier API", () => {
     expect(response.body.error.code).toBe("VALIDATION_ERROR");
   });
 
-  it.each(["companyId", "search", "isActive"])(
+  it.each(["companyId", "page", "isActive"])(
     "rejects unsupported Supplier list query parameter %s",
     async (parameter) => {
       const response = await request(app)

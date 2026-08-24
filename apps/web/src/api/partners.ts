@@ -28,6 +28,13 @@ export type CustomerCreateInput = {
 
 export type CustomerUpdateInput = Partial<CustomerCreateInput>
 
+export type PartnerLifecycleStatus = 'active' | 'archived'
+
+export type CustomerListFilters = {
+  search?: string
+  status?: PartnerLifecycleStatus
+}
+
 export type Supplier = {
   id: string
   name: string
@@ -53,6 +60,11 @@ export type SupplierCreateInput = {
 }
 
 export type SupplierUpdateInput = Partial<SupplierCreateInput>
+
+export type SupplierListFilters = {
+  search?: string
+  status?: PartnerLifecycleStatus
+}
 
 type CustomersData = { customers: Customer[] }
 type CustomerData = { customer: Customer }
@@ -112,9 +124,15 @@ function requireSupplier(data: SupplierData): Supplier {
 
 export async function getCustomers(
   accessToken: string,
+  filters: CustomerListFilters = {},
   signal?: AbortSignal,
 ): Promise<Customer[]> {
-  const data = await apiRequest<CustomersData>('/customers', {
+  const query = new URLSearchParams()
+  if (filters.search) query.set('search', filters.search)
+  if (filters.status) query.set('status', filters.status)
+  const path = `/customers${query.size > 0 ? `?${query.toString()}` : ''}`
+
+  const data = await apiRequest<CustomersData>(path, {
     accessToken,
     signal,
   })
@@ -177,9 +195,15 @@ export async function archiveCustomer(
 
 export async function getSuppliers(
   accessToken: string,
+  filters: SupplierListFilters = {},
   signal?: AbortSignal,
 ): Promise<Supplier[]> {
-  const data = await apiRequest<SuppliersData>('/suppliers', {
+  const query = new URLSearchParams()
+  if (filters.search) query.set('search', filters.search)
+  if (filters.status) query.set('status', filters.status)
+  const path = `/suppliers${query.size > 0 ? `?${query.toString()}` : ''}`
+
+  const data = await apiRequest<SuppliersData>(path, {
     accessToken,
     signal,
   })

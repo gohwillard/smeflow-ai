@@ -1,22 +1,18 @@
-import { useEffect, useRef, useState } from 'react'
+import { type FormEvent, useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router'
 import {
   archiveCustomer,
   getCustomers,
   updateCustomer,
   type Customer,
+  type CustomerListFilters,
+  type PartnerLifecycleStatus,
 } from '../api/partners'
 import { ApiError } from '../api/client'
 import { ConfirmationDialog } from '../components/ConfirmationDialog'
 import { LifecycleBadge } from '../components/LifecycleBadge'
 import { LoadingScreen } from '../components/LoadingScreen'
 import { useAuth } from '../features/auth/auth-context'
-
-function replaceCustomer(customers: Customer[], next: Customer): Customer[] {
-  return customers.map((customer) =>
-    customer.id === next.id ? next : customer,
-  )
-}
 
 export function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[] | null>(null)
@@ -26,20 +22,36 @@ export function CustomersPage() {
   const [lifecycleTarget, setLifecycleTarget] = useState<Customer | null>(null)
   const [pendingCustomerId, setPendingCustomerId] = useState<string | null>(null)
   const [retryCount, setRetryCount] = useState(0)
+  const [customersLoading, setCustomersLoading] = useState(true)
+  const [searchDraft, setSearchDraft] = useState('')
+  const [appliedSearch, setAppliedSearch] = useState('')
+  const [statusFilter, setStatusFilter] = useState<PartnerLifecycleStatus | ''>('')
   const lifecycleRequestRef = useRef(false)
   const { runAuthenticated, user } = useAuth()
   const canManage = user?.role === 'OWNER' || user?.role === 'ADMIN'
+  const filters: CustomerListFilters = {
+    ...(appliedSearch ? { search: appliedSearch } : {}),
+    ...(statusFilter ? { status: statusFilter } : {}),
+  }
+  const hasFilters = appliedSearch.length > 0 || statusFilter !== ''
 
   useEffect(() => {
     const controller = new AbortController()
 
     async function loadCustomers() {
+      setCustomersLoading(true)
       setLoadError(null)
-      setCustomers(null)
       try {
         setCustomers(
           await runAuthenticated((accessToken) =>
-            getCustomers(accessToken, controller.signal),
+            getCustomers(
+              accessToken,
+              {
+                ...(appliedSearch ? { search: appliedSearch } : {}),
+                ...(statusFilter ? { status: statusFilter } : {}),
+              },
+              controller.signal,
+            ),
           ),
         )
       } catch (error) {
@@ -49,12 +61,32 @@ export function CustomersPage() {
             ? error.message
             : 'Customers could not be loaded. Please try again.',
         )
+      } finally {
+        if (!controller.signal.aborted) setCustomersLoading(false)
       }
     }
 
     void loadCustomers()
     return () => controller.abort()
-  }, [retryCount, runAuthenticated])
+  }, [appliedSearch, retryCount, runAuthenticated, statusFilter])
+
+  function applySearch(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    const normalizedSearch = searchDraft.trim()
+    setSearchDraft(normalizedSearch)
+    setAppliedSearch(normalizedSearch)
+  }
+
+  function clearSearch() {
+    setSearchDraft('')
+    setAppliedSearch('')
+  }
+
+  function clearAllFilters() {
+    setSearchDraft('')
+    setAppliedSearch('')
+    setStatusFilter('')
+  }
 
   async function confirmLifecycleChange() {
     const customer = lifecycleTarget
@@ -78,10 +110,20 @@ export function CustomersPage() {
           ? archiveCustomer(accessToken, customer.id)
           : updateCustomer(accessToken, customer.id, { isActive: true }),
       )
-      setCustomers((current) => replaceCustomer(current ?? [], updated))
       setSuccessMessage(
         `Customer ${updated.name} ${updated.isActive ? 'reactivated' : 'archived'} successfully.`,
       )
+
+      try {
+        const refreshedCustomers = await runAuthenticated((accessToken) =>
+          getCustomers(accessToken, filters),
+        )
+        setCustomers(refreshedCustomers)
+      } catch {
+        setActionError(
+          'The Customer was updated, but the filtered list could not be reloaded.',
+        )
+      }
     } catch (error) {
       setActionError(
         error instanceof ApiError && error.status === 403
@@ -141,7 +183,54 @@ export function CustomersPage() {
         </div>
       )}
 
-      {customers?.length === 0 && !loadError && (
+      <div className="party-filters" aria-label="Customer search and filters">
+        <form className="party-search" onSubmit={applySearch}>
+          <label htmlFor="customer-search">Search Customers</label>
+          <div className="party-search__controls">
+            <input
+              id="customer-search"
+              maxLength={320}
+              onChange={(event) => setSearchDraft(event.target.value)}
+              placeholder="Search by name, registration number, contact person, email, or phone"
+              type="search"
+              value={searchDraft}
+            />
+            <button
+              className="button button--secondary"
+              disabled={customersLoading}
+              type="submit"
+            >
+              Search
+            </button>
+            {(searchDraft || appliedSearch) && (
+              <button className="text-button" onClick={clearSearch} type="button">
+                Clear search
+              </button>
+            )}
+          </div>
+        </form>
+        <label className="party-status-filter" htmlFor="customer-status-filter">
+          Lifecycle status
+          <select
+            disabled={customersLoading}
+            id="customer-status-filter"
+            onChange={(event) =>
+              setStatusFilter(event.target.value as PartnerLifecycleStatus | '')
+            }
+            value={statusFilter}
+          >
+            <option value="">All</option>
+            <option value="active">Active</option>
+            <option value="archived">Archived</option>
+          </select>
+        </label>
+      </div>
+
+      {customersLoading && customers && (
+        <p className="catalog-loading" role="status">Updating Customers…</p>
+      )}
+
+      {customers?.length === 0 && !hasFilters && !customersLoading && !loadError && (
         <div className="empty-state">
           <p className="card-label">No Customers</p>
           <h2>Your Customer list is empty</h2>
@@ -158,7 +247,18 @@ export function CustomersPage() {
         </div>
       )}
 
-      {customers && customers.length > 0 && !loadError && (
+      {customers?.length === 0 && hasFilters && !customersLoading && !loadError && (
+        <div className="empty-state">
+          <p className="card-label">No matches</p>
+          <h2>No Customers match your current search or filter</h2>
+          <p>Try different Customer details, or clear the active filters.</p>
+          <button className="button button--secondary" onClick={clearAllFilters} type="button">
+            Clear all filters
+          </button>
+        </div>
+      )}
+
+      {customers && customers.length > 0 && !customersLoading && !loadError && (
         <div className="table-card party-table-card">
           <div className="table-scroll">
             <table className="data-table party-table">

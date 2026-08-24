@@ -232,8 +232,39 @@ editing without implicit reactivation; custom archive/reactivate dialogs;
 destructive versus positive styling; DELETE archive requests; and reactivation
 PATCH requests containing only `{ isActive: true }`.
 
-The complete frontend regression suite contains 138 passing tests across 7 test
-files. Frontend lint and the TypeScript-backed production build pass. Responsive
-markup and CSS are implemented for desktop tables and narrow-screen stacked
-cards; manual browser verification at desktop, 430×932, and 390×844 remains
-required before Phase 4D approval.
+The final Phase 4D frontend baseline contains 141 passing tests across 7 test
+files after the approved dashboard shortcuts were added. Frontend lint and the
+TypeScript-backed production build pass. Responsive markup and CSS are
+implemented for desktop tables and narrow-screen stacked cards. The subsequent
+manual browser review at desktop, 430×932, and 390×844 approved Phase 4D after
+its documented UI remediations.
+
+## Phase 4E Coverage
+
+Phase 4E adds 91 Customer and Supplier backend integration cases across two new
+independent files. Each module verifies OWNER/ADMIN/STAFF read access; exact,
+partial, case-insensitive, and whitespace-normalized searches over name,
+registration number, contact person, email, and phone; intentional exclusion of
+addresses and notes; archived matches when status is omitted; active and
+archived status filters; combined AND semantics; empty, blank, overlong,
+control-character, and repeated search rejection; literal status validation;
+strict rejection of Company, pagination, sorting, Boolean lifecycle,
+Product-only, and arbitrary query fields; and Company isolation for search,
+status, and combined queries.
+
+Phase 4E also adds 22 frontend cases in one focused file. Customer and Supplier
+coverage verifies accessible controls for all three roles, trimmed and encoded
+search requests, active/archived/All mapping, combined search/status requests,
+clear-search preservation, clear-all recovery, distinct filtered no-result
+states, STAFF discovery access without writes, endpoint separation, absence of
+client Company scope, and filter-aware authoritative lifecycle refetches. The
+existing Phase 4D lifecycle cases now also assert the unfiltered authoritative
+refetch.
+
+The complete regression suites contain 407 passing backend tests across 12
+files and 163 passing frontend tests across 8 files. Backend typecheck/build,
+frontend lint/build, Prisma validation/generation/migration status, and
+repository hygiene checks pass. Responsive source review confirms the discovery
+controls use the existing desktop grid and stack vertically at the established
+52rem and 36rem breakpoints; final manual Phase 4E browser review at desktop,
+430×932, and 390×844 remains required for approval.

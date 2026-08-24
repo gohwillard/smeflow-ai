@@ -524,11 +524,31 @@ profile editing must not change lifecycle accidentally, and PATCH rejects
 `isActive: false`. Responses omit `companyId` and expose only approved business
 fields.
 
-The Phase 4C list accepts no query parameters and includes active and archived
-records in deterministic creation order. Unknown query parameters, including
-`companyId`, are rejected. A future Phase 4E may add a strictly validated,
-Company-scoped search/filter contract. Pagination and specialized search
-indexing remain deferred until explicitly designed and justified.
+Phase 4E extends only the Customer list endpoint with these optional query
+parameters:
+
+```text
+GET /api/v1/customers?search=...
+GET /api/v1/customers?status=active
+GET /api/v1/customers?status=archived
+GET /api/v1/customers?search=...&status=active|archived
+```
+
+`search` is trimmed, nonblank when supplied, limited to 320 characters, and
+matches a case-insensitive PostgreSQL substring in exactly `name`,
+`registrationNumber`, `contactPerson`, `email`, or `phone`. Addresses, notes,
+IDs, and timestamps are not searched. `status` accepts exactly lowercase
+`active` or `archived`; omission includes both active and archived Customers.
+Search and status combine with AND semantics and always remain inside the
+authenticated `req.auth.companyId` scope. Existing deterministic
+`createdAt ASC, id ASC` ordering and the `{ status, data: { customers } }`
+response remain unchanged.
+
+Only `search` and `status` are supported. Unknown parameters—including
+`companyId`, pagination, sorting, Boolean lifecycle aliases, and Product-only
+filters—return HTTP 400 `VALIDATION_ERROR`. Pagination, sorting controls,
+specialized search indexing, full-text search, and database extensions remain
+deferred.
 
 ## Suppliers
 
@@ -550,11 +570,28 @@ selection mirror Customers. Create accepts only `name` plus optional
 PATCH uses the same omitted/`null`/blank rules. DELETE archives idempotently;
 reactivation is an explicit `isActive: true` PATCH lifecycle action.
 
-The Phase 4C list accepts no query parameters and includes active and archived
-records in deterministic creation order. Unknown query parameters, including
-`companyId`, are rejected. Future Phase 4E search/filter behavior must remain
-combined with authenticated Company scope. Pagination and evidence-based
-specialized indexing remain deferred.
+Phase 4E gives the Supplier list the equivalent optional contract:
+
+```text
+GET /api/v1/suppliers?search=...
+GET /api/v1/suppliers?status=active
+GET /api/v1/suppliers?status=archived
+GET /api/v1/suppliers?search=...&status=active|archived
+```
+
+`search` is trimmed, nonblank when supplied, limited to 320 characters, and
+matches a case-insensitive PostgreSQL substring in exactly `name`,
+`registrationNumber`, `contactPerson`, `email`, or `phone`. Supplier address,
+notes, IDs, and timestamps are excluded. `status` accepts exactly lowercase
+`active` or `archived`; omission includes both lifecycle states. Search, status,
+and `req.auth.companyId` combine with AND semantics while deterministic
+`createdAt ASC, id ASC` ordering and the existing safe Supplier response remain
+unchanged.
+
+Only `search` and `status` are supported. Unknown fields, `companyId`,
+pagination/sort parameters, Boolean lifecycle aliases, and Product-only filters
+are rejected with HTTP 400 `VALIDATION_ERROR`. No pagination, full-text search,
+specialized index, extension, or schema change is introduced.
 
 ## Quotations
 

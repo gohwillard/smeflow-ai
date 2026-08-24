@@ -106,8 +106,14 @@ describe('Phase 4D Supplier list and routes', () => {
     expect(await screen.findByText('XYZ Supplies')).toBeTruthy()
     expect(screen.getByText('Daniel Lim')).toBeTruthy()
     expect(screen.getByText('orders@xyz.example')).toBeTruthy()
-    expect(screen.getAllByText('Active')).toHaveLength(1)
-    expect(screen.getAllByText('Archived')).toHaveLength(1)
+    expect(
+      within(screen.getByRole('row', { name: /XYZ Supplies/ })).getByText('Active'),
+    ).toBeTruthy()
+    expect(
+      within(screen.getByRole('row', { name: /Old Parts Co/ })).getByText(
+        'Archived',
+      ),
+    ).toBeTruthy()
     expect(
       screen.getByRole('cell', { name: /XYZ Supplies/ }).getAttribute('data-label'),
     ).toBe('Supplier')
@@ -266,9 +272,13 @@ describe('Phase 4D Supplier detail and lifecycle', () => {
     const fetchMock = await renderAuthenticatedPath('/suppliers', [
       success({ suppliers: [activeSupplier] }),
     ])
-    fetchMock.mockResolvedValueOnce(
-      success({ supplier: { ...activeSupplier, isActive: false } }),
-    )
+    fetchMock
+      .mockResolvedValueOnce(
+        success({ supplier: { ...activeSupplier, isActive: false } }),
+      )
+      .mockResolvedValueOnce(
+        success({ suppliers: [{ ...activeSupplier, isActive: false }] }),
+      )
     fireEvent.click(await screen.findByRole('button', { name: 'Archive' }))
     const dialog = screen.getByRole('dialog', { name: 'Archive Supplier?' })
     expect(within(dialog).getByText(/XYZ Supplies/)).toBeTruthy()
@@ -278,6 +288,7 @@ describe('Phase 4D Supplier detail and lifecycle', () => {
 
     expect(await screen.findByText('Supplier XYZ Supplies archived successfully.')).toBeTruthy()
     expect(fetchMock.mock.calls[3]?.[1]?.method).toBe('DELETE')
+    expect(fetchMock.mock.calls[4]?.[0]).toMatch(/\/suppliers$/)
     expect(screen.getByRole('button', { name: 'Reactivate' })).toBeTruthy()
   })
 
@@ -285,14 +296,18 @@ describe('Phase 4D Supplier detail and lifecycle', () => {
     const fetchMock = await renderAuthenticatedPath('/suppliers', [
       success({ suppliers: [archivedSupplier] }),
     ])
-    fetchMock.mockResolvedValueOnce(
-      success({ supplier: { ...archivedSupplier, isActive: true } }),
-    )
+    fetchMock
+      .mockResolvedValueOnce(
+        success({ supplier: { ...archivedSupplier, isActive: true } }),
+      )
+      .mockResolvedValueOnce(
+        success({ suppliers: [{ ...archivedSupplier, isActive: true }] }),
+      )
     fireEvent.click(await screen.findByRole('button', { name: 'Reactivate' }))
     const dialog = screen.getByRole('dialog', { name: 'Reactivate Supplier?' })
     fireEvent.click(within(dialog).getByRole('button', { name: 'Reactivate Supplier' }))
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4))
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(5))
     expect(fetchMock.mock.calls[3]?.[1]?.method).toBe('PATCH')
     expect(getRequestBody(fetchMock, 3)).toEqual({ isActive: true })
     expect(await screen.findByText('Supplier Old Parts Co reactivated successfully.')).toBeTruthy()

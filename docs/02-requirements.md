@@ -76,7 +76,7 @@ contact email and phone, billing address, default shipping address, and internal
 plain-text notes. `OWNER` and `ADMIN` may manage lifecycle and profile data;
 `STAFF` has read-only access. Names and contact fields are not unique. Company
 scope always comes from the authenticated backend context, never client input.
-Transaction history is a Phase 4E presentation foundation only until Sales
+Transaction history is a Phase 4F presentation foundation only until Sales
 records exist in Phase 6.
 
 ### FR-06 Suppliers
@@ -96,7 +96,7 @@ non-unique contact email and phone, primary address, and internal plain-text
 notes. `OWNER` and `ADMIN` may manage lifecycle and profile data; `STAFF` has
 read-only access. Archived Suppliers remain historically referenceable but may
 not normally be selected for a new future Purchase Order. Purchase history is a
-Phase 4E presentation foundation only until Purchasing records exist in Phase 5.
+Phase 4F presentation foundation only until Purchasing records exist in Phase 5.
 
 Customer and Supplier master data is mutable. Future Purchase Orders,
 Quotations, Sales Orders, and Invoices must retain the relevant master-data

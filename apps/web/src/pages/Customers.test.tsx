@@ -110,8 +110,14 @@ describe('Phase 4D Customer list and routes', () => {
     expect(await screen.findByText('ABC Trading')).toBeTruthy()
     expect(screen.getByText('Aisha Tan')).toBeTruthy()
     expect(screen.getByText('sales@abc.example')).toBeTruthy()
-    expect(screen.getAllByText('Active')).toHaveLength(1)
-    expect(screen.getAllByText('Archived')).toHaveLength(1)
+    expect(
+      within(screen.getByRole('row', { name: /ABC Trading/ })).getByText('Active'),
+    ).toBeTruthy()
+    expect(
+      within(screen.getByRole('row', { name: /Legacy Retail/ })).getByText(
+        'Archived',
+      ),
+    ).toBeTruthy()
     expect(screen.getByRole('link', { name: 'Customers' })).toBeTruthy()
     expect(screen.getByRole('link', { name: 'Suppliers' })).toBeTruthy()
     expect(
@@ -273,9 +279,13 @@ describe('Phase 4D Customer detail and lifecycle', () => {
     const fetchMock = await renderAuthenticatedPath('/customers', [
       success({ customers: [activeCustomer] }),
     ])
-    fetchMock.mockResolvedValueOnce(
-      success({ customer: { ...activeCustomer, isActive: false } }),
-    )
+    fetchMock
+      .mockResolvedValueOnce(
+        success({ customer: { ...activeCustomer, isActive: false } }),
+      )
+      .mockResolvedValueOnce(
+        success({ customers: [{ ...activeCustomer, isActive: false }] }),
+      )
     fireEvent.click(await screen.findByRole('button', { name: 'Archive' }))
     const dialog = screen.getByRole('dialog', { name: 'Archive Customer?' })
     expect(within(dialog).getByText(/ABC Trading/)).toBeTruthy()
@@ -285,6 +295,7 @@ describe('Phase 4D Customer detail and lifecycle', () => {
 
     expect(await screen.findByText('Customer ABC Trading archived successfully.')).toBeTruthy()
     expect(fetchMock.mock.calls[3]?.[1]?.method).toBe('DELETE')
+    expect(fetchMock.mock.calls[4]?.[0]).toMatch(/\/customers$/)
     expect(screen.getByRole('button', { name: 'Reactivate' })).toBeTruthy()
   })
 
@@ -292,14 +303,18 @@ describe('Phase 4D Customer detail and lifecycle', () => {
     const fetchMock = await renderAuthenticatedPath('/customers', [
       success({ customers: [archivedCustomer] }),
     ])
-    fetchMock.mockResolvedValueOnce(
-      success({ customer: { ...archivedCustomer, isActive: true } }),
-    )
+    fetchMock
+      .mockResolvedValueOnce(
+        success({ customer: { ...archivedCustomer, isActive: true } }),
+      )
+      .mockResolvedValueOnce(
+        success({ customers: [{ ...archivedCustomer, isActive: true }] }),
+      )
     fireEvent.click(await screen.findByRole('button', { name: 'Reactivate' }))
     const dialog = screen.getByRole('dialog', { name: 'Reactivate Customer?' })
     fireEvent.click(within(dialog).getByRole('button', { name: 'Reactivate Customer' }))
 
-    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(4))
+    await waitFor(() => expect(fetchMock).toHaveBeenCalledTimes(5))
     expect(fetchMock.mock.calls[3]?.[1]?.method).toBe('PATCH')
     expect(getRequestBody(fetchMock, 3)).toEqual({ isActive: true })
     expect(await screen.findByText('Customer Legacy Retail reactivated successfully.')).toBeTruthy()

@@ -141,8 +141,8 @@ Dashboard / AI Insights
 - [x] Phase 4A Customer and Supplier domain design approved
 - [x] Phase 4B Customer and Supplier schema migration complete
 - [x] Phase 4C Customer and Supplier backend complete
-- [ ] Phase 4D Customer and Supplier frontend implemented and awaiting manual browser approval
-- [ ] Phase 4E Customer and Supplier search and filtering not started
+- [x] Phase 4D Customer and Supplier frontend complete
+- [ ] Phase 4E Customer and Supplier search and filtering implemented and awaiting manual approval
 - [ ] Sales workflow implemented
 - [ ] AI assistant implemented
 - [ ] Production deployment completed
@@ -239,18 +239,35 @@ writes, STAFF reads, tenant-local not-found behavior, and database-validated
 Company scope. Their 316 backend tests across 10 files remain the approved
 backend baseline.
 
-Phase 4D — Customer & Supplier Frontend is current, implemented, and
-Codex-verified, awaiting manual browser approval. Protected Customer and
+Phase 4D — Customer & Supplier Frontend is complete following manual browser
+approval. Protected Customer and
 Supplier list, create, detail, and edit routes use typed native-fetch helpers,
 backend-authoritative archive/reactivate responses, accessible custom
 confirmation dialogs, OWNER/ADMIN controls, STAFF read-only presentation, and
 responsive desktop-table/mobile-card layouts. Optional-field clearing sends
 `null`; ordinary edit PATCH requests are diff-only and never include lifecycle
-or Company scope. All 138 frontend tests across 7 files pass, including 32
+or Company scope. Its final approved baseline contained 141 frontend tests
+across 7 files, including 32
 focused Phase 4D tests, together with frontend lint and the TypeScript-backed
 production build. No dependency, backend, Prisma schema, migration,
 search/filter, pagination, transaction-history, Purchasing, Sales, Dashboard,
-or AI work was added. Phase 4E, Phase 4F, and Phase 5 have not started.
+or AI work was added.
+
+Phase 4E — Customer & Supplier Search and Filtering is implemented and
+Codex-verified, awaiting manual browser/API approval. Both authenticated list
+APIs now strictly accept only optional trimmed `search` and
+`status=active|archived`; omitted status includes both lifecycle states. Search
+uses case-insensitive PostgreSQL substring matching across name, registration
+number, contact person, email, and phone, combined with status and the
+authenticated Company scope using AND semantics. The responsive list pages use
+explicit search submission, All/Active/Archived controls, useful clear and
+no-result states, and filter-aware authoritative refetches after lifecycle
+changes for every role. All 407 backend tests across 12 files and 163 frontend
+tests across 8 files pass, together with backend typecheck/build, frontend
+lint/build, and Prisma validation/generation/migration status. No dependency,
+schema, migration, pagination, sorting, specialized index, transaction history,
+Purchasing, Sales, Dashboard, or AI work was added. Phase 4F and Phase 5 remain
+not started.
 
 ## Local Development
 

@@ -67,7 +67,21 @@ export const customerIdParamsSchema = z
   })
   .strict();
 
-export const customerListQuerySchema = z.object({}).strict();
+export const customerListQuerySchema = z
+  .object({
+    search: z
+      .string()
+      .trim()
+      .min(1, "Search must not be blank")
+      .max(320, "Search must be at most 320 characters")
+      .refine(
+        (value) => !singleLineControlCharacterPattern.test(value),
+        "Search must not contain control characters",
+      )
+      .optional(),
+    status: z.enum(["active", "archived"]).optional(),
+  })
+  .strict();
 
 export const customerCreateSchema = z
   .object({
@@ -104,3 +118,4 @@ export const customerUpdateSchema = z
 
 export type CustomerCreateInput = z.infer<typeof customerCreateSchema>;
 export type CustomerUpdateInput = z.infer<typeof customerUpdateSchema>;
+export type CustomerListQuery = z.infer<typeof customerListQuerySchema>;

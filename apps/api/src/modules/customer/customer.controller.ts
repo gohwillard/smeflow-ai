@@ -70,7 +70,10 @@ export async function retrieveCustomers(
   }
 
   try {
-    const customers = await listCustomers(getAuthenticatedRequestContext(request));
+    const customers = await listCustomers(
+      getAuthenticatedRequestContext(request),
+      validationResult.data,
+    );
     response.status(200).json({ status: "success", data: { customers } });
   } catch (error) {
     next(error);
