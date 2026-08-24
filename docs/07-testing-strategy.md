@@ -175,3 +175,21 @@ intentional refresh-to-login behavior.
 
 At Phase 3G Codex verification, all 207 backend tests across 8 files and all
 106 frontend tests across 5 files pass.
+
+## Phase 4 Verification Direction
+
+Phase 4A changes documentation only, so its verification is repository and
+design consistency rather than application tests. Phase 4B must verify native
+UUID/timestamp types, required Company ownership, tenant-aware candidate keys,
+restrictive deletion, lifecycle defaults/indexes, string constraints, migration
+replay, and schema drift before any Customer or Supplier API is added.
+
+The later Customer and Supplier backend tests must cover strict field rejection,
+normalization and null-clearing, non-unique duplicate names/contact details,
+OWNER/ADMIN writes, STAFF read-only behavior, archive/reactivation,
+missing-versus-cross-Company not-found parity, two-Company list/search
+isolation, and preservation of archived historical references. Frontend tests
+must confirm role-aware actions and accessible loading, empty, error, detail,
+form, archive, and reactivation states. Purchasing and Sales tests will
+separately verify active-party selection and immutable document snapshots when
+those workflows are designed; Phase 4 does not create fake transaction records.

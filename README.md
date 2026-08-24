@@ -134,14 +134,18 @@ Dashboard / AI Insights
 - [x] Phase 3D Product frontend complete
 - [x] Phase 3E Inventory Movement and Manual Adjustment complete
 - [x] Phase 3F Product Search and Low Stock complete
-- [x] Phase 3G final verification Codex-verified
+- [x] Phase 3G final verification complete
+- [x] Phase 3 Product and Inventory Module complete
 - [x] Inventory module implemented
+- [x] Phase 4 Customers and Suppliers officially started
+- [ ] Phase 4A Customer and Supplier domain design awaiting manual approval
 - [ ] Sales workflow implemented
 - [ ] AI assistant implemented
 - [ ] Production deployment completed
 
 Completed phases: Phase 0 — Repository and Planning, Phase 1 — Application
-Foundation, and Phase 2 — Authentication and Company Setup.
+Foundation, Phase 2 — Authentication and Company Setup, and Phase 3 — Product
+and Inventory Module.
 
 Completed milestone: Phase 2H — Phase 2 Verification. The final audit confirmed
 the approved Company/User schema and migration, secure registration and login,
@@ -158,7 +162,7 @@ reload or address-bar navigation recreates the SPA, clears authentication, and
 returns the user to login; no token is stored in Web Storage, IndexedDB,
 cookies, or URLs.
 
-Phase 3 — Product and Inventory Module is in progress. Phase 3A — Product &
+Phase 3 — Product and Inventory Module is complete. Phase 3A — Product &
 Inventory Domain Design and Phase 3B — Product & Inventory Schema Migration are
 complete. Prisma and PostgreSQL now contain the approved `Category`, `Product`,
 `InventoryMovement`, and `InventoryMovementType` structures, tenant-aware
@@ -207,8 +211,8 @@ validation/generation/migration status, and 1440×1000/390×844 visual review. N
 dependency, schema, migration, pagination, reorder automation, notification,
 Dashboard, or AI work was added.
 
-Phase 3G — Phase 3 Final Verification is Codex-verified, awaiting a concise
-final user/ChatGPT acceptance check before Phase 3 is formally closed. The
+Phase 3G — Phase 3 Final Verification is complete following the final
+user/ChatGPT acceptance check. The
 complete Category, Product, Inventory, search, and low-stock subsystem passed
 scope, live PostgreSQL catalog, migration/drift, role, Company-isolation,
 strict-validation, exact-Decimal, transaction, concurrency, error-safety,
@@ -221,8 +225,17 @@ All 207 backend tests across 8 files and 106 frontend tests across 5 files pass,
 along with backend typecheck/build, frontend lint/build, Prisma
 validation/generation/migration status, two no-drift comparisons, and visual
 review at 1440×1000, 430×932, and 390×844. No application defect, dependency,
-schema, migration, or new business feature was introduced. Phase 4 has not
-started.
+schema, migration, or new business feature was introduced during verification.
+
+Phase 4 — Customers and Suppliers is now current. Phase 4A — Customer &
+Supplier Domain Design is documented and awaiting manual approval. The proposed
+design keeps Customer and Supplier as separate Company-owned master-data
+entities, defines normalization, non-uniqueness, OWNER/ADMIN management, STAFF
+read-only access, archive/reactivation, tenant-local not-found behavior,
+tenant-aware future relationships, and a historical document-snapshot
+invariant. Phase 4A is documentation only: no Prisma model, migration, API,
+frontend page, Purchasing, Sales, or AI functionality has been added. Phase 4B
+has not started.
 
 ## Local Development
 

@@ -65,8 +65,19 @@ The system shall allow users to:
 
 - Create customers
 - Edit customers
+- Archive and reactivate customers without deleting business history
 - Search customers
 - View customer transaction history
+
+For the Phase 4 MVP, a Customer is Company-owned master data for a party to
+whom the Company may later sell. Customer records contain a required display
+name and optional registration number, primary contact person, non-unique
+contact email and phone, billing address, default shipping address, and internal
+plain-text notes. `OWNER` and `ADMIN` may manage lifecycle and profile data;
+`STAFF` has read-only access. Names and contact fields are not unique. Company
+scope always comes from the authenticated backend context, never client input.
+Transaction history is a Phase 4E presentation foundation only until Sales
+records exist in Phase 6.
 
 ### FR-06 Suppliers
 
@@ -74,8 +85,23 @@ The system shall allow users to:
 
 - Create suppliers
 - Edit suppliers
+- Archive and reactivate suppliers without deleting business history
 - Search suppliers
 - View supplier purchase history
+
+For the Phase 4 MVP, a Supplier is separate Company-owned master data for a
+party from whom the Company may later purchase. Supplier records contain a
+required display name and optional registration number, primary contact person,
+non-unique contact email and phone, primary address, and internal plain-text
+notes. `OWNER` and `ADMIN` may manage lifecycle and profile data; `STAFF` has
+read-only access. Archived Suppliers remain historically referenceable but may
+not normally be selected for a new future Purchase Order. Purchase history is a
+Phase 4E presentation foundation only until Purchasing records exist in Phase 5.
+
+Customer and Supplier master data is mutable. Future Purchase Orders,
+Quotations, Sales Orders, and Invoices must retain the relevant master-data
+foreign key and, where their own approved design requires it, snapshot the
+identity/contact/address values needed for historical document accuracy.
 
 ### FR-07 Quotations
 

@@ -175,3 +175,31 @@ immutable movement. PostgreSQL row locking and a conditional stock predicate
 prevent competing stock-outs from overselling. Product search and the active
 `quantityOnHand <= reorderLevel` rule execute in PostgreSQL, while the frontend
 uses backend-authoritative refetches after stock changes.
+
+## Phase 4 Customer and Supplier Boundary
+
+Phase 4 keeps Customer and Supplier as separate modules inside the existing
+modular monolith:
+
+```text
+authenticated Customer/Supplier route
+  -> role guard and strict Zod boundary
+  -> Customer or Supplier service
+  -> Company-scoped Prisma query
+  -> PostgreSQL tenant and lifecycle constraints
+```
+
+Both modules will derive ownership only from the database-revalidated
+`req.auth.companyId`. A client-provided Company ID is never an ownership input,
+and cross-Company identifiers must be indistinguishable from tenant-local
+missing identifiers. `OWNER` and `ADMIN` will manage records; `STAFF` will read
+them. Archive/reactivate behavior preserves master data instead of hard-deleting
+it.
+
+Customer and Supplier are intentionally not combined into a generic business
+partner abstraction. Their future Purchasing and Sales relationships differ,
+and the MVP does not need shared multi-role lifecycle complexity. Future
+transaction documents must keep the relevant foreign key while snapshotting
+mutable party identity/contact/address values when their own domain design
+requires historical document accuracy. No transactional model or snapshot
+field is introduced during Phase 4A.

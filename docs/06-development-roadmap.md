@@ -37,19 +37,21 @@ The current project state is:
 - Phase 2F — Company Profile: ✅ Completed
 - Phase 2G — Protected Frontend Authentication Flow: ✅ Completed
 - Phase 2H — Phase 2 Verification: ✅ Completed
-- Phase 3 — Product and Inventory Module: 🚧 Current
+- Phase 3 — Product and Inventory Module: ✅ Completed
 - Phase 3A — Product & Inventory Domain Design: ✅ Completed
 - Phase 3B — Product & Inventory Schema Migration: ✅ Completed
 - Phase 3C — Category & Product Backend: ✅ Completed
 - Phase 3D — Product Frontend: ✅ Completed
 - Phase 3E — Inventory Movement & Manual Adjustment: ✅ Completed
 - Phase 3F — Product Search & Low Stock: ✅ Completed
-- Phase 3G — Product & Inventory Verification: 🚧 Codex-verified; awaiting
-  final user/ChatGPT approval
+- Phase 3G — Product & Inventory Verification: ✅ Completed
+- Phase 4 — Customers and Suppliers: 🚧 Current
+- Phase 4A — Customer & Supplier Domain Design: 🚧 Current; documented and
+  awaiting manual approval
 
-Phase 3 is in progress. Phase 3A through Phase 3F are complete. Phase 3G has
-passed Codex verification and awaits the concise final user/ChatGPT acceptance
-check before Phase 3 is formally closed. All later phases have not started.
+Phase 3 is complete following its final acceptance. Phase 4 has started with
+the documentation-only Phase 4A design milestone. Phase 4A is current and
+awaits manual approval; Phase 4B and all later milestones have not started.
 
 ---
 
@@ -398,14 +400,14 @@ was required.
 A new user can register, sign in, access protected pages, and access only data
 belonging to their company.
 
-Phase 2 is complete. Phase 3 has since completed Phase 3A through Phase 3F and
-Codex-verified Phase 3G, which awaits final approval.
+Phase 2 is complete. Phase 3 has since completed its full Product and Inventory
+scope and final verification.
 
 ---
 
 ## Phase 3 — Product and Inventory Module
 
-**Status:** 🚧 Current
+**Status:** ✅ Completed
 
 **Goal:** Build the first major operational SME module.
 
@@ -554,7 +556,7 @@ before Phase 3G started.
 
 ### Phase 3G — Product & Inventory Verification
 
-**Status:** 🚧 Codex-verified; awaiting final user/ChatGPT approval
+**Status:** ✅ Completed
 
 Verify at minimum:
 
@@ -581,7 +583,10 @@ validate/generate/migrate status, `git diff --check`, and visual review at
 verified the exact stock sequence, low-stock transition after Stock In, role
 matrix, and tenant-local failures, then cleaned up all fictional records. No
 application defect, dependency, schema, migration, or new business feature was
-introduced. Phase 4 has not started.
+introduced. Phase 4 had not started during that verification run.
+
+The subsequent final acceptance closed Phase 3 without further application,
+dependency, schema, or migration changes.
 
 ### Definition of Done
 
@@ -593,17 +598,37 @@ low-stock items.
 
 ## Phase 4 — Customers and Suppliers
 
-**Status:** ⬜ Planned
+**Status:** 🚧 Current
 
 **Goal:** Create the external-party master data required for purchasing and
 sales.
 
 ### Phase 4A — Customer & Supplier Domain Design
 
-**Status:** ⬜ Planned
+**Status:** 🚧 Current — documented and awaiting manual approval
 
-Design fields, company ownership, indexes, relationships, uniqueness decisions,
-and future transaction relationships.
+This milestone is design only. Do not create a Prisma model, migration, API, or
+frontend feature during Phase 4A.
+
+Design and review:
+
+- separate `Customer` and `Supplier` master-data boundaries;
+- required and optional fields, maximum lengths, and normalization;
+- Company ownership derived only from `req.auth.companyId`;
+- UUID, timestamp, table naming, lifecycle, and restrictive-delete strategy;
+- tenant-aware candidate keys, lifecycle indexes, and evidence-based search
+  indexing;
+- no uniqueness for names, registration numbers, contact emails, phone numbers,
+  contact people, or addresses;
+- OWNER/ADMIN management and STAFF read-only authorization;
+- archive/reactivate behavior and historical-reference preservation;
+- future strict REST/PATCH semantics and tenant-local not-found behavior; and
+- the requirement for future transaction documents to retain the master-data
+  foreign key and snapshot mutable party details where their own design requires
+  historical accuracy.
+
+The proposed design is documented in `docs/04-database-design.md`. It remains
+current until manual approval. Phase 4B must not start before that approval.
 
 ### Phase 4B — Customer & Supplier Schema Migration
 

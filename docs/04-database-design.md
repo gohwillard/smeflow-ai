@@ -31,6 +31,11 @@ verifies the complete integrated subsystem, live catalog, migration history,
 and schema drift. None of these milestones changed the Phase 3B Prisma schema
 or migrations.
 
+Phase 3 is complete. Phase 4A is the current documentation-only milestone. The
+proposed `Customer` and `Supplier` design below is awaiting manual approval
+before Phase 4B may implement it. No Customer or Supplier Prisma model,
+migration, API, or frontend feature exists yet.
+
 Models assigned to later roadmap phases remain planning context only. Their
 fields, relationships, constraints, and indexes must be designed in their own
 canonical milestones before implementation.
@@ -519,12 +524,237 @@ workflows. Customer, Supplier, Purchasing, Sales, Dashboard, and AI work remains
 in its later canonical phases; AI V1 remains read-only and may not execute
 arbitrary LLM-generated SQL.
 
+## Proposed Phase 4A Customer and Supplier Design
+
+This section is the proposed implementation specification for Phase 4B and the
+later Phase 4 API/frontend milestones. It is domain design only and remains
+subject to manual approval.
+
+### Domain Boundary and Separation
+
+A `Customer` is a Company-owned external party to whom the Company may later
+issue Quotations, Sales Orders, and Invoices. A `Supplier` is a separate
+Company-owned external party from whom the Company may later purchase goods.
+Both are master data: their contact details and lifecycle state may change over
+time independently of transactional documents.
+
+Customer and Supplier remain separate models because they serve different
+workflows, have different address needs, and will gain different transaction
+relationships. A real organization may be represented once in each model when
+it genuinely plays both roles. Phase 4 does not introduce a polymorphic
+`BusinessPartner`, partner-role table, shared-contact subsystem, or automatic
+link between those two records. That abstraction would add joins, lifecycle
+coordination, and role semantics without an approved MVP requirement.
+
+No mandatory `customerCode` or `supplierCode` is approved. The canonical
+requirements, API plan, and roadmap do not require such codes. UUIDs provide
+internal identity, while names and contact information provide business-facing
+identification. Auto-number sequencing is deferred to the document-numbering
+designs in Purchasing and Sales.
+
+### `Customer`
+
+Planned PostgreSQL table name: `customers`
+
+| Field | Conceptual type | Required | Maximum length | Design rule |
+| --- | --- | --- | --- | --- |
+| `id` | UUID | Yes | — | Immutable primary key; use the existing Prisma-generated UUID v4 and native PostgreSQL `uuid` convention. |
+| `companyId` | UUID | Yes | — | Immutable owner and required foreign key to `companies.id`; always derived from authenticated backend context. |
+| `name` | String | Yes | 200 | Trim, reject an empty result, and preserve display casing. Not unique. |
+| `registrationNumber` | String | No | 100 | Customer business-registration identifier where applicable; trim, blank to `null`, preserve meaningful formatting and casing, and do not apply jurisdiction-specific validation. |
+| `contactPerson` | String | No | 200 | Primary MVP contact; trim and normalize blank to `null`. |
+| `email` | String | No | 320 | Contact email; trim, lowercase, validate when present, and normalize blank to `null`. Not a login identity and not unique. |
+| `phone` | String | No | 50 | Trim and normalize blank to `null`; store as text and preserve meaningful characters such as `+`, spaces, parentheses, and leading zeroes. |
+| `billingAddress` | String | No | 2,000 | Primary billing/contact address; trim and normalize blank to `null`. |
+| `shippingAddress` | String | No | 2,000 | Default shipping/delivery address; trim and normalize blank to `null`. It is only a future default, not historical document truth. |
+| `notes` | String | No | 2,000 | Internal plain-text notes; trim and normalize blank to `null`. No CRM activity model or rich-text/HTML storage is introduced. |
+| `isActive` | Boolean | Yes | — | Defaults to `true`; `false` means archived, not deleted. |
+| `createdAt` | Timestamp with time zone | Yes | — | Defaults when created using the established `timestamptz(3)` convention. |
+| `updatedAt` | Timestamp with time zone | Yes | — | Prisma-maintained using `@updatedAt` and `timestamptz(3)`. |
+
+Customer has separate billing and shipping addresses because Sales commonly
+needs both defaults. Phase 4 does not add multiple-address records, contact
+lists, credit limits, tax profiles, payment terms, or customer-accounting data.
+
+### `Supplier`
+
+Planned PostgreSQL table name: `suppliers`
+
+| Field | Conceptual type | Required | Maximum length | Design rule |
+| --- | --- | --- | --- | --- |
+| `id` | UUID | Yes | — | Immutable primary key using the established UUID convention. |
+| `companyId` | UUID | Yes | — | Immutable owner and required foreign key to `companies.id`; always derived from authenticated backend context. |
+| `name` | String | Yes | 200 | Trim, reject an empty result, and preserve display casing. Not unique. |
+| `registrationNumber` | String | No | 100 | Supplier business-registration identifier where applicable; trim, blank to `null`, preserve meaningful formatting and casing, and do not apply jurisdiction-specific validation. |
+| `contactPerson` | String | No | 200 | Primary MVP contact; trim and normalize blank to `null`. |
+| `email` | String | No | 320 | Contact email; trim, lowercase, validate when present, and normalize blank to `null`. Not unique. |
+| `phone` | String | No | 50 | Trim and normalize blank to `null`; store as text and preserve meaningful formatting and leading zeroes. |
+| `address` | String | No | 2,000 | Primary supplier address; trim and normalize blank to `null`. |
+| `notes` | String | No | 2,000 | Internal plain-text notes; trim and normalize blank to `null`. |
+| `isActive` | Boolean | Yes | — | Defaults to `true`; `false` means archived, not deleted. |
+| `createdAt` | Timestamp with time zone | Yes | — | Defaults when created using `timestamptz(3)`. |
+| `updatedAt` | Timestamp with time zone | Yes | — | Prisma-maintained using `@updatedAt` and `timestamptz(3)`. |
+
+Supplier uses one primary address for the Phase 4 MVP. Supplier branches,
+multiple contacts, supplier catalogues, negotiated prices, payment terms,
+ratings, purchasing analytics, and accounts payable belong outside Phase 4A.
+
+### Normalization and Future Write Semantics
+
+Normalization is server-side and backend-authoritative:
+
+- required `name`: trim, reject an empty result, preserve display casing;
+- optional strings: omitted during create means `null`; supplied text is
+  trimmed, and a blank result becomes `null`;
+- email: trim; convert a blank result to `null`; otherwise lowercase, validate,
+  and store;
+- phone and registration number: trim while preserving meaningful punctuation,
+  casing, and leading zeroes; and
+- addresses and notes: store plain text only. Rendering layers must escape text
+  rather than interpreting stored HTML.
+
+Single-line identity/contact fields must reject control characters. Address and
+notes fields may retain ordinary line breaks but must reject NUL and other
+unsafe control characters. Phase 4B should add reviewed database checks for the
+required trimmed non-empty name and for optional stored strings being either
+`NULL` or already trimmed and non-empty. Zod remains the clearer first-line API
+validator.
+
+Future PATCH contracts are partial:
+
+```text
+field omitted        -> retain the stored value
+optional field null  -> clear it
+optional field blank -> normalize to null
+name omitted         -> retain the stored name
+name null or blank   -> validation error
+```
+
+Strict request objects must reject unknown fields and protected fields such as
+`id`, `companyId`, `createdAt`, `updatedAt`, and future relationship or history
+fields. Lifecycle changes use the explicit archive/reactivate behavior below;
+they must not be hidden side effects of editing contact details.
+
+### Uniqueness and Identity Decisions
+
+No Customer or Supplier business field is unique in Phase 4:
+
+- names may be identical within one Company;
+- registration numbers are not assumed globally or Company-unique;
+- contact emails may be shared;
+- phone numbers, contact people, and addresses may be shared; and
+- different Companies may store completely identical Customer or Supplier data.
+
+Only the UUID primary key identifies a row. This avoids rejecting legitimate
+businesses and avoids jurisdiction-specific identity assumptions. If later
+usage demonstrates a duplicate-data problem, deduplication should be designed
+from real requirements rather than retrofitted as an unsafe uniqueness rule.
+
+### Relationships, Tenant Integrity, and Deletion
+
+```text
+Company  1 -> 0..* Customer
+Company  1 -> 0..* Supplier
+
+Supplier 1 -> 0..* PurchaseOrder  (future Phase 5 only)
+Customer 1 -> 0..* Quotation      (future Phase 6 only)
+Customer 1 -> 0..* SalesOrder     (future Phase 6 only)
+Customer 1 -> 0..* Invoice        (future Phase 6 only)
+```
+
+Every Customer and Supplier belongs to exactly one Company. Future reads and
+writes must use the database-revalidated request context:
+
+```text
+req.auth = { userId, companyId, role }
+```
+
+The client must never select or override `companyId` through a path, query,
+body, hidden field, or frontend state. Detail, update, archive, and reactivation
+lookups must combine the requested UUID with `req.auth.companyId`; a missing ID
+and another Company's ID must return the same tenant-local not-found behavior.
+
+Phase 4B should use direct required Company foreign keys with `ON DELETE
+RESTRICT`. Customer and Supplier should each retain their UUID primary key and
+add a candidate key on `(id, companyId)` so future transactional foreign keys
+can prove same-Company ownership in PostgreSQL. This small overlapping index is
+consistent with Phase 3's tenant-aware design and prevents future documents from
+linking to another Company's master data. Normal application behavior provides
+no hard-delete operation.
+
+### Lifecycle and Authorization
+
+Archiving sets `isActive = false`; reactivation sets it back to `true`.
+Archiving is idempotent and does not erase or anonymize the record. An archived
+Customer or Supplier remains Company-scoped and readable, may be reactivated,
+and remains available to historical references. Future transaction creation
+must normally allow only active parties, while existing documents continue to
+reference an archived party.
+
+The Phase 4 authorization matrix is:
+
+| Capability | OWNER | ADMIN | STAFF |
+| --- | --- | --- | --- |
+| List/retrieve Customers | Yes | Yes | Yes |
+| Create/update/archive/reactivate Customers | Yes | Yes | No |
+| List/retrieve Suppliers | Yes | Yes | Yes |
+| Create/update/archive/reactivate Suppliers | Yes | Yes | No |
+
+Every route requires authentication. Backend role guards are authoritative;
+hidden frontend controls are only a UX measure. No role beyond `OWNER`, `ADMIN`,
+and `STAFF` is introduced.
+
+### Historical Document Snapshot Invariant
+
+Customer and Supplier master data is intentionally mutable. A future document
+must therefore not rely only on joining the latest master row to reconstruct
+the party name, registration/contact details, or address that applied when the
+document was issued or otherwise became historically significant.
+
+Phase 5 and Phase 6 must retain the Customer/Supplier foreign key for identity
+and navigation and, where required by that workflow, copy the relevant party
+identity, contact, and address values into immutable document snapshot fields at
+an explicitly designed document stage. The exact snapshot fields and timing
+belong to the Purchase Order, Quotation, Sales Order, and Invoice design
+milestones. Phase 4A does not add any transaction or snapshot column.
+
+### Planned Phase 4B Index and Constraint Direction
+
+Subject to schema review, the minimum planned indexes are:
+
+- Customer: candidate key `(id, companyId)` and non-unique
+  `(companyId, isActive)` for tenant lifecycle lists;
+- Supplier: candidate key `(id, companyId)` and non-unique
+  `(companyId, isActive)`; and
+- no standalone `companyId` index because it is the leading column of the
+  lifecycle index.
+
+Case-insensitive substring search over name, registration number, contact
+person, email, or phone is a planned API behavior, but an ordinary B-tree does
+not efficiently serve broad substring predicates. Phase 4A does not add a
+PostgreSQL extension or speculative search index. The later backend milestone
+should first implement the Company-scoped query and add specialized indexing
+only when measured data/query behavior justifies it.
+
+Phase 4B must review primary keys, native UUID/timestamp types, nullability,
+defaults, length checks, normalized-string checks, Company foreign keys,
+candidate keys, lifecycle indexes, and `ON DELETE RESTRICT`. It must not add
+Purchasing or Sales tables.
+
+### Explicit Phase 4A Exclusions
+
+Phase 4A does not implement Prisma models, migrations, APIs, frontend routes,
+search, pagination, transaction history, multiple contacts/addresses, CRM
+activity, credit or payment terms, purchasing, goods receiving, quotations,
+sales orders, fulfilment, invoices, payments, accounting, Dashboard, or AI.
+Product and Inventory behavior remains unchanged.
+
 ## Future Planned Models
 
 These models belong to later roadmap design milestones and must not be inferred
 as ready for Prisma implementation from this list:
 
-- Phase 4A: `Customer`, `Supplier`
+- Phase 4B: approved `Customer` and `Supplier` models after Phase 4A manual review
 - Phase 5A: `PurchaseOrder`, `PurchaseOrderItem`
 - Phase 6A: `Quotation`, `QuotationItem`, `SalesOrder`, `SalesOrderItem`, `Invoice`
 

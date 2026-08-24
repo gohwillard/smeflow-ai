@@ -491,23 +491,68 @@ the committed balance. Both records commit together or both roll back.
 
 ## Customers
 
+Planned for the later Phase 4 Customer backend milestone; not implemented in
+Phase 4A:
+
 ```text
 GET    /customers
-GET    /customers/:id
+GET    /customers/:customerId
 POST   /customers
-PATCH  /customers/:id
-DELETE /customers/:id
+PATCH  /customers/:customerId
+DELETE /customers/:customerId
 ```
+
+All routes will require Bearer authentication and derive ownership exclusively
+from `req.auth.companyId`. `OWNER`, `ADMIN`, and `STAFF` may list/retrieve;
+`OWNER` and `ADMIN` may create, update, archive, and reactivate. `STAFF` writes
+return HTTP 403. Missing and cross-Company IDs share `CUSTOMER_NOT_FOUND`.
+
+Create will strictly accept `name` plus optional `registrationNumber`,
+`contactPerson`, `email`, `phone`, `billingAddress`, `shippingAddress`, and
+`notes`. It will reject unknown or protected fields including `id`, `companyId`,
+`isActive`, timestamps, and future transaction/history fields. Required name is
+trimmed, nonblank, at most 200 characters, and keeps display casing. Optional
+strings are trimmed and blank values become `null`; email is lowercased and
+validated. Names, registration numbers, emails, and phones are not unique.
+
+PATCH is partial: omission preserves a value, explicit `null` clears an optional
+field, blank optional text normalizes to `null`, and `name` cannot be `null` or
+blank. DELETE is an idempotent archive operation (`isActive = false`), never a
+physical delete. Reactivation follows the established lifecycle pattern by
+setting `isActive: true` through an explicit PATCH lifecycle action; ordinary
+profile editing must not change lifecycle accidentally. Responses omit
+`companyId` and expose only approved business fields.
+
+The later list implementation may accept a strictly validated optional search
+term matching name, registration number, contact person, email, or phone
+case-insensitively. Search and any active/archive filter remain Company-scoped.
+The exact pagination/filter contract belongs to Phase 4C; Phase 4A adds no
+endpoint, extension, or search index.
 
 ## Suppliers
 
+Planned for the later Phase 4 Supplier backend milestone; not implemented in
+Phase 4A:
+
 ```text
 GET    /suppliers
-GET    /suppliers/:id
+GET    /suppliers/:supplierId
 POST   /suppliers
-PATCH  /suppliers/:id
-DELETE /suppliers/:id
+PATCH  /suppliers/:supplierId
+DELETE /suppliers/:supplierId
 ```
+
+Authentication, Company isolation, role enforcement, tenant-local not-found
+behavior, strict request validation, lifecycle semantics, and safe response
+selection mirror Customers. Create will accept only `name` plus optional
+`registrationNumber`, `contactPerson`, `email`, `phone`, `address`, and `notes`.
+PATCH uses the same omitted/`null`/blank rules. DELETE archives idempotently;
+reactivation is an explicit `isActive: true` PATCH lifecycle action.
+
+Future Supplier search may match name, registration number, contact person,
+email, or phone case-insensitively, always combined with authenticated Company
+scope. Exact list parameters and evidence-based indexing belong to Phase 4D.
+No Supplier API exists during Phase 4A.
 
 ## Quotations
 
