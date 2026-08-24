@@ -133,13 +133,25 @@ beforeAll(async () => {
         phone: "+60 3 9876 5432",
       },
     }),
+    prisma.supplier.create({
+      data: {
+        companyId: companyBId,
+        name: "Company B Archived Supplier",
+        isActive: false,
+      },
+    }),
   ]);
 
-  ["alpha", "activeSecret", "archivedSecret", "archived", "companyB"].forEach(
-    (key, index) => {
-      supplierIds[key] = suppliers[index]!.id;
-    },
-  );
+  [
+    "alpha",
+    "activeSecret",
+    "archivedSecret",
+    "archived",
+    "companyB",
+    "companyBArchived",
+  ].forEach((key, index) => {
+    supplierIds[key] = suppliers[index]!.id;
+  });
 
   const owner = companyA.users.find((user) => user.role === UserRole.OWNER);
   const admin = companyA.users.find((user) => user.role === UserRole.ADMIN);
@@ -304,16 +316,34 @@ describe("Phase 4E combined Supplier filters and isolation", () => {
   });
 
   it.each([
-    ["search", "/api/v1/suppliers?search=company+b"],
-    ["status", "/api/v1/suppliers?status=active"],
-    ["combined", "/api/v1/suppliers?search=company+b&status=active"],
-  ])("excludes Company B Suppliers from %s results", async (_label, path) => {
-    const response = await request(app)
-      .get(path)
-      .set("Authorization", bearer(ownerToken))
-      .expect(200);
-    expect(listedIds(response)).not.toContain(supplierIds.companyB);
-  });
+    [
+      "search",
+      "/api/v1/suppliers?search=company+b",
+      ["companyB", "companyBArchived"],
+    ],
+    ["active status", "/api/v1/suppliers?status=active", ["companyB"]],
+    [
+      "archived status",
+      "/api/v1/suppliers?status=archived",
+      ["companyBArchived"],
+    ],
+    [
+      "combined",
+      "/api/v1/suppliers?search=company+b&status=active",
+      ["companyB"],
+    ],
+  ])(
+    "excludes Company B Suppliers from %s results",
+    async (_label, path, hiddenKeys) => {
+      const response = await request(app)
+        .get(path)
+        .set("Authorization", bearer(ownerToken))
+        .expect(200);
+      for (const hiddenKey of hiddenKeys) {
+        expect(listedIds(response)).not.toContain(supplierIds[hiddenKey]);
+      }
+    },
+  );
 });
 
 describe("Phase 4E Supplier query validation", () => {
@@ -332,6 +362,7 @@ describe("Phase 4E Supplier query validation", () => {
   it.each([
     "companyId",
     "page",
+    "pageSize",
     "limit",
     "offset",
     "sort",

@@ -143,7 +143,8 @@ Dashboard / AI Insights
 - [x] Phase 4C Customer and Supplier backend complete
 - [x] Phase 4D Customer and Supplier frontend complete
 - [x] Phase 4E Customer and Supplier search and filtering complete
-- [ ] Phase 4F Transaction History Foundation implemented and awaiting manual approval
+- [x] Phase 4F Transaction History Foundation complete after manual approval
+- [ ] Phase 4G final verification implemented and awaiting manual approval
 - [ ] Sales workflow implemented
 - [ ] AI assistant implemented
 - [ ] Production deployment completed
@@ -269,17 +270,25 @@ lint/build, and Prisma validation/generation/migration status. No dependency,
 schema, migration, pagination, sorting, specialized index, transaction history,
 Purchasing, Sales, Dashboard, or AI work was added.
 
-Phase 4F — Related Transaction History Foundation is implemented and
-Codex-verified, awaiting manual browser approval. Customer and Supplier detail
-pages now contain restrained read-only Transaction History sections for all
-authenticated roles. The Customer section truthfully points to future Sales
-workflows, and the Supplier section points to future Purchasing workflows. No
-history API, fake record, count, total, transaction model, schema change, or
-migration was added. Documentation now fixes the future active-party,
-archived-reference, same-Company composite foreign-key, and immutable snapshot
-rules without implementing Purchasing or Sales. All 171 frontend tests across 8
-files pass, together with frontend lint/build and Prisma
-validation/generation/migration status. Phase 4G and Phase 5 remain not started.
+Phase 4F — Related Transaction History Foundation is complete after manual
+browser approval. Customer and Supplier detail pages contain restrained
+read-only Transaction History sections for all authenticated roles. The
+Customer section truthfully points to future Sales workflows, and the Supplier
+section points to future Purchasing workflows. No history API, fake record,
+count, total, transaction model, schema change, or migration was added.
+
+Phase 4G — Phase 4 Final Verification is implemented and Codex-verified,
+awaiting final manual approval. The complete Customer and Supplier subsystem
+passed domain, live PostgreSQL catalog, three-migration history, two no-drift
+comparisons, strict validation, role, Company-isolation, lifecycle,
+search/filter, frontend integration, accessibility-source, responsive-source,
+Phase 3 regression, authentication regression, build, and repository-hygiene
+review. All 411 backend tests across 12 files and all 171 frontend tests across
+8 files pass. Backend typecheck/build, frontend ESLint/build, Prisma
+validate/generate/migrate status, and `git diff --check` also pass. No
+application defect, dependency, schema, migration, generated contract, or new
+business feature was introduced. Phase 4 remains current until user manual
+acceptance; Phase 5 and Phase 6 have not started.
 
 ## Local Development
 

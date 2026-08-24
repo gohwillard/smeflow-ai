@@ -51,15 +51,16 @@ The current project state is:
 - Phase 4C — Customer & Supplier Backend: ✅ Completed
 - Phase 4D — Customer & Supplier Frontend: ✅ Completed
 - Phase 4E — Customer & Supplier Search and Filtering: ✅ Completed
-- Phase 4F — Related Transaction History Foundation: 🚧 Current
-- Phase 4G — Phase 4 Verification: ⬜ Planned
+- Phase 4F — Related Transaction History Foundation: ✅ Completed
+- Phase 4G — Phase 4 Verification: 🚧 Current
 
 Phase 3 is complete following its final acceptance. Phase 4A received manual
 approval and is complete. Phase 4B received manual approval and is complete.
 Phase 4C is complete after manual API/database approval, and Phase 4D is
 complete after manual browser approval. Phase 4E received manual browser/API
-approval and is complete. Phase 4F is implemented and Codex-verified, awaiting
-manual browser approval. Phase 4G and later milestones have not started.
+approval and is complete. Phase 4F received manual browser approval and is
+complete. Phase 4G is implemented and Codex-verified, awaiting final manual
+approval. Phase 5 and later milestones have not started.
 
 ---
 
@@ -734,7 +735,7 @@ index, Phase 4F, Phase 5, or AI work was added.
 
 ### Phase 4F — Related Transaction History Foundation
 
-**Status:** 🚧 Current
+**Status:** ✅ Completed
 
 Prepare customer and supplier detail structures for future transaction history.
 Do not invent or prematurely implement purchasing or sales records.
@@ -755,15 +756,36 @@ needs it. The Prisma schema and all three migrations remain unchanged.
 
 Six focused role cases were added to the existing Customer/Supplier frontend
 test files. All 171 frontend tests across 8 files pass, together with frontend
-lint/build and Prisma validation/generation/migration status. Phase 4F is
-implemented and Codex-verified, awaiting manual review at desktop, 430×932, and
-390×844. Phase 4G has not started.
+lint/build and Prisma validation/generation/migration status. The subsequent
+user-provided approved status confirms Phase 4F is complete.
 
 ### Phase 4G — Phase 4 Verification
 
-**Status:** ⬜ Planned
+**Status:** 🚧 Current
 
 Verify CRUD behavior, search, company isolation, and data integrity.
+
+The complete Phase 4 subsystem is implemented and Codex-verified, awaiting
+final manual approval. The audit covered the approved Customer/Supplier domain
+boundaries, Prisma schema and all three migrations, live PostgreSQL columns and
+constraints, two no-drift comparisons, strict create/PATCH/query validation,
+safe response selection, authenticated Company scope, OWNER/ADMIN/STAFF roles,
+tenant-local not-found behavior, lifecycle identity preservation,
+search/status AND semantics, frontend routes and API integration, custom
+Status controls and lifecycle dialogs, filter-aware refetches, Home shortcuts,
+truthful history foundations, accessibility and responsive source review,
+Phase 3/authentication regressions, and repository hygiene.
+
+Four focused backend cases now explicitly prove archived-filter tenant
+isolation and `pageSize` rejection for both Customer and Supplier. All 411
+backend tests across 12 files and all 171 frontend tests across 8 files
+pass. Backend typecheck/build, frontend ESLint/build, Prisma
+validation/generation/migration status, migration-to-live and schema-to-live
+no-drift comparisons, live catalog inspection, exact three-migration count, and
+`git diff --check` pass. No application defect, dependency, schema, migration,
+generated contract, or new business feature was introduced. Phase 4 is not
+officially complete until user manual acceptance. Phase 5 and Phase 6 remain
+unstarted.
 
 ### Definition of Done
 

@@ -281,6 +281,29 @@ are not added for non-existent transaction APIs. At Phase 4F Codex verification,
 all 171 frontend tests across 8 files pass, together with frontend lint and the
 production build.
 
+## Phase 4G Final Verification Coverage
+
+Phase 4G reruns the complete backend and frontend suites and audits the whole
+integrated Customer/Supplier subsystem rather than adding a new business
+feature. Coverage includes approved domain fields and exclusions, strict
+create/PATCH/query contracts, safe responses, OWNER/ADMIN/STAFF authorization,
+Company-isolated CRUD/search/status/combined queries, tenant-local 404s,
+archive/reactivation identity preservation, search/status AND semantics,
+frontend routing and authoritative refetch behavior, custom Status controls,
+lifecycle dialogs, Home shortcuts, truthful no-request history foundations,
+responsive and accessibility source review, and Phase 3/authentication
+regressions.
+
+Phase 4G adds four narrow integration cases that explicitly place archived
+records in Company B and prove `status=archived` cannot reveal them, and that
+explicitly reject `pageSize`, for both Customer and Supplier. At Phase 4G
+Codex verification, all 411 backend tests across 12 files and all 171 frontend
+tests across 8 files pass. Backend typecheck/build, frontend ESLint/build,
+Prisma validate/generate/migrate status, exact three-migration count,
+migration-to-live and schema-to-live no-drift comparisons, live PostgreSQL
+catalog inspection, and repository hygiene checks also pass. Final manual
+verification remains required before Phase 4 is officially complete.
+
 When Purchasing and Sales are implemented, their own integration tests must
 prove that Company A documents cannot reference Company B parties, archived
 parties cannot be selected for new documents, existing documents remain readable

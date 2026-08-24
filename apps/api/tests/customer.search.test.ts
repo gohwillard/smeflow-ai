@@ -134,13 +134,25 @@ beforeAll(async () => {
         phone: "+60 12 345 6789",
       },
     }),
+    prisma.customer.create({
+      data: {
+        companyId: companyBId,
+        name: "Company B Archived Customer",
+        isActive: false,
+      },
+    }),
   ]);
 
-  ["alice", "activeSecret", "archivedSecret", "archived", "companyB"].forEach(
-    (key, index) => {
-      customerIds[key] = customers[index]!.id;
-    },
-  );
+  [
+    "alice",
+    "activeSecret",
+    "archivedSecret",
+    "archived",
+    "companyB",
+    "companyBArchived",
+  ].forEach((key, index) => {
+    customerIds[key] = customers[index]!.id;
+  });
 
   const owner = companyA.users.find((user) => user.role === UserRole.OWNER);
   const admin = companyA.users.find((user) => user.role === UserRole.ADMIN);
@@ -305,16 +317,34 @@ describe("Phase 4E combined Customer filters and isolation", () => {
   });
 
   it.each([
-    ["search", "/api/v1/customers?search=company+b"],
-    ["status", "/api/v1/customers?status=active"],
-    ["combined", "/api/v1/customers?search=company+b&status=active"],
-  ])("excludes Company B Customers from %s results", async (_label, path) => {
-    const response = await request(app)
-      .get(path)
-      .set("Authorization", bearer(ownerToken))
-      .expect(200);
-    expect(listedIds(response)).not.toContain(customerIds.companyB);
-  });
+    [
+      "search",
+      "/api/v1/customers?search=company+b",
+      ["companyB", "companyBArchived"],
+    ],
+    ["active status", "/api/v1/customers?status=active", ["companyB"]],
+    [
+      "archived status",
+      "/api/v1/customers?status=archived",
+      ["companyBArchived"],
+    ],
+    [
+      "combined",
+      "/api/v1/customers?search=company+b&status=active",
+      ["companyB"],
+    ],
+  ])(
+    "excludes Company B Customers from %s results",
+    async (_label, path, hiddenKeys) => {
+      const response = await request(app)
+        .get(path)
+        .set("Authorization", bearer(ownerToken))
+        .expect(200);
+      for (const hiddenKey of hiddenKeys) {
+        expect(listedIds(response)).not.toContain(customerIds[hiddenKey]);
+      }
+    },
+  );
 });
 
 describe("Phase 4E Customer query validation", () => {
@@ -333,6 +363,7 @@ describe("Phase 4E Customer query validation", () => {
   it.each([
     "companyId",
     "page",
+    "pageSize",
     "limit",
     "offset",
     "sort",
