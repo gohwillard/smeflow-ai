@@ -282,3 +282,13 @@
 - **Verification:** All 138 frontend tests across 7 files pass, including all 32 focused Customer/Supplier tests. Frontend ESLint and the TypeScript-backed production build pass. Final diff, repository status, migration-count, and backend/database scope checks also passed.
 - **Scope:** The previously approved detail-header and metadata-divider fixes remain intact. No API, backend, Prisma schema, migration, dependency, route, form, lifecycle, authentication, search/filter, pagination, Phase 4E, or later-phase behavior changed.
 - **Next milestone:** Re-review both Customer and Supplier desktop tables and their 430×932/390×844 mobile cards. Do not start Phase 4E automatically.
+
+## Phase 4D — Manual Review Dashboard Update
+
+- **Status:** Implemented and Codex-verified; Phase 4D remains under manual browser review and is not officially complete.
+- **Updated:** Replaced the Product/Category-specific Home hero description with future-proof core-business-data wording. Added a Customers & Suppliers business-module card with `/customers` and `/suppliers` shortcuts alongside the existing Product Catalog, Current User, Company, and memory-only session cards.
+- **Layout decision:** Reused the established two-column `content-grid`, action-card structure, row actions, and primary/secondary button styles. The card order produces balanced Current User/Product Catalog and Company/Customers & Suppliers desktop rows, while the existing `52rem` breakpoint stacks every card naturally on narrow screens. No new CSS or dependency was required.
+- **Role behavior:** OWNER, ADMIN, and STAFF all see both shortcuts because every authenticated role may read Customer and Supplier lists; module-level write restrictions remain unchanged.
+- **Verification:** Added three role-parameterized Home cases to the existing application tests. All 141 frontend tests across 7 files pass, along with frontend ESLint and the TypeScript-backed production build. Final diff and scope checks passed.
+- **Scope:** No Customer/Supplier module behavior, Product/Category behavior, authentication persistence, backend, API, Prisma schema, migration, package, search/filter, pagination, count/statistic, Phase 4E, Phase 5, or later-phase functionality changed.
+- **Next milestone:** Manually re-review the Home dashboard together with the outstanding Phase 4D Customer/Supplier responsive UI. Do not start Phase 4E automatically.

@@ -14,8 +14,8 @@ export function ApplicationHomePage() {
         <p className="eyebrow">Authenticated workspace</p>
         <h1 id="home-heading">Welcome, {user.firstName}.</h1>
         <p>
-          Your protected SMEFlow workspace now includes Product and Category
-          management.
+          Your protected SMEFlow workspace brings your core business data
+          together in one place.
         </p>
       </div>
 
@@ -60,6 +60,23 @@ export function ApplicationHomePage() {
           <Link className="button button--secondary" to="/company">
             Open company profile
           </Link>
+        </article>
+
+        <article className="content-card content-card--action">
+          <p className="card-label">Customers &amp; Suppliers</p>
+          <h2>Manage Customers and Suppliers</h2>
+          <p>
+            Maintain the people and organizations your Company sells to and
+            buys from.
+          </p>
+          <div className="row-actions">
+            <Link className="button button--primary" to="/customers">
+              Customers
+            </Link>
+            <Link className="button button--secondary" to="/suppliers">
+              Suppliers
+            </Link>
+          </div>
         </article>
       </div>
 

@@ -1,4 +1,4 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import { MemoryRouter, useNavigate } from 'react-router'
 import { describe, expect, it, vi } from 'vitest'
 import App from './App'
@@ -307,6 +307,63 @@ describe('Phase 2G registration and login', () => {
     const meHeaders = fetchMock.mock.calls[1]?.[1]?.headers as Headers
     expect(meHeaders.get('Authorization')).toBe('Bearer memory-only-token')
   })
+
+  it.each(['OWNER', 'ADMIN', 'STAFF'] as const)(
+    'shows every master-data shortcut and the approved session context to %s',
+    async (role) => {
+      const currentUser = createUser(role)
+      const fetchMock = vi.fn()
+      mockSuccessfulLogin(fetchMock, currentUser)
+      vi.stubGlobal('fetch', fetchMock)
+
+      renderApp('/login')
+      fillLoginForm(currentUser.email)
+
+      expect(
+        await screen.findByRole('heading', { name: 'Welcome, Amina.' }),
+      ).toBeTruthy()
+      expect(
+        screen.getByText(
+          'Your protected SMEFlow workspace brings your core business data together in one place.',
+        ),
+      ).toBeTruthy()
+
+      const productCard = screen
+        .getByRole('heading', { name: 'Manage Products and Categories' })
+        .closest('article')
+      const partnerCard = screen
+        .getByRole('heading', { name: 'Manage Customers and Suppliers' })
+        .closest('article')
+
+      if (!productCard || !partnerCard) {
+        throw new Error('Expected Home business-module cards to render.')
+      }
+
+      expect(
+        within(productCard).getByRole('link', { name: 'Open Products' }),
+      ).toHaveProperty('pathname', '/products')
+      expect(
+        within(productCard).getByRole('link', { name: 'Categories' }),
+      ).toHaveProperty('pathname', '/categories')
+      expect(
+        within(partnerCard).getByRole('link', { name: 'Customers' }),
+      ).toHaveProperty('pathname', '/customers')
+      expect(
+        within(partnerCard).getByRole('link', { name: 'Suppliers' }),
+      ).toHaveProperty('pathname', '/suppliers')
+      expect(
+        screen.getByRole('link', { name: 'Open company profile' }),
+      ).toHaveProperty('pathname', '/company')
+      expect(screen.getByText(currentUser.email)).toBeTruthy()
+      expect(screen.getByText(role)).toBeTruthy()
+      expect(screen.getByText('Memory-only session')).toBeTruthy()
+      expect(
+        screen.getByText(
+          'For this MVP milestone, refreshing the browser clears your access token and requires you to sign in again.',
+        ),
+      ).toBeTruthy()
+    },
+  )
 
   it('shows the same safe invalid-credentials message and clears the password', async () => {
     const fetchMock = vi
