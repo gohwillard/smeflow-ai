@@ -158,7 +158,6 @@ export function SupplierDetailsPage() {
                 <LifecycleBadge isActive={supplier.isActive} />
               </div>
               <h1 id="supplier-details-heading">{supplier.name}</h1>
-              <p>{supplier.contactPerson ?? 'No contact person provided.'}</p>
             </div>
             {canManage ? (
               <div className="row-actions">
@@ -229,11 +228,11 @@ export function SupplierDetailsPage() {
                 <dt>Notes</dt>
                 <dd>{supplier.notes ?? '—'}</dd>
               </div>
-              <div>
+              <div className="detail-grid__metadata-start">
                 <dt>Created</dt>
                 <dd>{formatDate(supplier.createdAt)}</dd>
               </div>
-              <div>
+              <div className="detail-grid__metadata-end">
                 <dt>Last updated</dt>
                 <dd>{formatDate(supplier.updatedAt)}</dd>
               </div>

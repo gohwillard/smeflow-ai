@@ -29,7 +29,7 @@ const archivedSupplier: Supplier = {
   id: 'supplier-archived',
   name: 'Old Parts Co',
   registrationNumber: null,
-  contactPerson: null,
+  contactPerson: 'Archived Supplier Contact',
   email: null,
   phone: null,
   address: null,
@@ -237,8 +237,17 @@ describe('Phase 4D Supplier detail and lifecycle', () => {
       'STAFF',
     )
     expect(await screen.findByRole('heading', { name: 'Old Parts Co' })).toBeTruthy()
-    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(6)
+    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(5)
     expect(screen.getAllByText('Archived').length).toBeGreaterThanOrEqual(2)
+    const contactPerson = screen.getAllByText('Archived Supplier Contact')
+    expect(contactPerson).toHaveLength(1)
+    expect(contactPerson[0]?.tagName).toBe('DD')
+    expect(screen.getByText('Created').closest('div')?.className).toBe(
+      'detail-grid__metadata-start',
+    )
+    expect(screen.getByText('Last updated').closest('div')?.className).toBe(
+      'detail-grid__metadata-end',
+    )
     expect(screen.queryByRole('link', { name: 'Edit Supplier' })).toBeNull()
     expect(screen.queryByRole('button', { name: 'Reactivate Supplier' })).toBeNull()
   })

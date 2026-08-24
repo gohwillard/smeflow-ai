@@ -158,7 +158,6 @@ export function CustomerDetailsPage() {
                 <LifecycleBadge isActive={customer.isActive} />
               </div>
               <h1 id="customer-details-heading">{customer.name}</h1>
-              <p>{customer.contactPerson ?? 'No contact person provided.'}</p>
             </div>
             {canManage ? (
               <div className="row-actions">
@@ -233,11 +232,11 @@ export function CustomerDetailsPage() {
                 <dt>Notes</dt>
                 <dd>{customer.notes ?? '—'}</dd>
               </div>
-              <div>
+              <div className="detail-grid__metadata-start">
                 <dt>Created</dt>
                 <dd>{formatDate(customer.createdAt)}</dd>
               </div>
-              <div>
+              <div className="detail-grid__metadata-end">
                 <dt>Last updated</dt>
                 <dd>{formatDate(customer.updatedAt)}</dd>
               </div>

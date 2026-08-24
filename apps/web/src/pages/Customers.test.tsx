@@ -30,7 +30,7 @@ const archivedCustomer: Customer = {
   id: 'customer-archived',
   name: 'Legacy Retail',
   registrationNumber: null,
-  contactPerson: null,
+  contactPerson: 'Archived Customer Contact',
   email: null,
   phone: null,
   billingAddress: null,
@@ -245,8 +245,17 @@ describe('Phase 4D Customer detail and lifecycle', () => {
       success({ customer: archivedCustomer }),
     ], 'STAFF')
     expect(await screen.findByRole('heading', { name: 'Legacy Retail' })).toBeTruthy()
-    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(7)
+    expect(screen.getAllByText('—').length).toBeGreaterThanOrEqual(6)
     expect(screen.getAllByText('Archived').length).toBeGreaterThanOrEqual(2)
+    const contactPerson = screen.getAllByText('Archived Customer Contact')
+    expect(contactPerson).toHaveLength(1)
+    expect(contactPerson[0]?.tagName).toBe('DD')
+    expect(screen.getByText('Created').closest('div')?.className).toBe(
+      'detail-grid__metadata-start',
+    )
+    expect(screen.getByText('Last updated').closest('div')?.className).toBe(
+      'detail-grid__metadata-end',
+    )
     expect(screen.queryByRole('link', { name: 'Edit Customer' })).toBeNull()
   })
 

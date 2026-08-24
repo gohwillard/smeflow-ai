@@ -1062,7 +1062,7 @@ a:hover {
 
 .party-table th:first-child,
 .party-table td:first-child {
-  width: 20%;
+  width: 22%;
 }
 
 .party-table th:nth-child(2),
@@ -1087,7 +1087,7 @@ a:hover {
 
 .party-table th:last-child,
 .party-table td:last-child {
-  width: 24%;
+  width: 22%;
 }
 
 .party-table__wrap,
@@ -1163,11 +1163,29 @@ a:hover {
   border-bottom: 1px solid #e1ebe8;
 }
 
-.detail-grid > div:nth-child(odd):not(.detail-grid__wide) {
+.detail-grid
+  > div:nth-child(odd):not(.detail-grid__wide):not(
+    .detail-grid__metadata-start
+  ):not(.detail-grid__metadata-end) {
   padding-right: 1.5rem;
 }
 
-.detail-grid > div:nth-child(even):not(.detail-grid__wide) {
+.detail-grid
+  > div:nth-child(even):not(.detail-grid__wide):not(
+    .detail-grid__metadata-start
+  ):not(.detail-grid__metadata-end) {
+  padding-left: 1.5rem;
+  border-left: 1px solid #e1ebe8;
+}
+
+.detail-grid > .detail-grid__metadata-start {
+  padding-right: 1.5rem;
+  padding-left: 0;
+  border-left: 0;
+}
+
+.detail-grid > .detail-grid__metadata-end {
+  padding-right: 0;
   padding-left: 1.5rem;
   border-left: 1px solid #e1ebe8;
 }

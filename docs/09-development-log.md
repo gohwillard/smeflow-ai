@@ -244,3 +244,41 @@
 - **Scope:** No backend, Prisma schema, migration, package, search/filter, query parameter, pagination, related transaction history, Purchasing, Sales, Inventory, Dashboard, or AI change was added. Phase 4E, Phase 4F, and Phase 5 remain not started.
 - **Known issues:** No automated implementation blocker was identified. The intentional memory-only access token still means a hard refresh requires login.
 - **Next milestone:** User/ChatGPT manually verifies Phase 4D Customer/Supplier workflows, role presentation, lifecycle dialogs, and responsive layouts before approval. Do not start Phase 4E automatically.
+
+## Phase 4D — Manual Review Remediation
+
+- **Status:** Implemented and Codex-verified; awaiting user/ChatGPT browser re-review before Phase 4D approval.
+- **Remediated:** Removed the redundant contact-person subtitle from both Customer and Supplier detail headers while retaining Contact person in each details card. Added shared explicit metadata-start/end classes so Created and Last updated use equal columns, consistent padding, and the same centered divider regardless of how many full-width fields precede them.
+- **Root cause:** The shared detail grid inferred left/right styling from child parity. Customer has one more full-width address row than Supplier, which reversed the inherited padding and divider treatment for its final metadata cells.
+- **Verification:** All 138 frontend tests across 7 files pass, including updated Customer/Supplier detail assertions that each contact person renders exactly once inside a `dd` and both pages use the shared metadata classes. Frontend ESLint and the TypeScript-backed production build pass; `git diff --check` and final scope review also pass.
+- **Scope:** No API, backend, Prisma schema, migration, route, lifecycle, form, list, authentication, dependency, search/filter, pagination, Phase 4E, or later-phase behavior changed.
+- **Next milestone:** Re-review Customer and Supplier detail headers and metadata at desktop, 430×932, and 390×844. Do not start Phase 4E automatically.
+
+## Phase 4D — Second Manual Review UI Remediation
+
+- **Status:** Implemented and Codex-verified; awaiting user/ChatGPT browser re-review before Phase 4D approval.
+- **Remediated:** Removed the unintended far-left divider from the Customer Created/Last updated footer while retaining its centered divider, equal columns, separators, and mobile stacking. Gave Customer and Supplier desktop Actions columns one shared aligned three-slot track with slightly wider gaps for View, Edit, and Archive/Reactivate, plus a matching header track.
+- **Root cause:** The even-child detail-grid selector had greater specificity than the metadata-start override, so Customer's even-positioned Created cell retained `border-left`. The list actions previously inherited only the compact generic row gap and had no stable shared header/action track.
+- **Responsive decision:** Explicit metadata cells no longer participate in desktop parity rules. At the existing mobile-card breakpoint, the fixed desktop action grid resets to a naturally sized wrapping flex row, preserving tappable controls without oversized gaps or horizontal overflow.
+- **Verification:** All 138 frontend tests across 7 files pass, including the 32 Customer/Supplier tests and shared Actions-header hook assertions. Frontend ESLint and the TypeScript-backed production build pass; final diff and scope checks passed.
+- **Scope:** No API, backend, Prisma schema, migration, dependency, Product/Category/Inventory styling, route, form, lifecycle, authentication, search/filter, pagination, Phase 4E, or later-phase work changed.
+- **Next milestone:** Re-review both detail footers and both desktop/mobile action layouts at desktop, 430×932, and 390×844. Do not start Phase 4E automatically.
+
+## Phase 4D — Customer Table Visual Polish
+
+- **Status:** Implemented and Codex-verified; awaiting user/ChatGPT browser re-review before Phase 4D approval.
+- **Remediated:** Increased the desktop Customer identity column from 19% to 22% and redistributed Contact person, Email, and Phone to 14%, 17%, and 12%, while retaining 10% Status and 25% Actions tracks. Added a Customer-only table modifier so Supplier proportions remain unchanged.
+- **Action alignment:** Replaced the Customer action track's unequal left-aligned columns with three equal centered slots inside the existing 12.75rem track. View and Edit now occupy identical positions across active and archived rows; Archive and Reactivate share the third position; STAFF View occupies only the first slot. The Actions heading is centered over the same track.
+- **Responsive decision:** The existing narrow-screen table-to-card conversion still overrides desktop column widths. Its more-specific Customer action rule restores the compact 1.15rem wrapping flex gap, preventing the desktop equal-slot grid from leaking into mobile cards.
+- **Verification:** All 138 frontend tests across 7 files pass, including all 32 Customer/Supplier tests and explicit Customer-only/Supplier-unaffected table-modifier assertions. Frontend ESLint and the TypeScript-backed production build pass; final diff and scope checks passed.
+- **Scope:** No Supplier table redesign, detail-page change, API, backend, Prisma schema, migration, dependency, route, form, lifecycle, authentication, search/filter, pagination, Phase 4E, or later-phase work changed.
+- **Next milestone:** Re-review the Customer desktop table and its 430×932/390×844 mobile cards. Do not start Phase 4E automatically.
+
+## Phase 4D — Compact Actions and Shared Identity Width Remediation
+
+- **Status:** Implemented and Codex-verified; awaiting user/ChatGPT browser re-review before Phase 4D approval.
+- **Remediated:** Reverted the recent fixed-width Actions grids, equal action slots, centered Actions-header wrappers, and mobile grid-reset rules for both Customer and Supplier lists. Both tables again use the original compact `row-actions--compact` flex grouping, with the existing natural `1.15rem` gap between View, Edit, and Archive/Reactivate. Widened the first identity column in both tables to 22% and applied shared desktop proportions of 22% / 15% / 18% / 13% / 10% / 22% for Name / Contact person / Email / Phone / Status / Actions.
+- **Responsive decision:** The existing narrow-screen table-to-card conversion continues to override desktop column widths. No fixed action width or grid remains, so mobile cards inherit the established wrapping compact-action behavior without a new override.
+- **Verification:** All 138 frontend tests across 7 files pass, including all 32 focused Customer/Supplier tests. Frontend ESLint and the TypeScript-backed production build pass. Final diff, repository status, migration-count, and backend/database scope checks also passed.
+- **Scope:** The previously approved detail-header and metadata-divider fixes remain intact. No API, backend, Prisma schema, migration, dependency, route, form, lifecycle, authentication, search/filter, pagination, Phase 4E, or later-phase behavior changed.
+- **Next milestone:** Re-review both Customer and Supplier desktop tables and their 430×932/390×844 mobile cards. Do not start Phase 4E automatically.
