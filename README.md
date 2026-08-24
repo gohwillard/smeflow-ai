@@ -144,14 +144,16 @@ Dashboard / AI Insights
 - [x] Phase 4D Customer and Supplier frontend complete
 - [x] Phase 4E Customer and Supplier search and filtering complete
 - [x] Phase 4F Transaction History Foundation complete after manual approval
-- [ ] Phase 4G final verification implemented and awaiting manual approval
+- [x] Phase 4G final verification complete after manual approval
+- [x] Phase 4 Customers and Suppliers officially complete
+- [ ] Phase 5 Purchasing not started
 - [ ] Sales workflow implemented
 - [ ] AI assistant implemented
 - [ ] Production deployment completed
 
 Completed phases: Phase 0 — Repository and Planning, Phase 1 — Application
-Foundation, Phase 2 — Authentication and Company Setup, and Phase 3 — Product
-and Inventory Module.
+Foundation, Phase 2 — Authentication and Company Setup, Phase 3 — Product and
+Inventory Module, and Phase 4 — Customers and Suppliers.
 
 Completed milestone: Phase 2H — Phase 2 Verification. The final audit confirmed
 the approved Company/User schema and migration, secure registration and login,
@@ -233,7 +235,7 @@ validation/generation/migration status, two no-drift comparisons, and visual
 review at 1440×1000, 430×932, and 390×844. No application defect, dependency,
 schema, migration, or new business feature was introduced during verification.
 
-Phase 4 — Customers and Suppliers is current. Phase 4A — Customer & Supplier
+Phase 4 — Customers and Suppliers is officially complete. Phase 4A — Customer & Supplier
 Domain Design, Phase 4B — Customer & Supplier Schema Migration, and Phase 4C —
 Customer & Supplier Backend are complete and approved. The authenticated Phase
 4C APIs enforce strict normalization, safe response selection, OWNER/ADMIN
@@ -277,8 +279,8 @@ Customer section truthfully points to future Sales workflows, and the Supplier
 section points to future Purchasing workflows. No history API, fake record,
 count, total, transaction model, schema change, or migration was added.
 
-Phase 4G — Phase 4 Final Verification is implemented and Codex-verified,
-awaiting final manual approval. The complete Customer and Supplier subsystem
+Phase 4G — Phase 4 Final Verification is complete after final manual approval.
+The complete Customer and Supplier subsystem
 passed domain, live PostgreSQL catalog, three-migration history, two no-drift
 comparisons, strict validation, role, Company-isolation, lifecycle,
 search/filter, frontend integration, accessibility-source, responsive-source,
@@ -287,8 +289,12 @@ review. All 411 backend tests across 12 files and all 171 frontend tests across
 8 files pass. Backend typecheck/build, frontend ESLint/build, Prisma
 validate/generate/migrate status, and `git diff --check` also pass. No
 application defect, dependency, schema, migration, generated contract, or new
-business feature was introduced. Phase 4 remains current until user manual
-acceptance; Phase 5 and Phase 6 have not started.
+business feature was introduced. The user completed final manual verification
+of representative Customer/Supplier CRUD and lifecycle behavior, search and
+filtering, role and Company isolation, responsive UI, the custom Status
+dropdown, transaction-history foundations, database/migration sanity, and
+Phase 3 regression sanity. There is no active development milestone; Phase 5
+Purchasing has not started.
 
 ## Local Development
 

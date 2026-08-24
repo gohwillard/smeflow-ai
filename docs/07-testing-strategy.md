@@ -302,7 +302,10 @@ tests across 8 files pass. Backend typecheck/build, frontend ESLint/build,
 Prisma validate/generate/migrate status, exact three-migration count,
 migration-to-live and schema-to-live no-drift comparisons, live PostgreSQL
 catalog inspection, and repository hygiene checks also pass. Final manual
-verification remains required before Phase 4 is officially complete.
+verification subsequently approved representative Customer/Supplier CRUD and
+lifecycle, search/filtering, role behavior, Company isolation, responsive UI,
+the custom Status dropdown, transaction-history foundation, database/migration
+sanity, and Phase 3 regression sanity. Phase 4 is officially complete.
 
 When Purchasing and Sales are implemented, their own integration tests must
 prove that Company A documents cannot reference Company B parties, archived

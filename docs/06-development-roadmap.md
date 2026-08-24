@@ -45,22 +45,24 @@ The current project state is:
 - Phase 3E — Inventory Movement & Manual Adjustment: ✅ Completed
 - Phase 3F — Product Search & Low Stock: ✅ Completed
 - Phase 3G — Product & Inventory Verification: ✅ Completed
-- Phase 4 — Customers and Suppliers: 🚧 Current
+- Phase 4 — Customers and Suppliers: ✅ Completed
 - Phase 4A — Customer & Supplier Domain Design: ✅ Completed
 - Phase 4B — Customer & Supplier Schema Migration: ✅ Completed
 - Phase 4C — Customer & Supplier Backend: ✅ Completed
 - Phase 4D — Customer & Supplier Frontend: ✅ Completed
 - Phase 4E — Customer & Supplier Search and Filtering: ✅ Completed
 - Phase 4F — Related Transaction History Foundation: ✅ Completed
-- Phase 4G — Phase 4 Verification: 🚧 Current
+- Phase 4G — Phase 4 Verification: ✅ Completed
+- Phase 5 — Purchasing Workflow: ⬜ Planned (not started)
 
 Phase 3 is complete following its final acceptance. Phase 4A received manual
 approval and is complete. Phase 4B received manual approval and is complete.
 Phase 4C is complete after manual API/database approval, and Phase 4D is
 complete after manual browser approval. Phase 4E received manual browser/API
 approval and is complete. Phase 4F received manual browser approval and is
-complete. Phase 4G is implemented and Codex-verified, awaiting final manual
-approval. Phase 5 and later milestones have not started.
+complete. Phase 4G received final manual approval, so Phase 4 is officially
+complete. There is no active development milestone. Phase 5 and later
+milestones have not started.
 
 ---
 
@@ -607,7 +609,7 @@ low-stock items.
 
 ## Phase 4 — Customers and Suppliers
 
-**Status:** 🚧 Current
+**Status:** ✅ Completed
 
 **Goal:** Create the external-party master data required for purchasing and
 sales.
@@ -761,12 +763,12 @@ user-provided approved status confirms Phase 4F is complete.
 
 ### Phase 4G — Phase 4 Verification
 
-**Status:** 🚧 Current
+**Status:** ✅ Completed
 
 Verify CRUD behavior, search, company isolation, and data integrity.
 
-The complete Phase 4 subsystem is implemented and Codex-verified, awaiting
-final manual approval. The audit covered the approved Customer/Supplier domain
+The complete Phase 4 subsystem is Codex-verified and received final manual
+approval. The audit covered the approved Customer/Supplier domain
 boundaries, Prisma schema and all three migrations, live PostgreSQL columns and
 constraints, two no-drift comparisons, strict create/PATCH/query validation,
 safe response selection, authenticated Company scope, OWNER/ADMIN/STAFF roles,
@@ -783,9 +785,12 @@ pass. Backend typecheck/build, frontend ESLint/build, Prisma
 validation/generation/migration status, migration-to-live and schema-to-live
 no-drift comparisons, live catalog inspection, exact three-migration count, and
 `git diff --check` pass. No application defect, dependency, schema, migration,
-generated contract, or new business feature was introduced. Phase 4 is not
-officially complete until user manual acceptance. Phase 5 and Phase 6 remain
-unstarted.
+generated contract, or new business feature was introduced. Final manual
+verification approved representative Customer/Supplier CRUD and lifecycle,
+search/filter, role, Company-isolation, responsive UI, custom Status dropdown,
+transaction-history foundation, database/migration, and Phase 3 regression
+behavior. Phase 4 is officially complete. There is no active development
+milestone; Phase 5 and Phase 6 remain unstarted.
 
 ### Definition of Done
 
@@ -795,7 +800,7 @@ Users can manage customers and suppliers securely and consistently.
 
 ## Phase 5 — Purchasing Workflow
 
-**Status:** ⬜ Planned
+**Status:** ⬜ Planned (not started)
 
 **Goal:** Implement the complete supplier → purchase → stock-in workflow.
 
