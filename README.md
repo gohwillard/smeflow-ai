@@ -138,7 +138,8 @@ Dashboard / AI Insights
 - [x] Phase 3 Product and Inventory Module complete
 - [x] Inventory module implemented
 - [x] Phase 4 Customers and Suppliers officially started
-- [ ] Phase 4A Customer and Supplier domain design awaiting manual approval
+- [x] Phase 4A Customer and Supplier domain design approved
+- [ ] Phase 4B Customer and Supplier schema migration awaiting manual approval
 - [ ] Sales workflow implemented
 - [ ] AI assistant implemented
 - [ ] Production deployment completed
@@ -227,15 +228,15 @@ validation/generation/migration status, two no-drift comparisons, and visual
 review at 1440×1000, 430×932, and 390×844. No application defect, dependency,
 schema, migration, or new business feature was introduced during verification.
 
-Phase 4 — Customers and Suppliers is now current. Phase 4A — Customer &
-Supplier Domain Design is documented and awaiting manual approval. The proposed
-design keeps Customer and Supplier as separate Company-owned master-data
-entities, defines normalization, non-uniqueness, OWNER/ADMIN management, STAFF
-read-only access, archive/reactivation, tenant-local not-found behavior,
-tenant-aware future relationships, and a historical document-snapshot
-invariant. Phase 4A is documentation only: no Prisma model, migration, API,
-frontend page, Purchasing, Sales, or AI functionality has been added. Phase 4B
-has not started.
+Phase 4 — Customers and Suppliers is current. Phase 4A — Customer & Supplier
+Domain Design is complete and approved. Phase 4B — Customer & Supplier Schema
+Migration is implemented and Codex-verified, awaiting manual approval. Prisma
+and migration `20260824025721_add_customer_supplier` now implement the separate
+Company-owned `Customer` and `Supplier` master-data models with bounded nullable
+contact fields, native UUIDs, `timestamptz(3)` timestamps, lifecycle defaults,
+tenant-aware candidate keys, minimal lifecycle indexes, normalized-string
+checks, and `ON DELETE RESTRICT` Company relationships. No Customer/Supplier
+API or frontend, Purchasing, Sales, Dashboard, or AI work has started.
 
 ## Local Development
 

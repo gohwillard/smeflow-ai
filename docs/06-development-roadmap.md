@@ -46,12 +46,13 @@ The current project state is:
 - Phase 3F — Product Search & Low Stock: ✅ Completed
 - Phase 3G — Product & Inventory Verification: ✅ Completed
 - Phase 4 — Customers and Suppliers: 🚧 Current
-- Phase 4A — Customer & Supplier Domain Design: 🚧 Current; documented and
-  awaiting manual approval
+- Phase 4A — Customer & Supplier Domain Design: ✅ Completed
+- Phase 4B — Customer & Supplier Schema Migration: 🚧 Current; implemented and
+  Codex-verified, awaiting manual approval
 
-Phase 3 is complete following its final acceptance. Phase 4 has started with
-the documentation-only Phase 4A design milestone. Phase 4A is current and
-awaits manual approval; Phase 4B and all later milestones have not started.
+Phase 3 is complete following its final acceptance. Phase 4A received manual
+approval and is complete. Phase 4B is implemented and Codex-verified, awaiting
+manual approval; Phase 4C and all later milestones have not started.
 
 ---
 
@@ -605,7 +606,7 @@ sales.
 
 ### Phase 4A — Customer & Supplier Domain Design
 
-**Status:** 🚧 Current — documented and awaiting manual approval
+**Status:** ✅ Completed
 
 This milestone is design only. Do not create a Prisma model, migration, API, or
 frontend feature during Phase 4A.
@@ -627,15 +628,25 @@ Design and review:
   foreign key and snapshot mutable party details where their own design requires
   historical accuracy.
 
-The proposed design is documented in `docs/04-database-design.md`. It remains
-current until manual approval. Phase 4B must not start before that approval.
+The approved design is documented in `docs/04-database-design.md`. Phase 4A
+changed documentation only and received manual approval before Phase 4B began.
 
 ### Phase 4B — Customer & Supplier Schema Migration
 
-**Status:** ⬜ Planned
+**Status:** 🚧 Current — implemented and Codex-verified; awaiting manual approval
 
 Implement the approved schema, create the migration, and verify its database
 structure and constraints.
+
+Implemented as migration `20260824025721_add_customer_supplier`. It adds only
+the approved `Customer` and `Supplier` models, direct restrictive Company
+relationships, bounded nullable strings, native UUIDs, timezone-aware
+timestamps, lifecycle defaults, tenant-aware candidate keys, minimal lifecycle
+indexes, and reviewed normalized-string checks. Prisma validation/generation,
+migration deploy/status/replay, both drift comparisons, live PostgreSQL catalog
+inspection, transactional data-integrity smoke verification with rollback
+cleanup, all 207 backend tests, backend typecheck/build, and repository hygiene
+checks passed. Phase 4C has not started.
 
 ### Phase 4C — Customer Backend & Frontend
 

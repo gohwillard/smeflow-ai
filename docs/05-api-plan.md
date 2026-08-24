@@ -491,8 +491,8 @@ the committed balance. Both records commit together or both roll back.
 
 ## Customers
 
-Planned for the later Phase 4 Customer backend milestone; not implemented in
-Phase 4A:
+Planned for Phase 4C; no Customer API is implemented in Phase 4B. Phase 4B adds
+only the approved Customer database model:
 
 ```text
 GET    /customers
@@ -526,13 +526,13 @@ profile editing must not change lifecycle accidentally. Responses omit
 The later list implementation may accept a strictly validated optional search
 term matching name, registration number, contact person, email, or phone
 case-insensitively. Search and any active/archive filter remain Company-scoped.
-The exact pagination/filter contract belongs to Phase 4C; Phase 4A adds no
+The exact pagination/filter contract belongs to Phase 4C; Phase 4B adds no
 endpoint, extension, or search index.
 
 ## Suppliers
 
-Planned for the later Phase 4 Supplier backend milestone; not implemented in
-Phase 4A:
+Planned for Phase 4D; no Supplier API is implemented in Phase 4B. Phase 4B adds
+only the approved Supplier database model:
 
 ```text
 GET    /suppliers
@@ -552,7 +552,7 @@ reactivation is an explicit `isActive: true` PATCH lifecycle action.
 Future Supplier search may match name, registration number, contact person,
 email, or phone case-insensitively, always combined with authenticated Company
 scope. Exact list parameters and evidence-based indexing belong to Phase 4D.
-No Supplier API exists during Phase 4A.
+No Supplier API exists during Phase 4B.
 
 ## Quotations
 

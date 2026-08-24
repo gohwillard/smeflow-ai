@@ -31,10 +31,11 @@ verifies the complete integrated subsystem, live catalog, migration history,
 and schema drift. None of these milestones changed the Phase 3B Prisma schema
 or migrations.
 
-Phase 3 is complete. Phase 4A is the current documentation-only milestone. The
-proposed `Customer` and `Supplier` design below is awaiting manual approval
-before Phase 4B may implement it. No Customer or Supplier Prisma model,
-migration, API, or frontend feature exists yet.
+Phase 3 is complete. Phase 4A's `Customer` and `Supplier` domain design is
+approved. Phase 4B implements that design in Prisma schema and migration
+`20260824025721_add_customer_supplier`. The database layer is Codex-verified
+and awaits manual approval; no Customer or Supplier API or frontend feature
+exists yet.
 
 Models assigned to later roadmap phases remain planning context only. Their
 fields, relationships, constraints, and indexes must be designed in their own
@@ -524,11 +525,11 @@ workflows. Customer, Supplier, Purchasing, Sales, Dashboard, and AI work remains
 in its later canonical phases; AI V1 remains read-only and may not execute
 arbitrary LLM-generated SQL.
 
-## Proposed Phase 4A Customer and Supplier Design
+## Approved Phase 4A Customer and Supplier Design
 
-This section is the proposed implementation specification for Phase 4B and the
-later Phase 4 API/frontend milestones. It is domain design only and remains
-subject to manual approval.
+This section is the approved implementation specification used by Phase 4B and
+the later Phase 4 API/frontend milestones. Phase 4A itself changed only
+documentation.
 
 ### Domain Boundary and Separation
 
@@ -718,9 +719,9 @@ an explicitly designed document stage. The exact snapshot fields and timing
 belong to the Purchase Order, Quotation, Sales Order, and Invoice design
 milestones. Phase 4A does not add any transaction or snapshot column.
 
-### Planned Phase 4B Index and Constraint Direction
+### Phase 4B Index and Constraint Direction
 
-Subject to schema review, the minimum planned indexes are:
+The implemented minimum indexes are:
 
 - Customer: candidate key `(id, companyId)` and non-unique
   `(companyId, isActive)` for tenant lifecycle lists;
@@ -736,10 +737,31 @@ PostgreSQL extension or speculative search index. The later backend milestone
 should first implement the Company-scoped query and add specialized indexing
 only when measured data/query behavior justifies it.
 
-Phase 4B must review primary keys, native UUID/timestamp types, nullability,
+Phase 4B verified primary keys, native UUID/timestamp types, nullability,
 defaults, length checks, normalized-string checks, Company foreign keys,
-candidate keys, lifecycle indexes, and `ON DELETE RESTRICT`. It must not add
-Purchasing or Sales tables.
+candidate keys, lifecycle indexes, and `ON DELETE RESTRICT`. It added no
+Purchasing or Sales table.
+
+### Phase 4B Implementation Details
+
+- Migration `20260824025721_add_customer_supplier` creates only `customers` and
+  `suppliers` without changing either existing migration.
+- Prisma uses `@default(uuid())` with PostgreSQL `uuid`, `@db.Timestamptz(3)`,
+  and bounded `varchar` columns matching every approved maximum length.
+- Required names are checked as trimmed and non-empty. Optional strings remain
+  nullable and are checked to be either `NULL` or trimmed and non-empty. No
+  trigger, generated code, email-regex rule, `citext`, or extension was added.
+- Each table has only its UUID primary key and intentional unique
+  `(id, companyId)` candidate key. No name, registration, contact, email, phone,
+  or address uniqueness exists.
+- Each table has `(companyId, isActive)` for Company-scoped lifecycle lists. A
+  redundant standalone Company index and speculative search indexes were not
+  added.
+- Both required Company foreign keys use `ON DELETE RESTRICT`; normal lifecycle
+  remains archive/reactivate through `isActive`.
+- Migration replay, live-schema drift comparisons, PostgreSQL catalog checks,
+  transactional integrity checks with rollback cleanup, Prisma validation and
+  generation, and all existing backend regressions passed.
 
 ### Explicit Phase 4A Exclusions
 
@@ -754,7 +776,6 @@ Product and Inventory behavior remains unchanged.
 These models belong to later roadmap design milestones and must not be inferred
 as ready for Prisma implementation from this list:
 
-- Phase 4B: approved `Customer` and `Supplier` models after Phase 4A manual review
 - Phase 5A: `PurchaseOrder`, `PurchaseOrderItem`
 - Phase 6A: `Quotation`, `QuotationItem`, `SalesOrder`, `SalesOrderItem`, `Invoice`
 

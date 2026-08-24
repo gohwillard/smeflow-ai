@@ -20,6 +20,8 @@ model Company {
   categories         Category[]
   products           Product[]
   inventoryMovements InventoryMovement[]
+  customers          Customer[]
+  suppliers          Supplier[]
 
   @@map("companies")
 }
@@ -102,6 +104,47 @@ model InventoryMovement {
 
   @@index([companyId, productId, createdAt])
   @@map("inventory_movements")
+}
+
+model Customer {
+  id                 String   @id @default(uuid()) @db.Uuid
+  companyId          String   @db.Uuid
+  name               String   @db.VarChar(200)
+  registrationNumber String?  @db.VarChar(100)
+  contactPerson      String?  @db.VarChar(200)
+  email              String?  @db.VarChar(320)
+  phone              String?  @db.VarChar(50)
+  billingAddress     String?  @db.VarChar(2000)
+  shippingAddress    String?  @db.VarChar(2000)
+  notes              String?  @db.VarChar(2000)
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime @updatedAt @db.Timestamptz(3)
+  company            Company  @relation(fields: [companyId], references: [id], onDelete: Restrict)
+
+  @@unique([id, companyId])
+  @@index([companyId, isActive])
+  @@map("customers")
+}
+
+model Supplier {
+  id                 String   @id @default(uuid()) @db.Uuid
+  companyId          String   @db.Uuid
+  name               String   @db.VarChar(200)
+  registrationNumber String?  @db.VarChar(100)
+  contactPerson      String?  @db.VarChar(200)
+  email              String?  @db.VarChar(320)
+  phone              String?  @db.VarChar(50)
+  address            String?  @db.VarChar(2000)
+  notes              String?  @db.VarChar(2000)
+  isActive           Boolean  @default(true)
+  createdAt          DateTime @default(now()) @db.Timestamptz(3)
+  updatedAt          DateTime @updatedAt @db.Timestamptz(3)
+  company            Company  @relation(fields: [companyId], references: [id], onDelete: Restrict)
+
+  @@unique([id, companyId])
+  @@index([companyId, isActive])
+  @@map("suppliers")
 }
 
 enum UserRole {

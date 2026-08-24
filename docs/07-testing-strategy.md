@@ -178,11 +178,15 @@ At Phase 3G Codex verification, all 207 backend tests across 8 files and all
 
 ## Phase 4 Verification Direction
 
-Phase 4A changes documentation only, so its verification is repository and
-design consistency rather than application tests. Phase 4B must verify native
-UUID/timestamp types, required Company ownership, tenant-aware candidate keys,
-restrictive deletion, lifecycle defaults/indexes, string constraints, migration
-replay, and schema drift before any Customer or Supplier API is added.
+Phase 4A changed documentation only, so its verification was repository and
+design consistency. Phase 4B verified native UUID/timestamp and bounded string
+types, required Company ownership, tenant-aware candidate keys, restrictive
+deletion, lifecycle defaults/indexes, normalized-string constraints, migration
+replay, and two no-drift comparisons before any Customer or Supplier API was
+added. Transactional PostgreSQL checks covered nullable fields, active defaults,
+duplicate names/contact data within and across Companies, missing-Company FK
+rejection, restricted Company deletion, length enforcement, and rollback
+cleanup. All 207 existing backend tests across 8 files also passed.
 
 The later Customer and Supplier backend tests must cover strict field rejection,
 normalization and null-clearing, non-unique duplicate names/contact details,
