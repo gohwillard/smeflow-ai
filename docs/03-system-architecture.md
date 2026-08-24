@@ -189,12 +189,13 @@ authenticated Customer/Supplier route
   -> PostgreSQL tenant and lifecycle constraints
 ```
 
-Both modules will derive ownership only from the database-revalidated
-`req.auth.companyId`. A client-provided Company ID is never an ownership input,
+Both implemented backend modules derive ownership only from the
+database-revalidated `req.auth.companyId`. A client-provided Company ID is never
+an ownership input,
 and cross-Company identifiers must be indistinguishable from tenant-local
-missing identifiers. `OWNER` and `ADMIN` will manage records; `STAFF` will read
-them. Archive/reactivate behavior preserves master data instead of hard-deleting
-it.
+missing identifiers. `OWNER` and `ADMIN` manage records; `STAFF` reads them
+through the Phase 4C APIs. Archive/reactivate behavior preserves master
+data instead of hard-deleting it. Frontend presentation remains Phase 4D.
 
 Customer and Supplier are intentionally not combined into a generic business
 partner abstraction. Their future Purchasing and Sales relationships differ,

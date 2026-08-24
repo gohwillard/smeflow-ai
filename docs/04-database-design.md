@@ -32,10 +32,10 @@ and schema drift. None of these milestones changed the Phase 3B Prisma schema
 or migrations.
 
 Phase 3 is complete. Phase 4A's `Customer` and `Supplier` domain design is
-approved. Phase 4B implements that design in Prisma schema and migration
-`20260824025721_add_customer_supplier`. The database layer is Codex-verified
-and awaits manual approval; no Customer or Supplier API or frontend feature
-exists yet.
+approved. Phase 4B implemented and received approval for that design in Prisma
+schema and migration `20260824025721_add_customer_supplier`. Phase 4C now
+consumes the unchanged schema through authenticated, Company-scoped Customer
+and Supplier APIs. Frontend work remains deferred to Phase 4D.
 
 Models assigned to later roadmap phases remain planning context only. Their
 fields, relationships, constraints, and indexes must be designed in their own

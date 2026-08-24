@@ -491,8 +491,8 @@ the committed balance. Both records commit together or both roll back.
 
 ## Customers
 
-Planned for Phase 4C; no Customer API is implemented in Phase 4B. Phase 4B adds
-only the approved Customer database model:
+Implemented in the backend-only Phase 4C using the Customer model approved in
+Phase 4B:
 
 ```text
 GET    /customers
@@ -502,14 +502,14 @@ PATCH  /customers/:customerId
 DELETE /customers/:customerId
 ```
 
-All routes will require Bearer authentication and derive ownership exclusively
+All routes require Bearer authentication and derive ownership exclusively
 from `req.auth.companyId`. `OWNER`, `ADMIN`, and `STAFF` may list/retrieve;
 `OWNER` and `ADMIN` may create, update, archive, and reactivate. `STAFF` writes
 return HTTP 403. Missing and cross-Company IDs share `CUSTOMER_NOT_FOUND`.
 
-Create will strictly accept `name` plus optional `registrationNumber`,
+Create strictly accepts `name` plus optional `registrationNumber`,
 `contactPerson`, `email`, `phone`, `billingAddress`, `shippingAddress`, and
-`notes`. It will reject unknown or protected fields including `id`, `companyId`,
+`notes`. It rejects unknown or protected fields including `id`, `companyId`,
 `isActive`, timestamps, and future transaction/history fields. Required name is
 trimmed, nonblank, at most 200 characters, and keeps display casing. Optional
 strings are trimmed and blank values become `null`; email is lowercased and
@@ -520,19 +520,20 @@ field, blank optional text normalizes to `null`, and `name` cannot be `null` or
 blank. DELETE is an idempotent archive operation (`isActive = false`), never a
 physical delete. Reactivation follows the established lifecycle pattern by
 setting `isActive: true` through an explicit PATCH lifecycle action; ordinary
-profile editing must not change lifecycle accidentally. Responses omit
-`companyId` and expose only approved business fields.
+profile editing must not change lifecycle accidentally, and PATCH rejects
+`isActive: false`. Responses omit `companyId` and expose only approved business
+fields.
 
-The later list implementation may accept a strictly validated optional search
-term matching name, registration number, contact person, email, or phone
-case-insensitively. Search and any active/archive filter remain Company-scoped.
-The exact pagination/filter contract belongs to Phase 4C; Phase 4B adds no
-endpoint, extension, or search index.
+The Phase 4C list accepts no query parameters and includes active and archived
+records in deterministic creation order. Unknown query parameters, including
+`companyId`, are rejected. A future Phase 4E may add a strictly validated,
+Company-scoped search/filter contract. Pagination and specialized search
+indexing remain deferred until explicitly designed and justified.
 
 ## Suppliers
 
-Planned for Phase 4D; no Supplier API is implemented in Phase 4B. Phase 4B adds
-only the approved Supplier database model:
+Implemented alongside Customers in the backend-only Phase 4C using the Supplier
+model approved in Phase 4B:
 
 ```text
 GET    /suppliers
@@ -544,15 +545,16 @@ DELETE /suppliers/:supplierId
 
 Authentication, Company isolation, role enforcement, tenant-local not-found
 behavior, strict request validation, lifecycle semantics, and safe response
-selection mirror Customers. Create will accept only `name` plus optional
+selection mirror Customers. Create accepts only `name` plus optional
 `registrationNumber`, `contactPerson`, `email`, `phone`, `address`, and `notes`.
 PATCH uses the same omitted/`null`/blank rules. DELETE archives idempotently;
 reactivation is an explicit `isActive: true` PATCH lifecycle action.
 
-Future Supplier search may match name, registration number, contact person,
-email, or phone case-insensitively, always combined with authenticated Company
-scope. Exact list parameters and evidence-based indexing belong to Phase 4D.
-No Supplier API exists during Phase 4B.
+The Phase 4C list accepts no query parameters and includes active and archived
+records in deterministic creation order. Unknown query parameters, including
+`companyId`, are rejected. Future Phase 4E search/filter behavior must remain
+combined with authenticated Company scope. Pagination and evidence-based
+specialized indexing remain deferred.
 
 ## Quotations
 

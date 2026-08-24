@@ -197,3 +197,23 @@ must confirm role-aware actions and accessible loading, empty, error, detail,
 form, archive, and reactivation states. Purchasing and Sales tests will
 separately verify active-party selection and immutable document snapshots when
 those workflows are designed; Phase 4 does not create fake transaction records.
+
+## Phase 4C Coverage
+
+Phase 4C adds 109 Customer and Supplier API integration tests across two
+independent files. Both suites exercise real authenticated Express routes and
+PostgreSQL data. Coverage includes OWNER and ADMIN create/update/archive/
+reactivate access; STAFF list/detail access and rejected writes; unauthenticated
+requests; strict UUID, body, and no-query contracts; maximum lengths and email
+validation; server-side trimming, lowercasing, optional blank-to-null, and
+explicit null clearing; protected-field and `companyId` injection rejection;
+deliberately allowed duplicate names, emails, and registration numbers;
+idempotent archive without physical deletion; archived detail reads; explicit
+`isActive: true` reactivation; rejected `isActive: false` PATCH requests; safe
+response selection; and missing-versus-cross-Company not-found parity for
+detail, update, archive, and reactivation.
+
+The complete backend regression suite contains 316 passing tests across 10 test
+files. Phase 4C also passes backend typecheck/build and Prisma validation,
+generation, and migration status with exactly three migrations. Frontend tests
+were not run because Phase 4C changes no frontend code or contract.

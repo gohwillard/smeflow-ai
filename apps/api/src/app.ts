@@ -5,8 +5,10 @@ import { isDatabaseConnected } from "./config/database.js";
 import { authRouter } from "./modules/auth/auth.routes.js";
 import { categoryRouter } from "./modules/category/category.routes.js";
 import { companyRouter } from "./modules/company/company.routes.js";
+import { customerRouter } from "./modules/customer/customer.routes.js";
 import { inventoryRouter } from "./modules/inventory/inventory.routes.js";
 import { productRouter } from "./modules/product/product.routes.js";
+import { supplierRouter } from "./modules/supplier/supplier.routes.js";
 import { errorHandler } from "./shared/http/error-handler.js";
 
 const app = express();
@@ -21,8 +23,10 @@ app.use(express.json());
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/company", companyRouter);
 app.use("/api/v1/categories", categoryRouter);
+app.use("/api/v1/customers", customerRouter);
 app.use("/api/v1", inventoryRouter);
 app.use("/api/v1/products", productRouter);
+app.use("/api/v1/suppliers", supplierRouter);
 
 app.get("/api/v1/health", async (_request, response) => {
   const databaseConnected = await isDatabaseConnected();

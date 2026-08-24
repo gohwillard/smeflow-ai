@@ -47,12 +47,13 @@ The current project state is:
 - Phase 3G — Product & Inventory Verification: ✅ Completed
 - Phase 4 — Customers and Suppliers: 🚧 Current
 - Phase 4A — Customer & Supplier Domain Design: ✅ Completed
-- Phase 4B — Customer & Supplier Schema Migration: 🚧 Current; implemented and
-  Codex-verified, awaiting manual approval
+- Phase 4B — Customer & Supplier Schema Migration: ✅ Completed
+- Phase 4C — Customer & Supplier Backend: 🚧 Current
 
 Phase 3 is complete following its final acceptance. Phase 4A received manual
-approval and is complete. Phase 4B is implemented and Codex-verified, awaiting
-manual approval; Phase 4C and all later milestones have not started.
+approval and is complete. Phase 4B received manual approval and is complete.
+Phase 4C is the current backend-only milestone; Phase 4D and all later
+milestones have not started.
 
 ---
 
@@ -633,7 +634,7 @@ changed documentation only and received manual approval before Phase 4B began.
 
 ### Phase 4B — Customer & Supplier Schema Migration
 
-**Status:** 🚧 Current — implemented and Codex-verified; awaiting manual approval
+**Status:** ✅ Completed
 
 Implement the approved schema, create the migration, and verify its database
 structure and constraints.
@@ -646,36 +647,62 @@ indexes, and reviewed normalized-string checks. Prisma validation/generation,
 migration deploy/status/replay, both drift comparisons, live PostgreSQL catalog
 inspection, transactional data-integrity smoke verification with rollback
 cleanup, all 207 backend tests, backend typecheck/build, and repository hygiene
-checks passed. Phase 4C has not started.
+checks passed. Phase 4B received manual approval before Phase 4C began.
 
-### Phase 4C — Customer Backend & Frontend
+### Phase 4C — Customer & Supplier Backend
+
+**Status:** 🚧 Current
+
+- authenticated Customer list, detail, create, update, archive, and reactivate
+  APIs;
+- authenticated Supplier list, detail, create, update, archive, and reactivate
+  APIs;
+- strict request, path, and query validation with server-side normalization;
+- Company scope derived only from the database-validated authentication context;
+- OWNER/ADMIN write authorization and STAFF read-only authorization;
+- archive/reactivate lifecycle behavior without physical deletion; and
+- comprehensive backend integration tests for authorization, isolation,
+  normalization, lifecycle, validation, and deliberately non-unique business
+  data.
+
+This milestone is backend only. It does not implement Customer or Supplier
+frontend work, search, pagination, Purchasing, Sales, Dashboard, or AI.
+
+The backend implementation is Codex-verified and awaits manual API/database
+approval. All 316 backend tests across 10 files pass, including 109 focused
+Customer/Supplier tests. Backend typecheck/build, Prisma validation/generation,
+and migration status also pass; exactly three migrations remain and the schema
+is up to date.
+
+### Phase 4D — Customer & Supplier Frontend
 
 **Status:** ⬜ Planned
 
-- CRUD
-- Search and filtering
-- Customer details
-- Validation
-- Company isolation
+- Customer and Supplier lists and details;
+- create and edit forms;
+- archive and reactivate user interfaces;
+- role-aware read-only behavior;
+- loading, empty, error, and submission states;
+- responsive and accessible presentation; and
+- focused frontend tests.
 
-### Phase 4D — Supplier Backend & Frontend
+### Phase 4E — Customer & Supplier Search and Filtering
 
 **Status:** ⬜ Planned
 
-- CRUD
-- Search and filtering
-- Supplier details
-- Validation
-- Company isolation
+Add strictly validated, Company-scoped Customer and Supplier search/filter
+contracts and their corresponding frontend controls. Do not add pagination or
+specialized database indexing without an approved contract and supporting
+evidence.
 
-### Phase 4E — Related Transaction History Foundation
+### Phase 4F — Related Transaction History Foundation
 
 **Status:** ⬜ Planned
 
 Prepare customer and supplier detail structures for future transaction history.
 Do not invent or prematurely implement purchasing or sales records.
 
-### Phase 4F — Phase 4 Verification
+### Phase 4G — Phase 4 Verification
 
 **Status:** ⬜ Planned
 

@@ -139,7 +139,8 @@ Dashboard / AI Insights
 - [x] Inventory module implemented
 - [x] Phase 4 Customers and Suppliers officially started
 - [x] Phase 4A Customer and Supplier domain design approved
-- [ ] Phase 4B Customer and Supplier schema migration awaiting manual approval
+- [x] Phase 4B Customer and Supplier schema migration complete
+- [ ] Phase 4C Customer and Supplier backend implemented and awaiting manual approval
 - [ ] Sales workflow implemented
 - [ ] AI assistant implemented
 - [ ] Production deployment completed
@@ -230,13 +231,15 @@ schema, migration, or new business feature was introduced during verification.
 
 Phase 4 — Customers and Suppliers is current. Phase 4A — Customer & Supplier
 Domain Design is complete and approved. Phase 4B — Customer & Supplier Schema
-Migration is implemented and Codex-verified, awaiting manual approval. Prisma
-and migration `20260824025721_add_customer_supplier` now implement the separate
-Company-owned `Customer` and `Supplier` master-data models with bounded nullable
-contact fields, native UUIDs, `timestamptz(3)` timestamps, lifecycle defaults,
-tenant-aware candidate keys, minimal lifecycle indexes, normalized-string
-checks, and `ON DELETE RESTRICT` Company relationships. No Customer/Supplier
-API or frontend, Purchasing, Sales, Dashboard, or AI work has started.
+Migration is complete. Phase 4C — Customer & Supplier Backend is implemented and
+Codex-verified, awaiting manual API/database approval. Authenticated list,
+detail, create, partial-update, idempotent archive, and explicit reactivation
+routes enforce strict normalization, safe response selection, OWNER/ADMIN
+writes, STAFF reads, and database-validated Company scope. All 316 backend tests
+across 10 files pass, together with backend typecheck/build and Prisma
+validation/generation/migration status. Exactly three migrations remain and the
+schema is up to date. No frontend, search, pagination, Purchasing, Sales,
+Dashboard, or AI work was added; Phase 4D and Phase 5 have not started.
 
 ## Local Development
 
